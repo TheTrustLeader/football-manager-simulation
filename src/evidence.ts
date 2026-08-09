@@ -50,6 +50,10 @@ function rates(aggregate: Aggregate) {
   };
 }
 
+function bandCheck(actual: number, min: number, max: number) {
+  return { min, max, actual, pass: actual >= min && actual <= max };
+}
+
 function poissonProbability(lambda: number, goals: number): number {
   let factorial = 1;
   for (let value = 2; value <= goals; value += 1) factorial *= value;
@@ -140,6 +144,7 @@ const mirrorRates = rates(mirror);
 const abilityRates = rates(ability);
 const formationBaselineRates = rates(formationBaseline);
 const styleBaselineRates = rates(styleBaseline);
+const targets = ENGINE_CONFIG.calibrationTargets;
 const guardrails = ENGINE_CONFIG.ciGuardrails;
 const presenceThresholds = ENGINE_CONFIG.presenceTests;
 
@@ -172,25 +177,16 @@ const stylePresence = Object.fromEntries((["passing", "direct", "counter"] as St
   }];
 }));
 
-const checks = {
-  goalsPerMatch: {
-    min: guardrails.goalsPerMatchMin,
-    max: guardrails.goalsPerMatchMax,
-    actual: baselineRates.goalsPerMatch,
-    pass: baselineRates.goalsPerMatch >= guardrails.goalsPerMatchMin && baselineRates.goalsPerMatch <= guardrails.goalsPerMatchMax,
-  },
-  drawRate: {
-    min: guardrails.drawRateMin,
-    max: guardrails.drawRateMax,
-    actual: baselineRates.drawRate,
-    pass: baselineRates.drawRate >= guardrails.drawRateMin && baselineRates.drawRate <= guardrails.drawRateMax,
-  },
-  homeWinRate: {
-    min: guardrails.homeWinRateMin,
-    max: guardrails.homeWinRateMax,
-    actual: baselineRates.homeWinRate,
-    pass: baselineRates.homeWinRate >= guardrails.homeWinRateMin && baselineRates.homeWinRate <= guardrails.homeWinRateMax,
-  },
+const calibrationChecks = {
+  goalsPerMatch: bandCheck(baselineRates.goalsPerMatch, targets.goalsPerMatchMin, targets.goalsPerMatchMax),
+  drawRate: bandCheck(baselineRates.drawRate, targets.drawRateMin, targets.drawRateMax),
+  homeWinRate: bandCheck(baselineRates.homeWinRate, targets.homeWinRateMin, targets.homeWinRateMax),
+};
+
+const ciChecks = {
+  goalsPerMatch: bandCheck(baselineRates.goalsPerMatch, guardrails.goalsPerMatchMin, guardrails.goalsPerMatchMax),
+  drawRate: bandCheck(baselineRates.drawRate, guardrails.drawRateMin, guardrails.drawRateMax),
+  homeWinRate: bandCheck(baselineRates.homeWinRate, guardrails.homeWinRateMin, guardrails.homeWinRateMax),
   mirrorFairness: {
     tolerance: guardrails.mirrorWinRateTolerance,
     actualDifference: Math.abs(mirrorRates.homeWinRate - mirrorRates.awayWinRate),
@@ -232,7 +228,7 @@ const poissonReference = Object.fromEntries(poissonCells.map((scoreline) => {
 
 const simulatedMatches = count * 11;
 const evidence = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   generatedAt: new Date().toISOString(),
   buildVersion: process.env.GITHUB_SHA ?? "local-uncommitted",
   engineConfigVersion: ENGINE_CONFIG.version,
@@ -241,9 +237,11 @@ const evidence = {
   seedPool: pool,
   seedRange: { start: seeds[0], end: seeds.at(-1), count: seeds.length },
   calibrationSource: "02_Research-and-Period-Rules/PERIOD-MATCH-CALIBRATION_v1_2026-08-09.md",
-  thresholds: guardrails,
+  calibrationTargets: targets,
+  ciGuardrails: guardrails,
+  calibrationChecks,
+  ciChecks,
   presenceThresholds,
-  checks,
   baseline: { ...baselineRates, counts: baseline, scorelineMatrix: baseline.scorelines },
   neutralMirror: { ...mirrorRates, counts: mirror },
   abilitySignal: { ...abilityRates, counts: ability, strongLevel: 14, weakLevel: 8 },
@@ -259,7 +257,9 @@ const evidence = {
     matchesPerSecond: (simulatedMatches / elapsedMs) * 1000,
   },
   limitations: [
-    "Goals, draw and home-win CI bands are the sourced period calibration bands currently approved for Gate 1 tuning.",
+    "The sourced goals, draw and home-win bands remain the football calibration targets.",
+    "The 20,000-match CI safety bounds include the narrow sampling allowance recorded in Decision 004; a target miss remains visible in calibrationChecks even when ciChecks pass.",
+    "Final calibration acceptance is judged on the larger 500,000–1,000,000 tuning-seed run against calibrationTargets, not the buffered CI bounds.",
     "Formation and style presence are mechanism-presence checks, not claims that their final magnitudes are balanced.",
     "The 12-question simulation matrix remains blocked pending REVIEW-002 remediation and re-review.",
     "Validation seeds remain sealed during tuning.",
@@ -269,9 +269,9 @@ const evidence = {
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
-console.log(JSON.stringify({ buildVersion: evidence.buildVersion, configHash: ENGINE_CONFIG_HASH, checks, performance: evidence.performance }, null, 2));
+console.log(JSON.stringify({ buildVersion: evidence.buildVersion, configHash: ENGINE_CONFIG_HASH, calibrationChecks, ciChecks, performance: evidence.performance }, null, 2));
 
-const failedChecks = Object.entries(checks).filter(([, value]) => !value.pass).map(([name]) => name);
+const failedChecks = Object.entries(ciChecks).filter(([, value]) => !value.pass).map(([name]) => name);
 if (failedChecks.length > 0) {
-  throw new Error(`Simulation evidence gate failed: ${failedChecks.join(", ")}. Evidence written to ${outputPath}`);
+  throw new Error(`Simulation CI safety gate failed: ${failedChecks.join(", ")}. Evidence written to ${outputPath}`);
 }
