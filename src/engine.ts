@@ -11,6 +11,7 @@ interface PlayerRuntime {
   floorBreakpoint: number;
   formFactor: number;
   moraleFactor: number;
+  exitWorkload?: number;
 }
 
 interface AttributeCurveEntry {
@@ -31,18 +32,21 @@ interface AttributeCurve {
   entries: AttributeCurveEntry[];
 }
 
+interface ProfileCurves {
+  passing: AttributeCurve;
+  creativity: AttributeCurve;
+  pace: AttributeCurve;
+  aerial: AttributeCurve;
+  finishing: AttributeCurve;
+  defending: AttributeCurve;
+  goalkeeping: AttributeCurve;
+}
+
 interface TeamRuntime {
   workload: number;
   players: Map<string, PlayerRuntime>;
-  curves: {
-    passing: AttributeCurve;
-    creativity: AttributeCurve;
-    pace: AttributeCurve;
-    aerial: AttributeCurve;
-    finishing: AttributeCurve;
-    defending: AttributeCurve;
-    goalkeeping: AttributeCurve;
-  };
+  activePlayers: PlayerRuntime[];
+  curves: ProfileCurves;
 }
 
 function conditionFor(player: Player, conditions: Map<string, number>): number {
@@ -67,16 +71,15 @@ function createPlayerRuntime(player: Player, initialCondition: number): PlayerRu
   };
 }
 
-function createAttributeCurve(players: PlayerRuntime[], key: keyof Player["attributes"], predicate: (player: Player) => boolean = () => true): AttributeCurve {
+function createAttributeCurve(players: PlayerRuntime[], key: keyof Player["attributes"]): AttributeCurve {
+  if (players.length === 0) throw new Error(`Cannot build empty ${String(key)} attribute curve`);
   const entries: AttributeCurveEntry[] = [];
-  let count = 0;
   let sumWeight = 0;
   let totalWeightedInitialCondition = 0;
   let totalWeightedLossPerWorkload = 0;
   let minimumFloorBreakpoint = Number.POSITIVE_INFINITY;
 
   for (const runtime of players) {
-    if (!predicate(runtime.player)) continue;
     const weight = runtime.player.attributes[key] * runtime.formFactor * runtime.moraleFactor;
     entries.push({
       weight,
@@ -84,25 +87,42 @@ function createAttributeCurve(players: PlayerRuntime[], key: keyof Player["attri
       lossPerWorkload: runtime.lossPerWorkload,
       floorBreakpoint: runtime.floorBreakpoint,
     });
-    count += 1;
     sumWeight += weight;
     totalWeightedInitialCondition += weight * runtime.initialCondition;
     totalWeightedLossPerWorkload += weight * runtime.lossPerWorkload;
     minimumFloorBreakpoint = Math.min(minimumFloorBreakpoint, runtime.floorBreakpoint);
   }
 
-  if (count === 0) throw new Error(`Cannot build empty ${String(key)} attribute curve`);
   const condition = ENGINE_CONFIG.condition;
   const scaledRange = condition.range / condition.scale;
   return {
-    count,
+    count: players.length,
     sumWeight,
     totalWeightedInitialCondition,
     totalWeightedLossPerWorkload,
-    affineIntercept: (condition.base * sumWeight + scaledRange * totalWeightedInitialCondition) / count,
-    affineSlope: (scaledRange * totalWeightedLossPerWorkload) / count,
+    affineIntercept: (condition.base * sumWeight + scaledRange * totalWeightedInitialCondition) / players.length,
+    affineSlope: (scaledRange * totalWeightedLossPerWorkload) / players.length,
     minimumFloorBreakpoint,
     entries,
+  };
+}
+
+function buildProfileCurves(players: PlayerRuntime[]): ProfileCurves {
+  if (players.length === 0) throw new Error("Cannot build a team profile with no active players");
+  const outfield = players.filter((runtime) => runtime.player.primaryPosition !== "GK");
+  const forwards = players.filter((runtime) => runtime.player.primaryPosition === "FW");
+  const keepers = players.filter((runtime) => runtime.player.primaryPosition === "GK");
+  if (keepers.length === 0) throw new Error("Active team has no goalkeeper");
+  const finishers = forwards.length > 0 ? forwards : outfield;
+  if (finishers.length === 0) throw new Error("Active team has no eligible finisher");
+  return {
+    passing: createAttributeCurve(players, "passing"),
+    creativity: createAttributeCurve(players, "creativity"),
+    pace: createAttributeCurve(players, "pace"),
+    aerial: createAttributeCurve(players, "aerial"),
+    finishing: createAttributeCurve(finishers, "finishing"),
+    defending: createAttributeCurve(players, "defending"),
+    goalkeeping: createAttributeCurve(keepers, "goalkeeping"),
   };
 }
 
@@ -111,15 +131,8 @@ function createTeamRuntime(team: TeamInput, conditions: Map<string, number>): Te
   return {
     workload: 0,
     players: new Map(players.map((runtime) => [runtime.player.id, runtime])),
-    curves: {
-      passing: createAttributeCurve(players, "passing"),
-      creativity: createAttributeCurve(players, "creativity"),
-      pace: createAttributeCurve(players, "pace"),
-      aerial: createAttributeCurve(players, "aerial"),
-      finishing: createAttributeCurve(players, "finishing", (player) => player.primaryPosition === "FW"),
-      defending: createAttributeCurve(players, "defending"),
-      goalkeeping: createAttributeCurve(players, "goalkeeping", (player) => player.primaryPosition === "GK"),
-    },
+    activePlayers: [...players],
+    curves: buildProfileCurves(players),
   };
 }
 
@@ -173,12 +186,20 @@ function teamProfile(team: TeamInput, runtime: TeamRuntime) {
   if (team.tactics.style === "counter") attack *= 1 + clamp((pace - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
 
   const approach = c.approach[team.tactics.approach];
-  return { retention, progression, attack: attack * approach.attack, defence: defence * approach.defence, goalkeeper: goalkeeping };
+  const manpower = Math.pow(runtime.activePlayers.length / c.dismissal.baselinePlayers, c.dismissal.profileExponent);
+  return {
+    retention: retention * manpower,
+    progression: progression * manpower,
+    attack: attack * approach.attack * manpower,
+    defence: defence * approach.defence * manpower,
+    goalkeeper: goalkeeping,
+  };
 }
 
 function playerCondition(runtime: TeamRuntime, playerRuntime: PlayerRuntime): number {
-  if (runtime.workload === 0) return playerRuntime.initialCondition;
-  return Math.max(ENGINE_CONFIG.fatigue.minimumCondition, playerRuntime.initialCondition - runtime.workload * playerRuntime.lossPerWorkload);
+  const workload = playerRuntime.exitWorkload ?? runtime.workload;
+  if (workload === 0) return playerRuntime.initialCondition;
+  return Math.max(ENGINE_CONFIG.fatigue.minimumCondition, playerRuntime.initialCondition - workload * playerRuntime.lossPerWorkload);
 }
 
 function effectiveAttribute(runtime: TeamRuntime, player: Player, key: keyof Player["attributes"]): number {
@@ -203,28 +224,46 @@ function contributionFor(map: Map<string, PlayerContribution>, player: Player): 
   return value;
 }
 
-function outfieldPlayers(team: TeamInput): Player[] {
-  const players = team.starters.filter((p) => p.primaryPosition !== "GK");
-  if (players.length === 0) throw new Error(`${team.name} has no outfield players`);
+function activeOutfield(runtime: TeamRuntime, teamName: string): Player[] {
+  const players = runtime.activePlayers.filter((entry) => entry.player.primaryPosition !== "GK").map((entry) => entry.player);
+  if (players.length === 0) throw new Error(`${teamName} has no active outfield players`);
   return players;
 }
 
-function creditDefensiveStop(random: SeededRandom, team: TeamInput, contributions: Map<string, PlayerContribution>): void {
-  if (random.chance(ENGINE_CONFIG.defending.stopCreditShare)) contributionFor(contributions, random.pick(outfieldPlayers(team))).defensiveActions += 1;
+function pickDefenderByAbility(random: SeededRandom, runtime: TeamRuntime, candidates: Player[]): Player {
+  const weighted = candidates.map((player) => ({
+    player,
+    weight: Math.max(ENGINE_CONFIG.defending.stopCreditWeightFloor, effectiveAttribute(runtime, player, "defending")),
+  }));
+  const total = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+  let target = random.next() * total;
+  for (const entry of weighted) {
+    target -= entry.weight;
+    if (target < 0) return entry.player;
+  }
+  return weighted.at(-1)!.player;
 }
 
-function chooseAttacker(random: SeededRandom, team: TeamInput): Player {
-  const forwards = team.starters.filter((p) => p.primaryPosition === "FW");
-  if (forwards.length === 0) throw new Error(`${team.name} has no starting forward`);
-  return random.pick(forwards);
+function creditDefensiveStop(random: SeededRandom, team: TeamInput, runtime: TeamRuntime, contributions: Map<string, PlayerContribution>): void {
+  if (!random.chance(ENGINE_CONFIG.defending.stopCreditShare)) return;
+  const defender = pickDefenderByAbility(random, runtime, activeOutfield(runtime, team.name));
+  contributionFor(contributions, defender).defensiveActions += 1;
 }
 
-function chooseCreator(random: SeededRandom, team: TeamInput): Player {
-  const designated = team.starters.find((p) => p.id === team.tactics.creatorId);
+function chooseAttacker(random: SeededRandom, team: TeamInput, runtime: TeamRuntime): Player {
+  const active = runtime.activePlayers.map((entry) => entry.player);
+  const forwards = active.filter((player) => player.primaryPosition === "FW");
+  if (forwards.length > 0) return random.pick(forwards);
+  return random.pick(activeOutfield(runtime, team.name));
+}
+
+function chooseCreator(random: SeededRandom, team: TeamInput, runtime: TeamRuntime): Player {
+  const active = runtime.activePlayers.map((entry) => entry.player);
+  const designated = active.find((player) => player.id === team.tactics.creatorId);
   if (designated && random.chance(ENGINE_CONFIG.creator.designatedShare)) return designated;
-  const candidates = team.starters.filter((p) => p.primaryPosition === "MF" || p.primaryPosition === "FW");
-  if (candidates.length === 0) throw new Error(`${team.name} has no eligible creator`);
-  return random.pick(candidates);
+  const candidates = active.filter((player) => player.primaryPosition === "MF" || player.primaryPosition === "FW");
+  if (candidates.length > 0) return random.pick(candidates);
+  return random.pick(activeOutfield(runtime, team.name));
 }
 
 function fatiguePhaseMultiplier(minute: number): number {
@@ -235,8 +274,23 @@ function fatiguePhaseMultiplier(minute: number): number {
   return phases.minutes76To90;
 }
 
+function fatigueIncrement(team: TeamInput, minute: number): number {
+  return fatiguePhaseMultiplier(minute) * ENGINE_CONFIG.fatigue.approachMultiplier[team.tactics.approach];
+}
+
 function advanceFatigue(runtime: TeamRuntime, team: TeamInput, minute: number): void {
-  runtime.workload += fatiguePhaseMultiplier(minute) * ENGINE_CONFIG.fatigue.approachMultiplier[team.tactics.approach];
+  runtime.workload += fatigueIncrement(team, minute);
+}
+
+function sendOff(runtime: TeamRuntime, team: TeamInput, player: Player, minute: number, contribution: PlayerContribution): void {
+  const playerRuntime = runtime.players.get(player.id);
+  if (!playerRuntime) throw new Error(`Missing runtime state for dismissed player ${player.id}`);
+  const index = runtime.activePlayers.findIndex((entry) => entry.player.id === player.id);
+  if (index < 0) throw new Error(`${player.name} cannot be sent off twice`);
+  playerRuntime.exitWorkload = runtime.workload + fatigueIncrement(team, minute);
+  contribution.minutesPlayed = Math.min(contribution.minutesPlayed, minute);
+  runtime.activePlayers.splice(index, 1);
+  runtime.curves = buildProfileCurves(runtime.activePlayers);
 }
 
 export function simulateMatch(input: MatchInput): MatchOutput {
@@ -271,6 +325,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const attackingTeam = homeHasBall ? input.home : input.away;
     const defendingTeam = homeHasBall ? input.away : input.home;
     const attackRuntime = homeHasBall ? homeRuntime : awayRuntime;
+    const defenceRuntime = homeHasBall ? awayRuntime : homeRuntime;
     const attackProfile = homeHasBall ? homeProfile : awayProfile;
     const defenceProfile = homeHasBall ? awayProfile : homeProfile;
     const attackStats = homeHasBall ? homeStats : awayStats;
@@ -280,15 +335,15 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
     const progressionProbability = clamp(c.progression.base + (homeHasBall ? homeProgressionProbabilityBoost : 0) + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
     if (!random.chance(progressionProbability)) {
-      creditDefensiveStop(random, defendingTeam, contributions);
+      creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
       advanceFatigue(homeRuntime, input.home, minute);
       advanceFatigue(awayRuntime, input.away, minute);
       continue;
     }
 
-    const creator = chooseCreator(random, attackingTeam);
+    const creator = chooseCreator(random, attackingTeam, attackRuntime);
     contributionFor(contributions, creator).progressionActions += 1;
-    const errorDefender = random.pick(outfieldPlayers(defendingTeam));
+    const errorDefender = random.pick(activeOutfield(defenceRuntime, defendingTeam.name));
     const majorError = random.chance(c.defending.majorErrorChance);
     if (majorError) {
       contributionFor(contributions, errorDefender).majorErrors += 1;
@@ -297,7 +352,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
     const chanceProbability = clamp((c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor) * style.chanceRate, c.chance.min, c.chance.max);
     if (!majorError && !random.chance(chanceProbability)) {
-      creditDefensiveStop(random, defendingTeam, contributions);
+      creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
       advanceFatigue(homeRuntime, input.home, minute);
       advanceFatigue(awayRuntime, input.away, minute);
       continue;
@@ -307,7 +362,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     contributionFor(contributions, creator).chancesCreated += 1;
     events.push({ minute, type: "chance", teamId: attackingTeam.id, playerId: creator.id, detail: `${attackingTeam.name} create a chance` });
     if (random.chance(clamp(c.shot.base * style.shotRate, c.shot.min, c.shot.max))) {
-      const shooter = chooseAttacker(random, attackingTeam);
+      const shooter = chooseAttacker(random, attackingTeam, attackRuntime);
       const shooterContribution = contributionFor(contributions, shooter);
       attackStats.shots += 1;
       shooterContribution.shots += 1;
@@ -323,8 +378,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
           if (creator.id !== shooter.id) contributionFor(contributions, creator).assists += 1;
           events.push({ minute, type: "goal", teamId: attackingTeam.id, playerId: shooter.id, secondaryPlayerId: creator.id, detail: `${shooter.name} scores` });
         } else {
-          const keeper = defendingTeam.starters.find((p) => p.primaryPosition === "GK");
-          if (!keeper) throw new Error(`${defendingTeam.name} has no starting goalkeeper`);
+          const keeper = defenceRuntime.activePlayers.find((entry) => entry.player.primaryPosition === "GK")?.player;
+          if (!keeper) throw new Error(`${defendingTeam.name} has no active goalkeeper`);
           contributionFor(contributions, keeper).saves += 1;
           events.push({ minute, type: "save", teamId: defendingTeam.id, playerId: keeper.id, secondaryPlayerId: shooter.id, detail: `${keeper.name} makes the save` });
         }
@@ -332,12 +387,12 @@ export function simulateMatch(input: MatchInput): MatchOutput {
         events.push({ minute, type: "shot", teamId: attackingTeam.id, playerId: shooter.id, detail: `${shooter.name} shoots wide` });
       }
     } else {
-      creditDefensiveStop(random, defendingTeam, contributions);
+      creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
     }
 
     const baseFoul = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardFoul : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulFoul : c.tackling.normalFoul;
     if (random.chance(baseFoul + (defendingTeam === input.away ? awayDefendingFoulProbabilityAdd : 0))) {
-      const defender = random.pick(outfieldPlayers(defendingTeam));
+      const defender = random.pick(activeOutfield(defenceRuntime, defendingTeam.name));
       const dc = contributionFor(contributions, defender);
       defenceStats.fouls += 1;
       dc.fouls += 1;
@@ -347,6 +402,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
         defenceStats.redCards += 1;
         dc.redCards += 1;
         events.push({ minute, type: "red-card", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} is sent off` });
+        sendOff(defenceRuntime, defendingTeam, defender, minute, dc);
       } else {
         const yellowP = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardCard : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulCard : c.tackling.normalCard;
         if (random.chance(yellowP)) {
