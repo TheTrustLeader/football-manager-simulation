@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.6.3",
+  version: "match-engine-config-0.7.0",
   matchMinutes: 90,
   possessionBase: 0.5,
   possessionMin: 0.38,
@@ -9,6 +9,9 @@ export const ENGINE_CONFIG = {
     homeProgressionProbabilityBoost: 0.063,
     awayTravelConditionPenalty: 2,
     awayDefendingFoulProbabilityAdd: 0.003,
+  },
+  gameState: {
+    progressionProbabilityShift: 0.04,
   },
   fatigue: {
     baseConditionLossPerMinute: 0.675,
