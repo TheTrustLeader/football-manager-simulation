@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.3.1",
+  version: "match-engine-config-0.3.2",
   matchMinutes: 90,
   neutralPossession: 0.5,
   homePossessionBase: 0.515,
