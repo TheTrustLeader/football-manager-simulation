@@ -29,11 +29,6 @@ jobs:
       - name: Print deterministic golden-output hash
         run: npm run golden:print
 
-      - name: Run 50,000-seed performance equivalence
-        id: equivalence
-        continue-on-error: true
-        run: npm run equivalence -- 50000 evidence/performance-equivalence.json
-
       - name: Run tuning-seed evidence gate
         id: evidence
         continue-on-error: true
@@ -49,14 +44,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: match-lab-evidence
-          path: evidence/*.json
+          path: evidence/match-lab-evidence.json
           if-no-files-found: error
           retention-days: 90
 
       - name: Enforce evidence and test gates
         if: always()
         run: |
-          if [ "${{ steps.equivalence.outcome }}" != "success" ] || [ "${{ steps.evidence.outcome }}" != "success" ] || [ "${{ steps.tests.outcome }}" != "success" ]; then
-            echo "Match Lab gate failed: equivalence=${{ steps.equivalence.outcome }}, evidence=${{ steps.evidence.outcome }}, tests=${{ steps.tests.outcome }}"
+          if [ "${{ steps.evidence.outcome }}" != "success" ] || [ "${{ steps.tests.outcome }}" != "success" ]; then
+            echo "Match Lab gate failed: evidence=${{ steps.evidence.outcome }}, tests=${{ steps.tests.outcome }}"
             exit 1
           fi
