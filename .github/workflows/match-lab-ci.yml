@@ -29,9 +29,6 @@ jobs:
       - name: Print deterministic golden-output hash
         run: npm run golden:print
 
-      - name: Run temporary tuning-seed calibration sweep
-        run: npm run calibration:sweep -- 10000
-
       - name: Run tuning-seed evidence gate
         id: evidence
         continue-on-error: true
