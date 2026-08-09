@@ -118,6 +118,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const defenceProfile = homeHasBall ? awayProfile : homeProfile;
     const attackStats = homeHasBall ? homeStats : awayStats;
     const defenceStats = homeHasBall ? awayStats : homeStats;
+    const style = c.style[attackingTeam.tactics.style];
     attackStats.possessionTicks += 1;
 
     const progressionProbability = clamp(c.progression.base + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
@@ -135,7 +136,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       events.push({ minute, type: "attack", teamId: defendingTeam.id, playerId: errorDefender.id, detail: `${errorDefender.name} makes a major error` });
     }
 
-    const chanceProbability = clamp(c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor, c.chance.min, c.chance.max);
+    const rawChanceProbability = c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor;
+    const chanceProbability = clamp(rawChanceProbability * style.chanceRate, c.chance.min, c.chance.max);
     if (!majorError && !random.chance(chanceProbability)) {
       creditDefensiveStop(random, defendingTeam, contributions);
       continue;
@@ -144,7 +146,6 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     attackStats.chances += 1;
     contributionFor(contributions, creator).chancesCreated += 1;
     events.push({ minute, type: "chance", teamId: attackingTeam.id, playerId: creator.id, detail: `${attackingTeam.name} create a chance` });
-    const style = c.style[attackingTeam.tactics.style];
     const shotProbability = clamp(c.shot.base * style.shotRate, c.shot.min, c.shot.max);
     if (!random.chance(shotProbability)) {
       creditDefensiveStop(random, defendingTeam, contributions);
@@ -184,7 +185,6 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       defenceStats.fouls += 1;
       defenderContribution.fouls += 1;
       events.push({ minute, type: "foul", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} commits a foul` });
-
       const redProbability = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardRed : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulRed : c.tackling.normalRed;
       if (random.chance(redProbability)) {
         defenceStats.redCards += 1;
