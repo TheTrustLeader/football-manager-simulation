@@ -1,0 +1,43 @@
+name: Match Lab CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test -- --run
+
+      - name: Run 10,000 seeded matches
+        run: npm run simulate -- --matches=10000 --output=simulation-summary.json
+
+      - name: Upload simulation summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: match-lab-simulation-summary
+          path: simulation-summary.json
+          if-no-files-found: warn
+          retention-days: 14
