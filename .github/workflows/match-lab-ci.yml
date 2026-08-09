@@ -29,10 +29,15 @@ jobs:
       - name: Print deterministic golden-output hash
         run: npm run golden:print
 
-      - name: Run tuning-seed evidence gate
+      - name: Run tuning-seed CI evidence gate
         id: evidence
         continue-on-error: true
         run: npm run evidence -- 20000 tuning evidence/match-lab-evidence.json
+
+      - name: Run REVIEW-002 full tuning evidence
+        id: review002
+        continue-on-error: true
+        run: npm run review002:evidence -- 500000 evidence/review-002-full-evidence.json
 
       - name: Run behavioural and invariant tests
         id: tests
@@ -44,14 +49,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: match-lab-evidence
-          path: evidence/match-lab-evidence.json
+          path: evidence/*.json
           if-no-files-found: error
           retention-days: 90
 
       - name: Enforce evidence and test gates
         if: always()
         run: |
-          if [ "${{ steps.evidence.outcome }}" != "success" ] || [ "${{ steps.tests.outcome }}" != "success" ]; then
-            echo "Match Lab gate failed: evidence=${{ steps.evidence.outcome }}, tests=${{ steps.tests.outcome }}"
+          if [ "${{ steps.evidence.outcome }}" != "success" ] || [ "${{ steps.review002.outcome }}" != "success" ] || [ "${{ steps.tests.outcome }}" != "success" ]; then
+            echo "Match Lab gate failed: evidence=${{ steps.evidence.outcome }}, review002=${{ steps.review002.outcome }}, tests=${{ steps.tests.outcome }}"
             exit 1
           fi
