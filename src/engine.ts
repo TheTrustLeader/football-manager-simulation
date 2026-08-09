@@ -124,6 +124,10 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     contributionFor(contributions, creator).chancesCreated += 1;
     events.push({ minute, type: "chance", teamId: attackingTeam.id, playerId: creator.id, detail: `${attackingTeam.name} create a chance` });
 
+    const style = c.style[attackingTeam.tactics.style];
+    const shotProbability = clamp(c.shot.base * style.shotRate, c.shot.min, c.shot.max);
+    if (!random.chance(shotProbability)) continue;
+
     const shooter = chooseAttacker(random, attackingTeam);
     const shooterContribution = contributionFor(contributions, shooter);
     attackStats.shots += 1;
@@ -136,7 +140,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
     attackStats.shotsOnTarget += 1;
     shooterContribution.shotsOnTarget += 1;
-    const goalProbability = clamp(c.goal.base + (effectiveAttribute(shooter, "finishing") - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor, c.goal.min, c.goal.max);
+    const rawGoalProbability = c.goal.base + (effectiveAttribute(shooter, "finishing") - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor;
+    const goalProbability = clamp(rawGoalProbability * style.shotQuality, c.goal.min, c.goal.max);
     if (random.chance(goalProbability)) {
       attackStats.goals += 1;
       shooterContribution.goals += 1;
