@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.3.4",
+  version: "match-engine-config-0.3.5",
   matchMinutes: 90,
   neutralPossession: 0.5,
   homePossessionBase: 0.515,
@@ -67,7 +67,7 @@ export const ENGINE_CONFIG = {
   },
   formation: {
     "4-4-2": { retention: 1, progression: 1, attack: 1, defence: 1 },
-    "4-3-3": { retention: 0.98, progression: 1.05, attack: 1.08, defence: 0.95 },
+    "4-3-3": { retention: 0.98, progression: 1.07, attack: 1.12, defence: 0.94 },
     "4-5-1": { retention: 1.05, progression: 0.97, attack: 0.9, defence: 1.08 },
     "3-5-2": { retention: 1.04, progression: 1.06, attack: 1.05, defence: 0.96 },
     "5-3-2": { retention: 0.96, progression: 0.94, attack: 0.9, defence: 1.1 },
