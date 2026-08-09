@@ -9,26 +9,27 @@ function average(values: number[], label: string): number {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-function effectiveAttribute(player: Player, key: keyof Player["attributes"]): number {
+function effectiveAttribute(player: Player, key: keyof Player["attributes"], conditionAdjustment = 0): number {
   const c = ENGINE_CONFIG;
-  const condition = c.condition.base + c.condition.range * clamp(player.state.condition / c.condition.scale, 0, 1);
+  const adjustedCondition = clamp(player.state.condition + conditionAdjustment, 0, c.condition.scale);
+  const condition = c.condition.base + c.condition.range * clamp(adjustedCondition / c.condition.scale, 0, 1);
   const form = 1 + clamp(player.state.recentForm, -c.form.maxMagnitude, c.form.maxMagnitude) * c.form.effect;
   return player.attributes[key] * condition * form * c.morale[player.state.morale];
 }
 
-function teamProfile(team: TeamInput) {
+function teamProfile(team: TeamInput, conditionAdjustment = 0) {
   const c = ENGINE_CONFIG;
   const xi = team.starters;
-  const passing = average(xi.map((player) => effectiveAttribute(player, "passing")), "passing attributes");
-  const creativity = average(xi.map((player) => effectiveAttribute(player, "creativity")), "creativity attributes");
-  const pace = average(xi.map((player) => effectiveAttribute(player, "pace")), "pace attributes");
-  const aerial = average(xi.map((player) => effectiveAttribute(player, "aerial")), "aerial attributes");
+  const passing = average(xi.map((player) => effectiveAttribute(player, "passing", conditionAdjustment)), "passing attributes");
+  const creativity = average(xi.map((player) => effectiveAttribute(player, "creativity", conditionAdjustment)), "creativity attributes");
+  const pace = average(xi.map((player) => effectiveAttribute(player, "pace", conditionAdjustment)), "pace attributes");
+  const aerial = average(xi.map((player) => effectiveAttribute(player, "aerial", conditionAdjustment)), "aerial attributes");
   const forwards = xi.filter((player) => player.primaryPosition === "FW");
-  const finishing = average(forwards.map((player) => effectiveAttribute(player, "finishing")), "forward finishing attributes");
-  const defending = average(xi.map((player) => effectiveAttribute(player, "defending")), "defending attributes");
+  const finishing = average(forwards.map((player) => effectiveAttribute(player, "finishing", conditionAdjustment)), "forward finishing attributes");
+  const defending = average(xi.map((player) => effectiveAttribute(player, "defending", conditionAdjustment)), "defending attributes");
   const goalkeeperPlayer = xi.find((player) => player.primaryPosition === "GK");
   if (!goalkeeperPlayer) throw new Error(`${team.name} has no starting goalkeeper`);
-  const goalkeeper = effectiveAttribute(goalkeeperPlayer, "goalkeeping");
+  const goalkeeper = effectiveAttribute(goalkeeperPlayer, "goalkeeping", conditionAdjustment);
 
   let retention = passing * c.profileWeights.retention.passing + creativity * c.profileWeights.retention.creativity;
   let progression = passing * c.profileWeights.progression.passing + creativity * c.profileWeights.progression.creativity + pace * c.profileWeights.progression.pace + aerial * c.profileWeights.progression.aerial;
@@ -97,8 +98,12 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   validateMatchInput(input);
   const c = ENGINE_CONFIG;
   const random = new SeededRandom(input.seed);
+  const homeAdvantageApplied = !input.neutralVenue;
+  const awayTravelConditionPenalty = homeAdvantageApplied ? c.homeAdvantage.awayTravelConditionPenalty : 0;
+  const homeProgressionProbabilityBoost = homeAdvantageApplied ? c.homeAdvantage.homeProgressionProbabilityBoost : 0;
+  const awayDefendingFoulProbabilityAdd = homeAdvantageApplied ? c.homeAdvantage.awayDefendingFoulProbabilityAdd : 0;
   const homeProfile = teamProfile(input.home);
-  const awayProfile = teamProfile(input.away);
+  const awayProfile = teamProfile(input.away, -awayTravelConditionPenalty);
   const homeStats = emptyStats();
   const awayStats = emptyStats();
   const events: MatchEvent[] = [{ minute: 0, type: "kick-off", detail: "Kick-off" }];
@@ -109,9 +114,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   }
 
   for (let minute = 1; minute <= c.matchMinutes; minute += 1) {
-    const homePossession = input.neutralVenue ? c.neutralPossession : c.homePossessionBase;
     const retentionDelta = (homeProfile.retention - awayProfile.retention) / c.retentionDeltaDivisor;
-    const homeHasBall = random.chance(clamp(homePossession + retentionDelta, c.possessionMin, c.possessionMax));
+    const homeHasBall = random.chance(clamp(c.possessionBase + retentionDelta, c.possessionMin, c.possessionMax));
     const attackingTeam = homeHasBall ? input.home : input.away;
     const defendingTeam = homeHasBall ? input.away : input.home;
     const attackProfile = homeHasBall ? homeProfile : awayProfile;
@@ -121,7 +125,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const style = c.style[attackingTeam.tactics.style];
     attackStats.possessionTicks += 1;
 
-    const progressionProbability = clamp(c.progression.base + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
+    const homeProgressionStageBoost = homeHasBall ? homeProgressionProbabilityBoost : 0;
+    const progressionProbability = clamp(c.progression.base + homeProgressionStageBoost + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
     if (!random.chance(progressionProbability)) {
       creditDefensiveStop(random, defendingTeam, contributions);
       continue;
@@ -156,7 +161,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const shooterContribution = contributionFor(contributions, shooter);
     attackStats.shots += 1;
     shooterContribution.shots += 1;
-    const onTargetProbability = clamp(c.onTarget.base + (effectiveAttribute(shooter, "finishing") - c.onTarget.finishingBaseline) / c.onTarget.finishingDivisor, c.onTarget.min, c.onTarget.max);
+    const shooterConditionAdjustment = attackingTeam === input.away ? -awayTravelConditionPenalty : 0;
+    const onTargetProbability = clamp(c.onTarget.base + (effectiveAttribute(shooter, "finishing", shooterConditionAdjustment) - c.onTarget.finishingBaseline) / c.onTarget.finishingDivisor, c.onTarget.min, c.onTarget.max);
     if (!random.chance(onTargetProbability)) {
       events.push({ minute, type: "shot", teamId: attackingTeam.id, playerId: shooter.id, detail: `${shooter.name} shoots wide` });
       continue;
@@ -164,7 +170,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
     attackStats.shotsOnTarget += 1;
     shooterContribution.shotsOnTarget += 1;
-    const rawGoalProbability = c.goal.base + (effectiveAttribute(shooter, "finishing") - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor;
+    const rawGoalProbability = c.goal.base + (effectiveAttribute(shooter, "finishing", shooterConditionAdjustment) - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor;
     const goalProbability = clamp(rawGoalProbability * style.shotQuality, c.goal.min, c.goal.max);
     if (random.chance(goalProbability)) {
       attackStats.goals += 1;
@@ -178,7 +184,9 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       events.push({ minute, type: "save", teamId: defendingTeam.id, playerId: keeper.id, secondaryPlayerId: shooter.id, detail: `${keeper.name} makes the save` });
     }
 
-    const foulProbability = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardFoul : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulFoul : c.tackling.normalFoul;
+    const baseFoulProbability = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardFoul : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulFoul : c.tackling.normalFoul;
+    const refereeStageAdd = defendingTeam === input.away ? awayDefendingFoulProbabilityAdd : 0;
+    const foulProbability = baseFoulProbability + refereeStageAdd;
     if (random.chance(foulProbability)) {
       const defender = random.pick(outfieldPlayers(defendingTeam));
       const defenderContribution = contributionFor(contributions, defender);
@@ -208,7 +216,25 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   }
 
   events.push({ minute: c.matchMinutes, type: "full-time", detail: `Full-time: ${input.home.name} ${homeStats.goals}-${awayStats.goals} ${input.away.name}` });
-  return { seed: input.seed, engineConfigVersion: c.version, engineConfigHash: ENGINE_CONFIG_HASH, homeTeamId: input.home.id, awayTeamId: input.away.id, home: homeStats, away: awayStats, events, contributions: [...contributions.values()] };
+  return {
+    seed: input.seed,
+    engineConfigVersion: c.version,
+    engineConfigHash: ENGINE_CONFIG_HASH,
+    homeTeamId: input.home.id,
+    awayTeamId: input.away.id,
+    home: homeStats,
+    away: awayStats,
+    events,
+    contributions: [...contributions.values()],
+    diagnostics: {
+      homeAdvantage: {
+        applied: homeAdvantageApplied,
+        homeProgressionProbabilityBoost,
+        awayTravelConditionPenalty,
+        awayDefendingFoulProbabilityAdd,
+      },
+    },
+  };
 }
 
 export function validateMatchInput(input: MatchInput): void {
