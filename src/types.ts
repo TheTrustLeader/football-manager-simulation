@@ -4,6 +4,7 @@ export type Approach = "cautious" | "balanced" | "attacking";
 export type Tackling = "careful" | "normal" | "hard";
 export type Position = "GK" | "DF" | "MF" | "FW";
 export type Morale = "very-low" | "low" | "steady" | "good" | "high";
+export type ScoreState = "level" | "leading" | "trailing";
 
 export interface Attributes {
   defending: number;
@@ -118,6 +119,11 @@ export interface TeamStats {
   redCards: number;
 }
 
+export interface ScoreStateDiagnostic {
+  possessions: number;
+  progressions: number;
+}
+
 export interface MatchDiagnostics {
   homeAdvantage: {
     applied: boolean;
@@ -129,6 +135,15 @@ export interface MatchDiagnostics {
     applied: boolean;
     baseConditionLossPerMinute: number;
     minimumCondition: number;
+  };
+  gameState: {
+    progressionProbabilityShift: number;
+    scoreStateMinutes: {
+      level: number;
+      homeLeading: number;
+      awayLeading: number;
+    };
+    attackingState: Record<ScoreState, ScoreStateDiagnostic>;
   };
 }
 
