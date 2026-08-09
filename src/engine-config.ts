@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.5.0",
+  version: "match-engine-config-0.5.1",
   matchMinutes: 90,
   possessionBase: 0.5,
   possessionMin: 0.38,
@@ -11,11 +11,17 @@ export const ENGINE_CONFIG = {
     awayDefendingFoulProbabilityAdd: 0.003,
   },
   fatigue: {
-    baseConditionLossPerMinute: 0.09,
+    baseConditionLossPerMinute: 0.135,
     staminaBaseline: 10,
     staminaSensitivity: 0.025,
     minimumCondition: 35,
     approachMultiplier: { cautious: 0.9, balanced: 1, attacking: 1.12 },
+    phaseMultiplier: {
+      firstHalf: 0.25,
+      minutes46To60: 0.6,
+      minutes61To75: 1.05,
+      minutes76To90: 1.55,
+    },
   },
   condition: { base: 0.78, range: 0.22, scale: 100 },
   form: { maxMagnitude: 1, effect: 0.025 },
