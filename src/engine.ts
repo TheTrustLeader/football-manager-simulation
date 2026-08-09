@@ -45,12 +45,8 @@ function teamProfile(team: TeamInput) {
   retention *= style.retention;
   progression *= style.progression;
   attack *= style.attack;
-
-  if (team.tactics.style === "direct") {
-    progression *= 1 + clamp((aerial - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
-  } else if (team.tactics.style === "counter") {
-    attack *= 1 + clamp((pace - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
-  }
+  if (team.tactics.style === "direct") progression *= 1 + clamp((aerial - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
+  else if (team.tactics.style === "counter") attack *= 1 + clamp((pace - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
 
   const approach = c.approach[team.tactics.approach];
   attack *= approach.attack;
@@ -70,6 +66,17 @@ function contributionFor(contributions: Map<string, PlayerContribution>, player:
   const contribution = contributions.get(player.id);
   if (!contribution) throw new Error(`Missing contribution record for ${player.id}`);
   return contribution;
+}
+
+function outfieldPlayers(team: TeamInput): Player[] {
+  const players = team.starters.filter((player) => player.primaryPosition !== "GK");
+  if (players.length === 0) throw new Error(`${team.name} has no outfield players`);
+  return players;
+}
+
+function creditDefensiveStop(random: SeededRandom, team: TeamInput, contributions: Map<string, PlayerContribution>): void {
+  if (!random.chance(ENGINE_CONFIG.defending.stopCreditShare)) return;
+  contributionFor(contributions, random.pick(outfieldPlayers(team))).defensiveActions += 1;
 }
 
 function chooseAttacker(random: SeededRandom, team: TeamInput): Player {
@@ -114,19 +121,35 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     attackStats.possessionTicks += 1;
 
     const progressionProbability = clamp(c.progression.base + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
-    if (!random.chance(progressionProbability)) continue;
+    if (!random.chance(progressionProbability)) {
+      creditDefensiveStop(random, defendingTeam, contributions);
+      continue;
+    }
+
     const creator = chooseCreator(random, attackingTeam);
     contributionFor(contributions, creator).progressionActions += 1;
+    const errorDefender = random.pick(outfieldPlayers(defendingTeam));
+    const majorError = random.chance(c.defending.majorErrorChance);
+    if (majorError) {
+      contributionFor(contributions, errorDefender).majorErrors += 1;
+      events.push({ minute, type: "attack", teamId: defendingTeam.id, playerId: errorDefender.id, detail: `${errorDefender.name} makes a major error` });
+    }
 
     const chanceProbability = clamp(c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor, c.chance.min, c.chance.max);
-    if (!random.chance(chanceProbability)) continue;
+    if (!majorError && !random.chance(chanceProbability)) {
+      creditDefensiveStop(random, defendingTeam, contributions);
+      continue;
+    }
+
     attackStats.chances += 1;
     contributionFor(contributions, creator).chancesCreated += 1;
     events.push({ minute, type: "chance", teamId: attackingTeam.id, playerId: creator.id, detail: `${attackingTeam.name} create a chance` });
-
     const style = c.style[attackingTeam.tactics.style];
     const shotProbability = clamp(c.shot.base * style.shotRate, c.shot.min, c.shot.max);
-    if (!random.chance(shotProbability)) continue;
+    if (!random.chance(shotProbability)) {
+      creditDefensiveStop(random, defendingTeam, contributions);
+      continue;
+    }
 
     const shooter = chooseAttacker(random, attackingTeam);
     const shooterContribution = contributionFor(contributions, shooter);
@@ -156,25 +179,31 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
     const foulProbability = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardFoul : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulFoul : c.tackling.normalFoul;
     if (random.chance(foulProbability)) {
-      const outfield = defendingTeam.starters.filter((player) => player.primaryPosition !== "GK");
-      if (outfield.length === 0) throw new Error(`${defendingTeam.name} has no outfield players`);
-      const defender = random.pick(outfield);
+      const defender = random.pick(outfieldPlayers(defendingTeam));
       const defenderContribution = contributionFor(contributions, defender);
       defenceStats.fouls += 1;
       defenderContribution.fouls += 1;
       events.push({ minute, type: "foul", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} commits a foul` });
-      const cardProbability = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardCard : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulCard : c.tackling.normalCard;
-      if (random.chance(cardProbability)) {
-        defenceStats.yellowCards += 1;
-        defenderContribution.yellowCards += 1;
-        events.push({ minute, type: "yellow-card", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} is booked` });
+
+      const redProbability = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardRed : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulRed : c.tackling.normalRed;
+      if (random.chance(redProbability)) {
+        defenceStats.redCards += 1;
+        defenderContribution.redCards += 1;
+        events.push({ minute, type: "red-card", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} is sent off` });
+      } else {
+        const cardProbability = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardCard : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulCard : c.tackling.normalCard;
+        if (random.chance(cardProbability)) {
+          defenceStats.yellowCards += 1;
+          defenderContribution.yellowCards += 1;
+          events.push({ minute, type: "yellow-card", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} is booked` });
+        }
       }
     }
   }
 
   for (const contribution of contributions.values()) {
     const r = c.ratings;
-    const raw = r.baseline + contribution.goals * r.goal + contribution.assists * r.assist + contribution.shotsOnTarget * r.shotOnTarget + contribution.chancesCreated * r.chanceCreated + contribution.progressionActions * r.progressionAction + contribution.defensiveActions * r.defensiveAction + contribution.saves * r.save + contribution.majorErrors * r.majorError + contribution.redCards * r.redCard + contribution.yellowCards * r.yellowCard;
+    const raw = r.baseline + contribution.goals * r.goal + contribution.assists * r.assist + contribution.shots * r.shot + contribution.shotsOnTarget * r.shotOnTarget + contribution.chancesCreated * r.chanceCreated + contribution.progressionActions * r.progressionAction + contribution.defensiveActions * r.defensiveAction + contribution.saves * r.save + contribution.majorErrors * r.majorError + contribution.redCards * r.redCard + contribution.yellowCards * r.yellowCard;
     contribution.rating = Math.round(clamp(raw, r.min, r.max) * r.precision) / r.precision;
   }
 
