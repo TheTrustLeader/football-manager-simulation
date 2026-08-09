@@ -117,6 +117,15 @@ export interface TeamStats {
   redCards: number;
 }
 
+export interface MatchDiagnostics {
+  homeAdvantage: {
+    applied: boolean;
+    homeProgressionProbabilityBoost: number;
+    awayTravelConditionPenalty: number;
+    awayDefendingFoulProbabilityAdd: number;
+  };
+}
+
 export interface MatchOutput {
   seed: number;
   engineConfigVersion: string;
@@ -127,4 +136,5 @@ export interface MatchOutput {
   away: TeamStats;
   events: MatchEvent[];
   contributions: PlayerContribution[];
+  diagnostics: MatchDiagnostics;
 }
