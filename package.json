@@ -10,6 +10,7 @@
     "simulate": "tsx src/simulate.ts",
     "evidence": "tsx src/evidence.ts",
     "review002:evidence": "tsx src/review-002-full-evidence.ts",
+    "game-state:sweep": "tsx src/game-state-sweep.ts",
     "golden:print": "tsx src/print-golden.ts"
   },
   "devDependencies": {
