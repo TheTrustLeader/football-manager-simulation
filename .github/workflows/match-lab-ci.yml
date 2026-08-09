@@ -19,25 +19,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Type-check
-        run: npm run typecheck
+      - name: Build and type-check
+        run: npm run build
 
       - name: Run tests
-        run: npm test -- --run
+        run: npm test
 
       - name: Run 10,000 seeded matches
-        run: npm run simulate -- --matches=10000 --output=simulation-summary.json
+        run: npm run simulate -- 10000 | tee simulation-summary.txt
 
       - name: Upload simulation summary
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: match-lab-simulation-summary
-          path: simulation-summary.json
+          path: simulation-summary.txt
           if-no-files-found: warn
           retention-days: 14
