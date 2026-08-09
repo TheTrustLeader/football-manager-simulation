@@ -116,13 +116,16 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const attackStats = attackingTeam === input.home ? homeStats : awayStats;
     const defenceStats = defendingTeam === input.home ? homeStats : awayStats;
 
-    const progressionProbability = clamp(0.24 + (attackProfile.progression - defenceProfile.defence) / 180, 0.12, 0.38);
+    // Calibration v0.2: increase the rate at which ordinary possession becomes
+    // meaningful attacking play. This is the first tuning layer only; home
+    // advantage and tactical weights remain unchanged until scoring is plausible.
+    const progressionProbability = clamp(0.42 + (attackProfile.progression - defenceProfile.defence) / 170, 0.24, 0.60);
     if (!random.chance(progressionProbability)) continue;
 
     const creator = chooseCreator(random, attackingTeam);
     contributions.get(creator.id)!.progressionActions += 1;
 
-    const chanceProbability = clamp(0.28 + (attackProfile.attack - defenceProfile.defence) / 200, 0.14, 0.42);
+    const chanceProbability = clamp(0.50 + (attackProfile.attack - defenceProfile.defence) / 180, 0.28, 0.68);
     if (!random.chance(chanceProbability)) continue;
 
     attackStats.chances += 1;
@@ -134,7 +137,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     attackStats.shots += 1;
     shooterContribution.shots += 1;
 
-    const onTargetProbability = clamp(0.42 + (effectiveAttribute(shooter, "finishing") - 10) / 80, 0.25, 0.66);
+    const onTargetProbability = clamp(0.45 + (effectiveAttribute(shooter, "finishing") - 10) / 80, 0.28, 0.68);
     if (!random.chance(onTargetProbability)) {
       events.push({ minute, type: "shot", teamId: attackingTeam.id, playerId: shooter.id, detail: `${shooter.name} shoots wide` });
       continue;
@@ -142,7 +145,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
     attackStats.shotsOnTarget += 1;
     shooterContribution.shotsOnTarget += 1;
-    const goalProbability = clamp(0.25 + (effectiveAttribute(shooter, "finishing") - defenceProfile.goalkeeper) / 90, 0.12, 0.42);
+    const goalProbability = clamp(0.28 + (effectiveAttribute(shooter, "finishing") - defenceProfile.goalkeeper) / 90, 0.14, 0.44);
 
     if (random.chance(goalProbability)) {
       attackStats.goals += 1;
