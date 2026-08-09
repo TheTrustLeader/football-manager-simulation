@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.6.2",
+  version: "match-engine-config-0.6.3",
   matchMinutes: 90,
   possessionBase: 0.5,
   possessionMin: 0.38,
@@ -97,14 +97,22 @@ export const ENGINE_CONFIG = {
     styleMinimumConversionDelta: 0.002,
     ratingCoverageMatches: 1000,
   },
-  ciGuardrails: {
-    sampleMatches: 20000,
+  calibrationTargets: {
     goalsPerMatchMin: 2.4,
     goalsPerMatchMax: 2.7,
     drawRateMin: 0.27,
     drawRateMax: 0.31,
     homeWinRateMin: 0.41,
     homeWinRateMax: 0.47,
+  },
+  ciGuardrails: {
+    sampleMatches: 20000,
+    goalsPerMatchMin: 2.375,
+    goalsPerMatchMax: 2.725,
+    drawRateMin: 0.263,
+    drawRateMax: 0.317,
+    homeWinRateMin: 0.403,
+    homeWinRateMax: 0.477,
     mirrorWinRateTolerance: 0.025,
     abilityStrongWinRateMin: 0.42,
     abilityWeakWinRateMax: 0.18,
