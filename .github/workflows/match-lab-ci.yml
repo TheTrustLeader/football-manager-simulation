@@ -9,7 +9,7 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install dependencies
         run: npm install
@@ -26,17 +26,17 @@ jobs:
       - name: Build and type-check
         run: npm run build
 
-      - name: Run tests
+      - name: Run behavioural and invariant tests
         run: npm test
 
-      - name: Run 10,000 seeded matches
-        run: npm run simulate -- 10000 | tee simulation-summary.txt
+      - name: Run tuning-seed evidence gate
+        run: npm run evidence -- 20000 tuning evidence/match-lab-evidence.json
 
-      - name: Upload simulation summary
+      - name: Upload Match Lab evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: match-lab-simulation-summary
-          path: simulation-summary.txt
+          name: match-lab-evidence
+          path: evidence/match-lab-evidence.json
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 90
