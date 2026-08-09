@@ -29,6 +29,7 @@ function aggregate(count: number, homeOverrides = {}, awayOverrides = {}) {
   return {
     goalsPerMatch: (homeGoals + awayGoals) / count,
     homeGoalsPerMatch: homeGoals / count,
+    awayGoalsPerMatch: awayGoals / count,
     chancesPerMatch: homeChances / count,
     shotConversion: homeShots === 0 ? 0 : homeGoals / homeShots,
     homeWinRate: homeWins / count,
@@ -113,17 +114,37 @@ describe("Match Engine core", () => {
     }
   });
   it("produces a stable hash for a known match output", () => expect(stableHash(simulateMatch(input(424242)))).toMatch(/^fnv1a64:[0-9a-f]{16}$/));
+  it("keeps age as data only at Gate 1", () => {
+    const younger = input(8811);
+    const older = input(8811);
+    for (const player of [...younger.home.starters, ...younger.away.starters]) player.age = 18;
+    for (const player of [...older.home.starters, ...older.away.starters]) player.age = 36;
+    expect(simulateMatch(younger)).toEqual(simulateMatch(older));
+  });
+  it("calibrates average-stamina balanced starters to material late-match fatigue", () => {
+    const source = input(9123);
+    source.home.tactics.tackling = "careful";
+    source.away.tactics.tackling = "careful";
+    const result = simulateMatch(source);
+    const homeStarterIds = new Set(source.home.starters.map((player) => player.id));
+    const conditions = Object.entries(result.finalCondition).filter(([id]) => homeStarterIds.has(id)).map(([, condition]) => condition);
+    const averageCondition = conditions.reduce((sum, condition) => sum + condition, 0) / conditions.length;
+    expect(averageCondition).toBeGreaterThanOrEqual(55);
+    expect(averageCondition).toBeLessThanOrEqual(65);
+  });
 });
 
 describe("Behavioural presence", () => {
-  it("makes each non-baseline formation statistically distinguishable", () => {
+  it("makes each non-baseline formation statistically distinguishable on attack or defence", () => {
     const count = ENGINE_CONFIG.presenceTests.sampleMatches;
     const baseline = aggregate(count, { formation: "4-4-2" as Formation });
     const alternatives: Formation[] = ["4-3-3", "4-5-1", "3-5-2", "5-3-2"];
     for (const formation of alternatives) {
       const candidate = aggregate(count, { formation });
-      const delta = Math.abs(candidate.homeGoalsPerMatch - baseline.homeGoalsPerMatch);
-      expect(delta, `${formation} goal-rate delta ${delta.toFixed(4)}; baseline ${baseline.homeGoalsPerMatch.toFixed(4)}, candidate ${candidate.homeGoalsPerMatch.toFixed(4)}`).toBeGreaterThanOrEqual(ENGINE_CONFIG.presenceTests.formationMinimumGoalRateDelta);
+      const scoredDelta = Math.abs(candidate.homeGoalsPerMatch - baseline.homeGoalsPerMatch);
+      const concededDelta = Math.abs(candidate.awayGoalsPerMatch - baseline.awayGoalsPerMatch);
+      const presenceDelta = Math.max(scoredDelta, concededDelta);
+      expect(presenceDelta, `${formation} two-sided goal delta ${presenceDelta.toFixed(4)}; scored ${scoredDelta.toFixed(4)}, conceded ${concededDelta.toFixed(4)}`).toBeGreaterThanOrEqual(ENGINE_CONFIG.presenceTests.formationMinimumGoalRateDelta);
     }
   });
 
@@ -143,6 +164,43 @@ describe("Behavioural presence", () => {
   it("exercises every contribution field used by the ratings ledger", () => {
     const coverage = collectRatingCoverage(ENGINE_CONFIG.presenceTests.ratingCoverageMatches);
     for (const [field, total] of Object.entries(coverage)) expect(total, `${field} was never exercised`).toBeGreaterThan(0);
+  });
+
+  it("credits defensive actions towards stronger defenders", () => {
+    let strongDefensiveActions = 0;
+    let weakDefensiveActions = 0;
+    const count = 2000;
+    for (let seed = 1; seed <= count; seed += 1) {
+      const home = makeTeam("defence-signal", 10);
+      const away = makeTeam("attack-signal", 10);
+      const defenders = home.starters.filter((player) => player.primaryPosition === "DF");
+      defenders[0]!.attributes.defending = 20;
+      defenders[1]!.attributes.defending = 2;
+      const result = simulateMatch({ seed, neutralVenue: true, home, away });
+      strongDefensiveActions += result.contributions.find((contribution) => contribution.playerId === defenders[0]!.id)!.defensiveActions;
+      weakDefensiveActions += result.contributions.find((contribution) => contribution.playerId === defenders[1]!.id)!.defensiveActions;
+    }
+    expect(strongDefensiveActions).toBeGreaterThan(weakDefensiveActions * 3);
+  });
+
+  it("removes a dismissed player from all later match events and prevents a second red", () => {
+    let redCardsChecked = 0;
+    for (let seed = 1; seed <= 5000 && redCardsChecked < 20; seed += 1) {
+      const home = makeTeam("red-home", 10, { tackling: "hard" });
+      const away = makeTeam("red-away", 10, { tackling: "hard" });
+      const result = simulateMatch({ seed, neutralVenue: true, home, away });
+      for (let index = 0; index < result.events.length; index += 1) {
+        const event = result.events[index]!;
+        if (event.type !== "red-card" || !event.playerId) continue;
+        redCardsChecked += 1;
+        const laterAppearance = result.events.slice(index + 1).find((later) => later.playerId === event.playerId || later.secondaryPlayerId === event.playerId);
+        expect(laterAppearance, `${event.playerId} appeared after dismissal at minute ${event.minute}`).toBeUndefined();
+        const contribution = result.contributions.find((candidate) => candidate.playerId === event.playerId)!;
+        expect(contribution.redCards).toBe(1);
+        expect(contribution.minutesPlayed).toBe(event.minute);
+      }
+    }
+    expect(redCardsChecked).toBeGreaterThan(0);
   });
 });
 
