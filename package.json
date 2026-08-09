@@ -9,6 +9,7 @@
     "test:watch": "vitest",
     "simulate": "tsx src/simulate.ts",
     "evidence": "tsx src/evidence.ts",
+    "equivalence": "tsx src/performance-equivalence.ts",
     "golden:print": "tsx src/print-golden.ts"
   },
   "devDependencies": {
