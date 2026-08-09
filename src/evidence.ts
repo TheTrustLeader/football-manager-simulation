@@ -4,7 +4,7 @@ import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { seedRange, type SeedPoolName } from "./seed-pools.js";
-import type { Formation, Style } from "./types.js";
+import type { Formation, ScoreState, Style } from "./types.js";
 
 interface Aggregate {
   matches: number;
@@ -18,8 +18,21 @@ interface Aggregate {
   scorelines: Record<string, number>;
 }
 
+interface StateCounter {
+  possessions: number;
+  progressions: number;
+}
+
 function emptyAggregate(): Aggregate {
   return { matches: 0, homeWins: 0, draws: 0, awayWins: 0, homeGoals: 0, awayGoals: 0, homeChances: 0, homeShots: 0, scorelines: {} };
+}
+
+function emptyStateCounters(): Record<ScoreState, StateCounter> {
+  return {
+    level: { possessions: 0, progressions: 0 },
+    leading: { possessions: 0, progressions: 0 },
+    trailing: { possessions: 0, progressions: 0 },
+  };
 }
 
 function addResult(aggregate: Aggregate, result: ReturnType<typeof simulateMatch>): void {
@@ -60,6 +73,12 @@ function poissonProbability(lambda: number, goals: number): number {
   return Math.exp(-lambda) * Math.pow(lambda, goals) / factorial;
 }
 
+function poissonDrawRate(homeLambda: number, awayLambda: number): number {
+  let rate = 0;
+  for (let goals = 0; goals <= 15; goals += 1) rate += poissonProbability(homeLambda, goals) * poissonProbability(awayLambda, goals);
+  return rate;
+}
+
 const count = Number.parseInt(process.argv[2] ?? `${ENGINE_CONFIG.ciGuardrails.sampleMatches}`, 10);
 const pool = (process.argv[3] ?? "tuning") as SeedPoolName;
 const outputPath = process.argv[4] ?? "evidence/match-lab-evidence.json";
@@ -84,12 +103,21 @@ const styleCandidates: Record<Style, Aggregate> = {
   direct: emptyAggregate(),
   counter: emptyAggregate(),
 };
+const gameStateCounters = emptyStateCounters();
+const scoreStateMinutes = { level: 0, homeLeading: 0, awayLeading: 0 };
 const invariantFailingSeeds: number[] = [];
 const started = performance.now();
 
 for (const seed of seeds) {
   const baselineResult = simulateMatch({ seed, home: makeTeam("home", 10), away: makeTeam("away", 10) });
   addResult(baseline, baselineResult);
+  for (const state of ["level", "leading", "trailing"] as const) {
+    gameStateCounters[state].possessions += baselineResult.diagnostics.gameState.attackingState[state].possessions;
+    gameStateCounters[state].progressions += baselineResult.diagnostics.gameState.attackingState[state].progressions;
+  }
+  scoreStateMinutes.level += baselineResult.diagnostics.gameState.scoreStateMinutes.level;
+  scoreStateMinutes.homeLeading += baselineResult.diagnostics.gameState.scoreStateMinutes.homeLeading;
+  scoreStateMinutes.awayLeading += baselineResult.diagnostics.gameState.scoreStateMinutes.awayLeading;
 
   const neutralResult = simulateMatch({ seed, neutralVenue: true, home: makeTeam("mirror-home", 10), away: makeTeam("mirror-away", 10) });
   addResult(mirror, neutralResult);
@@ -177,6 +205,18 @@ const stylePresence = Object.fromEntries((["passing", "direct", "counter"] as St
   }];
 }));
 
+const progressionRates = Object.fromEntries((["level", "leading", "trailing"] as ScoreState[]).map((state) => [state, {
+  possessions: gameStateCounters[state].possessions,
+  progressions: gameStateCounters[state].progressions,
+  rate: gameStateCounters[state].possessions === 0 ? null : gameStateCounters[state].progressions / gameStateCounters[state].possessions,
+}])) as Record<ScoreState, { possessions: number; progressions: number; rate: number | null }>;
+const gameStateOrderingPass = progressionRates.trailing.rate !== null && progressionRates.level.rate !== null && progressionRates.leading.rate !== null
+  && progressionRates.trailing.rate > progressionRates.level.rate
+  && progressionRates.level.rate > progressionRates.leading.rate;
+
+const expectedPoissonDrawRate = poissonDrawRate(baselineRates.homeGoalsPerMatch, baselineRates.awayGoalsPerMatch);
+const drawExcessOverPoisson = baselineRates.drawRate - expectedPoissonDrawRate;
+
 const calibrationChecks = {
   goalsPerMatch: bandCheck(baselineRates.goalsPerMatch, targets.goalsPerMatchMin, targets.goalsPerMatchMax),
   drawRate: bandCheck(baselineRates.drawRate, targets.drawRateMin, targets.drawRateMax),
@@ -210,6 +250,12 @@ const ciChecks = {
     pass: Object.values(stylePresence).every((value) => value.pass),
     failing: Object.entries(stylePresence).filter(([, value]) => !value.pass).map(([style]) => style),
   },
+  gameStateOrdering: {
+    trailingRate: progressionRates.trailing.rate,
+    levelRate: progressionRates.level.rate,
+    leadingRate: progressionRates.leading.rate,
+    pass: gameStateOrderingPass,
+  },
   invariants: {
     failingSeedCount: invariantFailingSeeds.length,
     pass: invariantFailingSeeds.length === 0,
@@ -228,7 +274,7 @@ const poissonReference = Object.fromEntries(poissonCells.map((scoreline) => {
 
 const simulatedMatches = count * 11;
 const evidence = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   generatedAt: new Date().toISOString(),
   buildVersion: process.env.GITHUB_SHA ?? "local-uncommitted",
   engineConfigVersion: ENGINE_CONFIG.version,
@@ -245,6 +291,14 @@ const evidence = {
   baseline: { ...baselineRates, counts: baseline, scorelineMatrix: baseline.scorelines },
   neutralMirror: { ...mirrorRates, counts: mirror },
   abilitySignal: { ...abilityRates, counts: ability, strongLevel: 14, weakLevel: 8 },
+  gameState: {
+    progressionProbabilityShift: ENGINE_CONFIG.gameState.progressionProbabilityShift,
+    scoreStateMinutes,
+    progressionRates,
+    independentPoissonDrawRate: expectedPoissonDrawRate,
+    observedDrawRate: baselineRates.drawRate,
+    drawExcessOverPoisson,
+  },
   presence: {
     formation: { baseline: formationBaselineRates, candidates: formationPresence },
     style: { baseline: styleBaselineRates, candidates: stylePresence },
@@ -260,16 +314,16 @@ const evidence = {
     "The sourced goals, draw and home-win bands remain the football calibration targets.",
     "The 20,000-match CI safety bounds include the narrow sampling allowance recorded in Decision 004; a target miss remains visible in calibrationChecks even when ciChecks pass.",
     "Final calibration acceptance is judged on the larger 500,000–1,000,000 tuning-seed run against calibrationTargets, not the buffered CI bounds.",
+    "Game-state response is evidenced by trailing > level > leading attacking progression and the observed draw excess over an independent Poisson reference.",
     "Formation and style presence are mechanism-presence checks, not claims that their final magnitudes are balanced.",
-    "The 12-question simulation matrix remains blocked pending REVIEW-002 remediation and re-review.",
+    "The 12-question simulation matrix remains blocked pending independent re-review.",
     "Validation seeds remain sealed during tuning.",
-    "Poisson comparison is diagnostic evidence only; it is not an optimisation target.",
   ],
 };
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
-console.log(JSON.stringify({ buildVersion: evidence.buildVersion, configHash: ENGINE_CONFIG_HASH, calibrationChecks, ciChecks, performance: evidence.performance }, null, 2));
+console.log(JSON.stringify({ buildVersion: evidence.buildVersion, configHash: ENGINE_CONFIG_HASH, calibrationChecks, ciChecks, gameState: evidence.gameState, performance: evidence.performance }, null, 2));
 
 const failedChecks = Object.entries(ciChecks).filter(([, value]) => !value.pass).map(([name]) => name);
 if (failedChecks.length > 0) {
