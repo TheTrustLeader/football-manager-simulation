@@ -8,12 +8,12 @@ const mutableConfig = ENGINE_CONFIG as unknown as {
   homeAdvantage: { homeProgressionProbabilityBoost: number };
 };
 
-const count = Number.parseInt(process.argv[2] ?? "5000", 10);
+const count = Number.parseInt(process.argv[2] ?? "10000", 10);
 const seeds = seedRange("tuning", count);
 const originalGoalBase = mutableConfig.goal.base;
 const originalHomeBoost = mutableConfig.homeAdvantage.homeProgressionProbabilityBoost;
-const goalBases = [0.295, 0.3, 0.305, 0.31];
-const homeBoosts = [0.06, 0.08, 0.1, 0.12];
+const goalBases = [0.2875, 0.29, 0.2925, 0.295];
+const homeBoosts = [0.05, 0.055, 0.06, 0.065];
 const results: unknown[] = [];
 
 try {
