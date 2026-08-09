@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.3.3",
+  version: "match-engine-config-0.3.4",
   matchMinutes: 90,
   neutralPossession: 0.5,
   homePossessionBase: 0.515,
@@ -16,10 +16,10 @@ export const ENGINE_CONFIG = {
     defence: { defending: 0.7, pace: 0.15, aerial: 0.15 },
   },
   style: {
-    passing: { retention: 1.08, progression: 1.03, attack: 1, shotRate: 0.93, shotQuality: 1.08 },
-    direct: { retention: 0.94, progression: 1.04, attack: 1, shotRate: 1.08, shotQuality: 0.96 },
-    counter: { retention: 0.96, progression: 1, attack: 1.02, shotRate: 0.92, shotQuality: 1.12 },
-    balanced: { retention: 1, progression: 1, attack: 1, shotRate: 1, shotQuality: 1 },
+    passing: { retention: 1.08, progression: 1.03, attack: 1, chanceRate: 1.05, shotRate: 0.93, shotQuality: 1.08 },
+    direct: { retention: 0.94, progression: 1.04, attack: 1, chanceRate: 1.08, shotRate: 1.08, shotQuality: 0.96 },
+    counter: { retention: 0.96, progression: 1, attack: 1.02, chanceRate: 0.93, shotRate: 0.92, shotQuality: 1.12 },
+    balanced: { retention: 1, progression: 1, attack: 1, chanceRate: 1, shotRate: 1, shotQuality: 1 },
     attributeBaseline: 10,
     attributeDivisor: 200,
     attributeMin: -0.03,
@@ -67,10 +67,10 @@ export const ENGINE_CONFIG = {
   },
   formation: {
     "4-4-2": { retention: 1, progression: 1, attack: 1, defence: 1 },
-    "4-3-3": { retention: 0.99, progression: 1.03, attack: 1.05, defence: 0.97 },
-    "4-5-1": { retention: 1.04, progression: 0.98, attack: 0.94, defence: 1.04 },
-    "3-5-2": { retention: 1.03, progression: 1.04, attack: 1.02, defence: 0.98 },
-    "5-3-2": { retention: 0.97, progression: 0.96, attack: 0.95, defence: 1.07 },
+    "4-3-3": { retention: 0.98, progression: 1.05, attack: 1.08, defence: 0.95 },
+    "4-5-1": { retention: 1.05, progression: 0.97, attack: 0.9, defence: 1.08 },
+    "3-5-2": { retention: 1.04, progression: 1.06, attack: 1.05, defence: 0.96 },
+    "5-3-2": { retention: 0.96, progression: 0.94, attack: 0.9, defence: 1.1 },
   },
   presenceTests: {
     sampleMatches: 2000,
