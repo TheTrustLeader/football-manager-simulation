@@ -111,6 +111,7 @@ export interface TeamStats {
   shots: number;
   shotsOnTarget: number;
   chances: number;
+  possessionTicks: number;
   fouls: number;
   yellowCards: number;
   redCards: number;
@@ -118,6 +119,8 @@ export interface TeamStats {
 
 export interface MatchOutput {
   seed: number;
+  engineConfigVersion: string;
+  engineConfigHash: string;
   homeTeamId: string;
   awayTeamId: string;
   home: TeamStats;
