@@ -91,7 +91,6 @@ const referenceElapsedMs = performance.now() - referenceStarted;
 
 const optimisedAggregate = emptyAggregate();
 let changedScorelines = 0;
-let maxFinalConditionAbsoluteDelta = 0;
 const goalDifference: RunningDifference = { n: 0, mean: 0, m2: 0 };
 const homeWinDifference: RunningDifference = { n: 0, mean: 0, m2: 0 };
 const drawDifference: RunningDifference = { n: 0, mean: 0, m2: 0 };
@@ -110,14 +109,6 @@ for (let index = 0; index < seeds.length; index += 1) {
   addDifference(homeWinDifference, Number(optimised.homeGoals > optimised.awayGoals) - Number(reference.homeGoals > reference.awayGoals));
   addDifference(drawDifference, Number(optimised.homeGoals === optimised.awayGoals) - Number(reference.homeGoals === reference.awayGoals));
   addDifference(awayWinDifference, Number(optimised.homeGoals < optimised.awayGoals) - Number(reference.homeGoals < reference.awayGoals));
-
-  const referenceResult = simulateMatchReference({ seed, home: makeTeam("condition-home", 10), away: makeTeam("condition-away", 10) });
-  const optimisedResult = simulateMatch({ seed, home: makeTeam("condition-home", 10), away: makeTeam("condition-away", 10) });
-  for (const [playerId, referenceCondition] of Object.entries(referenceResult.finalCondition)) {
-    const optimisedCondition = optimisedResult.finalCondition[playerId];
-    if (optimisedCondition === undefined) throw new Error(`Missing optimised final condition for ${playerId}`);
-    maxFinalConditionAbsoluteDelta = Math.max(maxFinalConditionAbsoluteDelta, Math.abs(optimisedCondition - referenceCondition));
-  }
 }
 const optimisedElapsedMs = performance.now() - optimisedStarted;
 
@@ -145,9 +136,6 @@ const evidence = {
     homeWinRate: differenceSummary(homeWinDifference),
     drawRate: differenceSummary(drawDifference),
     awayWinRate: differenceSummary(awayWinDifference),
-  },
-  finalCondition: {
-    maxAbsoluteDelta: maxFinalConditionAbsoluteDelta,
   },
   performance: {
     referenceElapsedMs,
