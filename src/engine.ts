@@ -4,9 +4,43 @@ import type { MatchEvent, MatchInput, MatchOutput, Player, PlayerContribution, T
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
-function average(values: number[], label: string): number {
-  if (values.length === 0) throw new Error(`Cannot average empty ${label}`);
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
+interface PlayerRuntime {
+  player: Player;
+  initialCondition: number;
+  lossPerWorkload: number;
+  floorBreakpoint: number;
+  formFactor: number;
+  moraleFactor: number;
+}
+
+interface AttributeCurveEntry {
+  weight: number;
+  initialCondition: number;
+  lossPerWorkload: number;
+  floorBreakpoint: number;
+}
+
+interface AttributeCurve {
+  count: number;
+  sumWeight: number;
+  totalWeightedInitialCondition: number;
+  totalWeightedLossPerWorkload: number;
+  minimumFloorBreakpoint: number;
+  entries: AttributeCurveEntry[];
+}
+
+interface TeamRuntime {
+  workload: number;
+  players: Map<string, PlayerRuntime>;
+  curves: {
+    passing: AttributeCurve;
+    creativity: AttributeCurve;
+    pace: AttributeCurve;
+    aerial: AttributeCurve;
+    finishing: AttributeCurve;
+    defending: AttributeCurve;
+    goalkeeping: AttributeCurve;
+  };
 }
 
 function conditionFor(player: Player, conditions: Map<string, number>): number {
@@ -15,43 +49,91 @@ function conditionFor(player: Player, conditions: Map<string, number>): number {
   return value;
 }
 
-interface PreparedPlayer {
-  player: Player;
-  conditionFactor: number;
-  formFactor: number;
-  moraleFactor: number;
+function createPlayerRuntime(player: Player, initialCondition: number): PlayerRuntime {
+  const c = ENGINE_CONFIG;
+  const f = c.fatigue;
+  const staminaFactor = Math.max(0.65, 1 + (f.staminaBaseline - player.attributes.stamina) * f.staminaSensitivity);
+  const lossPerWorkload = f.baseConditionLossPerMinute * staminaFactor;
+  const floorBreakpoint = lossPerWorkload === 0 ? Number.POSITIVE_INFINITY : Math.max(0, (initialCondition - f.minimumCondition) / lossPerWorkload);
+  return {
+    player,
+    initialCondition,
+    lossPerWorkload,
+    floorBreakpoint,
+    formFactor: 1 + clamp(player.state.recentForm, -c.form.maxMagnitude, c.form.maxMagnitude) * c.form.effect,
+    moraleFactor: c.morale[player.state.morale],
+  };
 }
 
-function preparePlayers(team: TeamInput, conditions: Map<string, number>): PreparedPlayer[] {
-  const c = ENGINE_CONFIG;
-  return team.starters.map((player) => {
-    const conditionValue = conditionFor(player, conditions);
+function createAttributeCurve(players: PlayerRuntime[], key: keyof Player["attributes"], predicate: (player: Player) => boolean = () => true): AttributeCurve {
+  const selected = players.filter((runtime) => predicate(runtime.player));
+  if (selected.length === 0) throw new Error(`Cannot build empty ${String(key)} attribute curve`);
+  const entries = selected.map((runtime) => {
+    const weight = runtime.player.attributes[key] * runtime.formFactor * runtime.moraleFactor;
     return {
-      player,
-      conditionFactor: c.condition.base + c.condition.range * clamp(conditionValue / c.condition.scale, 0, 1),
-      formFactor: 1 + clamp(player.state.recentForm, -c.form.maxMagnitude, c.form.maxMagnitude) * c.form.effect,
-      moraleFactor: c.morale[player.state.morale],
+      weight,
+      initialCondition: runtime.initialCondition,
+      lossPerWorkload: runtime.lossPerWorkload,
+      floorBreakpoint: runtime.floorBreakpoint,
     };
   });
+  return {
+    count: entries.length,
+    sumWeight: entries.reduce((sum, entry) => sum + entry.weight, 0),
+    totalWeightedInitialCondition: entries.reduce((sum, entry) => sum + entry.weight * entry.initialCondition, 0),
+    totalWeightedLossPerWorkload: entries.reduce((sum, entry) => sum + entry.weight * entry.lossPerWorkload, 0),
+    minimumFloorBreakpoint: entries.reduce((minimum, entry) => Math.min(minimum, entry.floorBreakpoint), Number.POSITIVE_INFINITY),
+    entries,
+  };
 }
 
-function effectiveAttribute(prepared: PreparedPlayer, key: keyof Player["attributes"]): number {
-  return prepared.player.attributes[key] * prepared.conditionFactor * prepared.formFactor * prepared.moraleFactor;
+function createTeamRuntime(team: TeamInput, conditions: Map<string, number>): TeamRuntime {
+  const players = team.starters.map((player) => createPlayerRuntime(player, conditionFor(player, conditions)));
+  return {
+    workload: 0,
+    players: new Map(players.map((runtime) => [runtime.player.id, runtime])),
+    curves: {
+      passing: createAttributeCurve(players, "passing"),
+      creativity: createAttributeCurve(players, "creativity"),
+      pace: createAttributeCurve(players, "pace"),
+      aerial: createAttributeCurve(players, "aerial"),
+      finishing: createAttributeCurve(players, "finishing", (player) => player.primaryPosition === "FW"),
+      defending: createAttributeCurve(players, "defending"),
+      goalkeeping: createAttributeCurve(players, "goalkeeping", (player) => player.primaryPosition === "GK"),
+    },
+  };
 }
 
-function teamProfile(team: TeamInput, conditions: Map<string, number>) {
+function weightedCondition(curve: AttributeCurve, workload: number): number {
+  if (workload === 0 || workload < curve.minimumFloorBreakpoint) {
+    return curve.totalWeightedInitialCondition - workload * curve.totalWeightedLossPerWorkload;
+  }
+  const floor = ENGINE_CONFIG.fatigue.minimumCondition;
+  let total = 0;
+  for (const entry of curve.entries) {
+    const condition = workload >= entry.floorBreakpoint
+      ? floor
+      : entry.initialCondition - workload * entry.lossPerWorkload;
+    total += entry.weight * condition;
+  }
+  return total;
+}
+
+function curveAverage(curve: AttributeCurve, workload: number): number {
+  const c = ENGINE_CONFIG.condition;
+  const conditionWeighted = weightedCondition(curve, workload);
+  return (c.base * curve.sumWeight + (c.range / c.scale) * conditionWeighted) / curve.count;
+}
+
+function teamProfile(team: TeamInput, runtime: TeamRuntime) {
   const c = ENGINE_CONFIG;
-  const xi = preparePlayers(team, conditions);
-  const passing = average(xi.map((p) => effectiveAttribute(p, "passing")), "passing attributes");
-  const creativity = average(xi.map((p) => effectiveAttribute(p, "creativity")), "creativity attributes");
-  const pace = average(xi.map((p) => effectiveAttribute(p, "pace")), "pace attributes");
-  const aerial = average(xi.map((p) => effectiveAttribute(p, "aerial")), "aerial attributes");
-  const forwards = xi.filter((p) => p.player.primaryPosition === "FW");
-  const finishing = average(forwards.map((p) => effectiveAttribute(p, "finishing")), "forward finishing attributes");
-  const defending = average(xi.map((p) => effectiveAttribute(p, "defending")), "defending attributes");
-  const keeper = xi.find((p) => p.player.primaryPosition === "GK");
-  if (!keeper) throw new Error(`${team.name} has no starting goalkeeper`);
-  const goalkeeping = effectiveAttribute(keeper, "goalkeeping");
+  const passing = curveAverage(runtime.curves.passing, runtime.workload);
+  const creativity = curveAverage(runtime.curves.creativity, runtime.workload);
+  const pace = curveAverage(runtime.curves.pace, runtime.workload);
+  const aerial = curveAverage(runtime.curves.aerial, runtime.workload);
+  const finishing = curveAverage(runtime.curves.finishing, runtime.workload);
+  const defending = curveAverage(runtime.curves.defending, runtime.workload);
+  const goalkeeping = curveAverage(runtime.curves.goalkeeping, runtime.workload);
 
   let retention = passing * c.profileWeights.retention.passing + creativity * c.profileWeights.retention.creativity;
   let progression = passing * c.profileWeights.progression.passing + creativity * c.profileWeights.progression.creativity + pace * c.profileWeights.progression.pace + aerial * c.profileWeights.progression.aerial;
@@ -73,6 +155,19 @@ function teamProfile(team: TeamInput, conditions: Map<string, number>) {
 
   const approach = c.approach[team.tactics.approach];
   return { retention, progression, attack: attack * approach.attack, defence: defence * approach.defence, goalkeeper: goalkeeping };
+}
+
+function playerCondition(runtime: TeamRuntime, playerRuntime: PlayerRuntime): number {
+  if (runtime.workload === 0) return playerRuntime.initialCondition;
+  return Math.max(ENGINE_CONFIG.fatigue.minimumCondition, playerRuntime.initialCondition - runtime.workload * playerRuntime.lossPerWorkload);
+}
+
+function effectiveAttribute(runtime: TeamRuntime, player: Player, key: keyof Player["attributes"]): number {
+  const prepared = runtime.players.get(player.id);
+  if (!prepared) throw new Error(`Missing runtime state for ${player.id}`);
+  const c = ENGINE_CONFIG.condition;
+  const conditionFactor = c.base + c.range * clamp(playerCondition(runtime, prepared) / c.scale, 0, 1);
+  return player.attributes[key] * conditionFactor * prepared.formFactor * prepared.moraleFactor;
 }
 
 function emptyStats(): TeamStats {
@@ -121,16 +216,8 @@ function fatiguePhaseMultiplier(minute: number): number {
   return phases.minutes76To90;
 }
 
-function applyFatigue(team: TeamInput, conditions: Map<string, number>, minute: number): void {
-  const f = ENGINE_CONFIG.fatigue;
-  const approachMultiplier = f.approachMultiplier[team.tactics.approach];
-  const phaseMultiplier = fatiguePhaseMultiplier(minute);
-  for (const player of team.starters) {
-    const current = conditionFor(player, conditions);
-    const staminaFactor = Math.max(0.65, 1 + (f.staminaBaseline - player.attributes.stamina) * f.staminaSensitivity);
-    const loss = f.baseConditionLossPerMinute * phaseMultiplier * approachMultiplier * staminaFactor;
-    conditions.set(player.id, Math.max(f.minimumCondition, current - loss));
-  }
+function advanceFatigue(runtime: TeamRuntime, team: TeamInput, minute: number): void {
+  runtime.workload += fatiguePhaseMultiplier(minute) * ENGINE_CONFIG.fatigue.approachMultiplier[team.tactics.approach];
 }
 
 export function simulateMatch(input: MatchInput): MatchOutput {
@@ -146,6 +233,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   for (const player of [...input.home.starters, ...input.home.substitutes]) conditions.set(player.id, player.state.condition);
   for (const player of [...input.away.starters, ...input.away.substitutes]) conditions.set(player.id, clamp(player.state.condition - awayTravelConditionPenalty, 0, c.condition.scale));
 
+  const homeRuntime = createTeamRuntime(input.home, conditions);
+  const awayRuntime = createTeamRuntime(input.away, conditions);
   const homeStats = emptyStats();
   const awayStats = emptyStats();
   const events: MatchEvent[] = [{ minute: 0, type: "kick-off", detail: "Kick-off" }];
@@ -156,12 +245,13 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   }
 
   for (let minute = 1; minute <= c.matchMinutes; minute += 1) {
-    const homeProfile = teamProfile(input.home, conditions);
-    const awayProfile = teamProfile(input.away, conditions);
+    const homeProfile = teamProfile(input.home, homeRuntime);
+    const awayProfile = teamProfile(input.away, awayRuntime);
     const retentionDelta = (homeProfile.retention - awayProfile.retention) / c.retentionDeltaDivisor;
     const homeHasBall = random.chance(clamp(c.possessionBase + retentionDelta, c.possessionMin, c.possessionMax));
     const attackingTeam = homeHasBall ? input.home : input.away;
     const defendingTeam = homeHasBall ? input.away : input.home;
+    const attackRuntime = homeHasBall ? homeRuntime : awayRuntime;
     const attackProfile = homeHasBall ? homeProfile : awayProfile;
     const defenceProfile = homeHasBall ? awayProfile : homeProfile;
     const attackStats = homeHasBall ? homeStats : awayStats;
@@ -172,8 +262,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const progressionProbability = clamp(c.progression.base + (homeHasBall ? homeProgressionProbabilityBoost : 0) + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
     if (!random.chance(progressionProbability)) {
       creditDefensiveStop(random, defendingTeam, contributions);
-      applyFatigue(input.home, conditions, minute);
-      applyFatigue(input.away, conditions, minute);
+      advanceFatigue(homeRuntime, input.home, minute);
+      advanceFatigue(awayRuntime, input.away, minute);
       continue;
     }
 
@@ -189,8 +279,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const chanceProbability = clamp((c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor) * style.chanceRate, c.chance.min, c.chance.max);
     if (!majorError && !random.chance(chanceProbability)) {
       creditDefensiveStop(random, defendingTeam, contributions);
-      applyFatigue(input.home, conditions, minute);
-      applyFatigue(input.away, conditions, minute);
+      advanceFatigue(homeRuntime, input.home, minute);
+      advanceFatigue(awayRuntime, input.away, minute);
       continue;
     }
 
@@ -202,13 +292,12 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       const shooterContribution = contributionFor(contributions, shooter);
       attackStats.shots += 1;
       shooterContribution.shots += 1;
-      const shooterPrepared = preparePlayers(attackingTeam, conditions).find((p) => p.player.id === shooter.id);
-      if (!shooterPrepared) throw new Error(`Missing prepared shooter ${shooter.id}`);
-      const onTargetProbability = clamp(c.onTarget.base + (effectiveAttribute(shooterPrepared, "finishing") - c.onTarget.finishingBaseline) / c.onTarget.finishingDivisor, c.onTarget.min, c.onTarget.max);
+      const shooterFinishing = effectiveAttribute(attackRuntime, shooter, "finishing");
+      const onTargetProbability = clamp(c.onTarget.base + (shooterFinishing - c.onTarget.finishingBaseline) / c.onTarget.finishingDivisor, c.onTarget.min, c.onTarget.max);
       if (random.chance(onTargetProbability)) {
         attackStats.shotsOnTarget += 1;
         shooterContribution.shotsOnTarget += 1;
-        const goalProbability = clamp((c.goal.base + (effectiveAttribute(shooterPrepared, "finishing") - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor) * style.shotQuality, c.goal.min, c.goal.max);
+        const goalProbability = clamp((c.goal.base + (shooterFinishing - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor) * style.shotQuality, c.goal.min, c.goal.max);
         if (random.chance(goalProbability)) {
           attackStats.goals += 1;
           shooterContribution.goals += 1;
@@ -249,8 +338,14 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       }
     }
 
-    applyFatigue(input.home, conditions, minute);
-    applyFatigue(input.away, conditions, minute);
+    advanceFatigue(homeRuntime, input.home, minute);
+    advanceFatigue(awayRuntime, input.away, minute);
+  }
+
+  for (const runtime of [homeRuntime, awayRuntime]) {
+    for (const playerRuntime of runtime.players.values()) {
+      conditions.set(playerRuntime.player.id, playerCondition(runtime, playerRuntime));
+    }
   }
 
   for (const contribution of contributions.values()) {
