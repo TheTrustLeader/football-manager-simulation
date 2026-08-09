@@ -1,11 +1,15 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.3.6",
+  version: "match-engine-config-0.4.0",
   matchMinutes: 90,
-  neutralPossession: 0.5,
-  homePossessionBase: 0.515,
+  possessionBase: 0.5,
   possessionMin: 0.38,
   possessionMax: 0.62,
   retentionDeltaDivisor: 120,
+  homeAdvantage: {
+    homeProgressionProbabilityBoost: 0.018,
+    awayTravelConditionPenalty: 2,
+    awayDefendingFoulProbabilityAdd: 0.003,
+  },
   condition: { base: 0.78, range: 0.22, scale: 100 },
   form: { maxMagnitude: 1, effect: 0.025 },
   morale: { "very-low": 0.94, low: 0.97, steady: 1, good: 1.02, high: 1.04 },
