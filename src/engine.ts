@@ -10,7 +10,7 @@ import type {
 } from "./types.js";
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
-const average = (values: number[]): number => values.reduce((sum, value) => sum + value, 0) / values.length;
+const average = (values: number[]): number => values.length === 0 ? 10 : values.reduce((sum, value) => sum + value, 0) / values.length;
 
 function moraleFactor(morale: Player["state"]["morale"]): number {
   return { "very-low": 0.94, low: 0.97, steady: 1, good: 1.02, high: 1.04 }[morale];
@@ -28,7 +28,8 @@ function teamProfile(team: TeamInput) {
   const creativity = average(xi.map((p) => effectiveAttribute(p, "creativity")));
   const pace = average(xi.map((p) => effectiveAttribute(p, "pace")));
   const aerial = average(xi.map((p) => effectiveAttribute(p, "aerial")));
-  const finishing = average(xi.filter((p) => p.primaryPosition === "FW").map((p) => effectiveAttribute(p, "finishing")) || [10]);
+  const forwards = xi.filter((p) => p.primaryPosition === "FW");
+  const finishing = average(forwards.map((p) => effectiveAttribute(p, "finishing")));
   const defending = average(xi.map((p) => effectiveAttribute(p, "defending")));
   const goalkeeper = effectiveAttribute(xi.find((p) => p.primaryPosition === "GK") ?? xi[0]!, "goalkeeping");
 
@@ -91,10 +92,6 @@ function chooseCreator(random: SeededRandom, team: TeamInput): Player {
   return random.pick(candidates.length > 0 ? candidates : team.starters);
 }
 
-function addEvent(events: MatchEvent[], event: MatchEvent): void {
-  events.push(event);
-}
-
 export function simulateMatch(input: MatchInput): MatchOutput {
   validateMatchInput(input);
   const random = new SeededRandom(input.seed);
@@ -125,11 +122,12 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const creator = chooseCreator(random, attackingTeam);
     contributions.get(creator.id)!.progressionActions += 1;
 
-    if (!random.chance(clamp(0.28 + (attackProfile.attack - defenceProfile.defence) / 200, 0.14, 0.42))) continue;
+    const chanceProbability = clamp(0.28 + (attackProfile.attack - defenceProfile.defence) / 200, 0.14, 0.42);
+    if (!random.chance(chanceProbability)) continue;
 
     attackStats.chances += 1;
     contributions.get(creator.id)!.chancesCreated += 1;
-    addEvent(events, { minute, type: "chance", teamId: attackingTeam.id, playerId: creator.id, detail: `${attackingTeam.name} create a chance` });
+    events.push({ minute, type: "chance", teamId: attackingTeam.id, playerId: creator.id, detail: `${attackingTeam.name} create a chance` });
 
     const shooter = chooseAttacker(random, attackingTeam);
     const shooterContribution = contributions.get(shooter.id)!;
@@ -138,7 +136,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
     const onTargetProbability = clamp(0.42 + (effectiveAttribute(shooter, "finishing") - 10) / 80, 0.25, 0.66);
     if (!random.chance(onTargetProbability)) {
-      addEvent(events, { minute, type: "shot", teamId: attackingTeam.id, playerId: shooter.id, detail: `${shooter.name} shoots wide` });
+      events.push({ minute, type: "shot", teamId: attackingTeam.id, playerId: shooter.id, detail: `${shooter.name} shoots wide` });
       continue;
     }
 
@@ -150,41 +148,42 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       attackStats.goals += 1;
       shooterContribution.goals += 1;
       if (creator.id !== shooter.id) contributions.get(creator.id)!.assists += 1;
-      addEvent(events, { minute, type: "goal", teamId: attackingTeam.id, playerId: shooter.id, secondaryPlayerId: creator.id, detail: `${shooter.name} scores` });
+      events.push({ minute, type: "goal", teamId: attackingTeam.id, playerId: shooter.id, secondaryPlayerId: creator.id, detail: `${shooter.name} scores` });
     } else {
       const keeper = defendingTeam.starters.find((p) => p.primaryPosition === "GK") ?? defendingTeam.starters[0]!;
       contributions.get(keeper.id)!.saves += 1;
-      addEvent(events, { minute, type: "save", teamId: defendingTeam.id, playerId: keeper.id, secondaryPlayerId: shooter.id, detail: `${keeper.name} makes the save` });
+      events.push({ minute, type: "save", teamId: defendingTeam.id, playerId: keeper.id, secondaryPlayerId: shooter.id, detail: `${keeper.name} makes the save` });
     }
 
     const tacklingBase = defendingTeam.tactics.tackling === "hard" ? 0.055 : defendingTeam.tactics.tackling === "careful" ? 0.025 : 0.038;
     if (random.chance(tacklingBase)) {
-      const defender = random.pick(defendingTeam.starters.filter((p) => p.primaryPosition !== "GK"));
+      const outfield = defendingTeam.starters.filter((p) => p.primaryPosition !== "GK");
+      const defender = random.pick(outfield.length > 0 ? outfield : defendingTeam.starters);
       const defenderContribution = contributions.get(defender.id)!;
       defenceStats.fouls += 1;
       defenderContribution.fouls += 1;
-      addEvent(events, { minute, type: "foul", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} commits a foul` });
+      events.push({ minute, type: "foul", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} commits a foul` });
+
       const cardChance = defendingTeam.tactics.tackling === "hard" ? 0.28 : defendingTeam.tactics.tackling === "careful" ? 0.11 : 0.18;
       if (random.chance(cardChance)) {
         defenceStats.yellowCards += 1;
         defenderContribution.yellowCards += 1;
-        addEvent(events, { minute, type: "yellow-card", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} is booked` });
+        events.push({ minute, type: "yellow-card", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} is booked` });
       }
     }
   }
 
   for (const contribution of contributions.values()) {
-    const raw =
-      6 +
-      contribution.goals * 0.9 +
-      contribution.assists * 0.45 +
-      contribution.chancesCreated * 0.08 +
-      contribution.progressionActions * 0.015 +
-      contribution.defensiveActions * 0.04 +
-      contribution.saves * 0.12 -
-      contribution.majorErrors * 0.6 -
-      contribution.redCards * 1.2 -
-      contribution.yellowCards * 0.08;
+    const raw = 6
+      + contribution.goals * 0.9
+      + contribution.assists * 0.45
+      + contribution.chancesCreated * 0.08
+      + contribution.progressionActions * 0.015
+      + contribution.defensiveActions * 0.04
+      + contribution.saves * 0.12
+      - contribution.majorErrors * 0.6
+      - contribution.redCards * 1.2
+      - contribution.yellowCards * 0.08;
     contribution.rating = Math.round(clamp(raw, 1, 10) * 10) / 10;
   }
 
