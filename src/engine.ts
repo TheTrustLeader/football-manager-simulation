@@ -97,13 +97,22 @@ function chooseCreator(random: SeededRandom, team: TeamInput): Player {
   return random.pick(candidates);
 }
 
-function applyFatigue(team: TeamInput, conditions: Map<string, number>): void {
+function fatiguePhaseMultiplier(minute: number): number {
+  const phases = ENGINE_CONFIG.fatigue.phaseMultiplier;
+  if (minute <= 45) return phases.firstHalf;
+  if (minute <= 60) return phases.minutes46To60;
+  if (minute <= 75) return phases.minutes61To75;
+  return phases.minutes76To90;
+}
+
+function applyFatigue(team: TeamInput, conditions: Map<string, number>, minute: number): void {
   const f = ENGINE_CONFIG.fatigue;
   const approachMultiplier = f.approachMultiplier[team.tactics.approach];
+  const phaseMultiplier = fatiguePhaseMultiplier(minute);
   for (const player of team.starters) {
     const current = conditionFor(player, conditions);
     const staminaFactor = Math.max(0.65, 1 + (f.staminaBaseline - player.attributes.stamina) * f.staminaSensitivity);
-    const loss = f.baseConditionLossPerMinute * approachMultiplier * staminaFactor;
+    const loss = f.baseConditionLossPerMinute * phaseMultiplier * approachMultiplier * staminaFactor;
     conditions.set(player.id, Math.max(f.minimumCondition, current - loss));
   }
 }
@@ -147,8 +156,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const progressionProbability = clamp(c.progression.base + (homeHasBall ? homeProgressionProbabilityBoost : 0) + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
     if (!random.chance(progressionProbability)) {
       creditDefensiveStop(random, defendingTeam, contributions);
-      applyFatigue(input.home, conditions);
-      applyFatigue(input.away, conditions);
+      applyFatigue(input.home, conditions, minute);
+      applyFatigue(input.away, conditions, minute);
       continue;
     }
 
@@ -164,8 +173,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const chanceProbability = clamp((c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor) * style.chanceRate, c.chance.min, c.chance.max);
     if (!majorError && !random.chance(chanceProbability)) {
       creditDefensiveStop(random, defendingTeam, contributions);
-      applyFatigue(input.home, conditions);
-      applyFatigue(input.away, conditions);
+      applyFatigue(input.home, conditions, minute);
+      applyFatigue(input.away, conditions, minute);
       continue;
     }
 
@@ -222,8 +231,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       }
     }
 
-    applyFatigue(input.home, conditions);
-    applyFatigue(input.away, conditions);
+    applyFatigue(input.home, conditions, minute);
+    applyFatigue(input.away, conditions, minute);
   }
 
   for (const contribution of contributions.values()) {
