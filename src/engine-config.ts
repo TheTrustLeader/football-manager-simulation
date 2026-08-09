@@ -1,12 +1,12 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.7.0",
+  version: "match-engine-config-0.7.1",
   matchMinutes: 90,
   possessionBase: 0.5,
   possessionMin: 0.38,
   possessionMax: 0.62,
   retentionDeltaDivisor: 120,
   homeAdvantage: {
-    homeProgressionProbabilityBoost: 0.063,
+    homeProgressionProbabilityBoost: 0.085,
     awayTravelConditionPenalty: 2,
     awayDefendingFoulProbabilityAdd: 0.003,
   },
