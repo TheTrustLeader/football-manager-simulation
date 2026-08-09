@@ -15,27 +15,43 @@ function conditionFor(player: Player, conditions: Map<string, number>): number {
   return value;
 }
 
-function effectiveAttribute(player: Player, key: keyof Player["attributes"], conditions: Map<string, number>): number {
+interface PreparedPlayer {
+  player: Player;
+  conditionFactor: number;
+  formFactor: number;
+  moraleFactor: number;
+}
+
+function preparePlayers(team: TeamInput, conditions: Map<string, number>): PreparedPlayer[] {
   const c = ENGINE_CONFIG;
-  const conditionValue = conditionFor(player, conditions);
-  const condition = c.condition.base + c.condition.range * clamp(conditionValue / c.condition.scale, 0, 1);
-  const form = 1 + clamp(player.state.recentForm, -c.form.maxMagnitude, c.form.maxMagnitude) * c.form.effect;
-  return player.attributes[key] * condition * form * c.morale[player.state.morale];
+  return team.starters.map((player) => {
+    const conditionValue = conditionFor(player, conditions);
+    return {
+      player,
+      conditionFactor: c.condition.base + c.condition.range * clamp(conditionValue / c.condition.scale, 0, 1),
+      formFactor: 1 + clamp(player.state.recentForm, -c.form.maxMagnitude, c.form.maxMagnitude) * c.form.effect,
+      moraleFactor: c.morale[player.state.morale],
+    };
+  });
+}
+
+function effectiveAttribute(prepared: PreparedPlayer, key: keyof Player["attributes"]): number {
+  return prepared.player.attributes[key] * prepared.conditionFactor * prepared.formFactor * prepared.moraleFactor;
 }
 
 function teamProfile(team: TeamInput, conditions: Map<string, number>) {
   const c = ENGINE_CONFIG;
-  const xi = team.starters;
-  const passing = average(xi.map((p) => effectiveAttribute(p, "passing", conditions)), "passing attributes");
-  const creativity = average(xi.map((p) => effectiveAttribute(p, "creativity", conditions)), "creativity attributes");
-  const pace = average(xi.map((p) => effectiveAttribute(p, "pace", conditions)), "pace attributes");
-  const aerial = average(xi.map((p) => effectiveAttribute(p, "aerial", conditions)), "aerial attributes");
-  const forwards = xi.filter((p) => p.primaryPosition === "FW");
-  const finishing = average(forwards.map((p) => effectiveAttribute(p, "finishing", conditions)), "forward finishing attributes");
-  const defending = average(xi.map((p) => effectiveAttribute(p, "defending", conditions)), "defending attributes");
-  const keeper = xi.find((p) => p.primaryPosition === "GK");
+  const xi = preparePlayers(team, conditions);
+  const passing = average(xi.map((p) => effectiveAttribute(p, "passing")), "passing attributes");
+  const creativity = average(xi.map((p) => effectiveAttribute(p, "creativity")), "creativity attributes");
+  const pace = average(xi.map((p) => effectiveAttribute(p, "pace")), "pace attributes");
+  const aerial = average(xi.map((p) => effectiveAttribute(p, "aerial")), "aerial attributes");
+  const forwards = xi.filter((p) => p.player.primaryPosition === "FW");
+  const finishing = average(forwards.map((p) => effectiveAttribute(p, "finishing")), "forward finishing attributes");
+  const defending = average(xi.map((p) => effectiveAttribute(p, "defending")), "defending attributes");
+  const keeper = xi.find((p) => p.player.primaryPosition === "GK");
   if (!keeper) throw new Error(`${team.name} has no starting goalkeeper`);
-  const goalkeeping = effectiveAttribute(keeper, "goalkeeping", conditions);
+  const goalkeeping = effectiveAttribute(keeper, "goalkeeping");
 
   let retention = passing * c.profileWeights.retention.passing + creativity * c.profileWeights.retention.creativity;
   let progression = passing * c.profileWeights.progression.passing + creativity * c.profileWeights.progression.creativity + pace * c.profileWeights.progression.pace + aerial * c.profileWeights.progression.aerial;
@@ -186,11 +202,13 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       const shooterContribution = contributionFor(contributions, shooter);
       attackStats.shots += 1;
       shooterContribution.shots += 1;
-      const onTargetProbability = clamp(c.onTarget.base + (effectiveAttribute(shooter, "finishing", conditions) - c.onTarget.finishingBaseline) / c.onTarget.finishingDivisor, c.onTarget.min, c.onTarget.max);
+      const shooterPrepared = preparePlayers(attackingTeam, conditions).find((p) => p.player.id === shooter.id);
+      if (!shooterPrepared) throw new Error(`Missing prepared shooter ${shooter.id}`);
+      const onTargetProbability = clamp(c.onTarget.base + (effectiveAttribute(shooterPrepared, "finishing") - c.onTarget.finishingBaseline) / c.onTarget.finishingDivisor, c.onTarget.min, c.onTarget.max);
       if (random.chance(onTargetProbability)) {
         attackStats.shotsOnTarget += 1;
         shooterContribution.shotsOnTarget += 1;
-        const goalProbability = clamp((c.goal.base + (effectiveAttribute(shooter, "finishing", conditions) - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor) * style.shotQuality, c.goal.min, c.goal.max);
+        const goalProbability = clamp((c.goal.base + (effectiveAttribute(shooterPrepared, "finishing") - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor) * style.shotQuality, c.goal.min, c.goal.max);
         if (random.chance(goalProbability)) {
           attackStats.goals += 1;
           shooterContribution.goals += 1;
