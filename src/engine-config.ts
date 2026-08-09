@@ -1,12 +1,12 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.6.0",
+  version: "match-engine-config-0.6.1",
   matchMinutes: 90,
   possessionBase: 0.5,
   possessionMin: 0.38,
   possessionMax: 0.62,
   retentionDeltaDivisor: 120,
   homeAdvantage: {
-    homeProgressionProbabilityBoost: 0.018,
+    homeProgressionProbabilityBoost: 0.06,
     awayTravelConditionPenalty: 2,
     awayDefendingFoulProbabilityAdd: 0.003,
   },
@@ -51,7 +51,7 @@ export const ENGINE_CONFIG = {
   chance: { base: 0.5, differenceDivisor: 180, min: 0.28, max: 0.68 },
   shot: { base: 0.9, min: 0.55, max: 0.96 },
   onTarget: { base: 0.45, finishingBaseline: 10, finishingDivisor: 80, min: 0.28, max: 0.68 },
-  goal: { base: 0.28, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
+  goal: { base: 0.29, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
   creator: { designatedShare: 0.35 },
   defending: { stopCreditShare: 0.7, stopCreditWeightFloor: 1, majorErrorChance: 0.006 },
   dismissal: { baselinePlayers: 11, profileExponent: 0.75 },
