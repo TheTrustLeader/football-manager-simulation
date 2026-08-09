@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.3.5",
+  version: "match-engine-config-0.3.6",
   matchMinutes: 90,
   neutralPossession: 0.5,
   homePossessionBase: 0.515,
@@ -32,7 +32,7 @@ export const ENGINE_CONFIG = {
   },
   progression: { base: 0.42, differenceDivisor: 170, min: 0.24, max: 0.6 },
   chance: { base: 0.5, differenceDivisor: 180, min: 0.28, max: 0.68 },
-  shot: { base: 0.82, min: 0.55, max: 0.96 },
+  shot: { base: 0.9, min: 0.55, max: 0.96 },
   onTarget: { base: 0.45, finishingBaseline: 10, finishingDivisor: 80, min: 0.28, max: 0.68 },
   goal: { base: 0.28, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
   creator: { designatedShare: 0.35 },
