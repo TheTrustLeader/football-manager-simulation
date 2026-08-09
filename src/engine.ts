@@ -25,6 +25,8 @@ interface AttributeCurve {
   sumWeight: number;
   totalWeightedInitialCondition: number;
   totalWeightedLossPerWorkload: number;
+  affineIntercept: number;
+  affineSlope: number;
   minimumFloorBreakpoint: number;
   entries: AttributeCurveEntry[];
 }
@@ -66,23 +68,40 @@ function createPlayerRuntime(player: Player, initialCondition: number): PlayerRu
 }
 
 function createAttributeCurve(players: PlayerRuntime[], key: keyof Player["attributes"], predicate: (player: Player) => boolean = () => true): AttributeCurve {
-  const selected = players.filter((runtime) => predicate(runtime.player));
-  if (selected.length === 0) throw new Error(`Cannot build empty ${String(key)} attribute curve`);
-  const entries = selected.map((runtime) => {
+  const entries: AttributeCurveEntry[] = [];
+  let count = 0;
+  let sumWeight = 0;
+  let totalWeightedInitialCondition = 0;
+  let totalWeightedLossPerWorkload = 0;
+  let minimumFloorBreakpoint = Number.POSITIVE_INFINITY;
+
+  for (const runtime of players) {
+    if (!predicate(runtime.player)) continue;
     const weight = runtime.player.attributes[key] * runtime.formFactor * runtime.moraleFactor;
-    return {
+    entries.push({
       weight,
       initialCondition: runtime.initialCondition,
       lossPerWorkload: runtime.lossPerWorkload,
       floorBreakpoint: runtime.floorBreakpoint,
-    };
-  });
+    });
+    count += 1;
+    sumWeight += weight;
+    totalWeightedInitialCondition += weight * runtime.initialCondition;
+    totalWeightedLossPerWorkload += weight * runtime.lossPerWorkload;
+    minimumFloorBreakpoint = Math.min(minimumFloorBreakpoint, runtime.floorBreakpoint);
+  }
+
+  if (count === 0) throw new Error(`Cannot build empty ${String(key)} attribute curve`);
+  const condition = ENGINE_CONFIG.condition;
+  const scaledRange = condition.range / condition.scale;
   return {
-    count: entries.length,
-    sumWeight: entries.reduce((sum, entry) => sum + entry.weight, 0),
-    totalWeightedInitialCondition: entries.reduce((sum, entry) => sum + entry.weight * entry.initialCondition, 0),
-    totalWeightedLossPerWorkload: entries.reduce((sum, entry) => sum + entry.weight * entry.lossPerWorkload, 0),
-    minimumFloorBreakpoint: entries.reduce((minimum, entry) => Math.min(minimum, entry.floorBreakpoint), Number.POSITIVE_INFINITY),
+    count,
+    sumWeight,
+    totalWeightedInitialCondition,
+    totalWeightedLossPerWorkload,
+    affineIntercept: (condition.base * sumWeight + scaledRange * totalWeightedInitialCondition) / count,
+    affineSlope: (scaledRange * totalWeightedLossPerWorkload) / count,
+    minimumFloorBreakpoint,
     entries,
   };
 }
@@ -105,9 +124,6 @@ function createTeamRuntime(team: TeamInput, conditions: Map<string, number>): Te
 }
 
 function weightedCondition(curve: AttributeCurve, workload: number): number {
-  if (workload === 0 || workload < curve.minimumFloorBreakpoint) {
-    return curve.totalWeightedInitialCondition - workload * curve.totalWeightedLossPerWorkload;
-  }
   const floor = ENGINE_CONFIG.fatigue.minimumCondition;
   let total = 0;
   for (const entry of curve.entries) {
@@ -120,6 +136,9 @@ function weightedCondition(curve: AttributeCurve, workload: number): number {
 }
 
 function curveAverage(curve: AttributeCurve, workload: number): number {
+  if (workload === 0 || workload < curve.minimumFloorBreakpoint) {
+    return curve.affineIntercept - workload * curve.affineSlope;
+  }
   const c = ENGINE_CONFIG.condition;
   const conditionWeighted = weightedCondition(curve, workload);
   return (c.base * curve.sumWeight + (c.range / c.scale) * conditionWeighted) / curve.count;
