@@ -1,6 +1,6 @@
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { SeededRandom } from "./random.js";
-import type { MatchEvent, MatchInput, MatchOutput, Player, PlayerContribution, TeamInput, TeamStats } from "./types.js";
+import type { MatchEvent, MatchInput, MatchOutput, Player, PlayerContribution, ScoreState, TeamInput, TeamStats } from "./types.js";
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
@@ -293,6 +293,12 @@ function sendOff(runtime: TeamRuntime, team: TeamInput, player: Player, minute: 
   runtime.curves = buildProfileCurves(runtime.activePlayers);
 }
 
+function scoreState(attackingGoals: number, defendingGoals: number): ScoreState {
+  if (attackingGoals > defendingGoals) return "leading";
+  if (attackingGoals < defendingGoals) return "trailing";
+  return "level";
+}
+
 export function simulateMatch(input: MatchInput): MatchOutput {
   validateMatchInput(input);
   const c = ENGINE_CONFIG;
@@ -312,12 +318,24 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   const awayStats = emptyStats();
   const events: MatchEvent[] = [{ minute: 0, type: "kick-off", detail: "Kick-off" }];
   const contributions = new Map<string, PlayerContribution>();
+  const gameStateDiagnostics = {
+    scoreStateMinutes: { level: 0, homeLeading: 0, awayLeading: 0 },
+    attackingState: {
+      level: { possessions: 0, progressions: 0 },
+      leading: { possessions: 0, progressions: 0 },
+      trailing: { possessions: 0, progressions: 0 },
+    },
+  };
   for (const team of [input.home, input.away]) {
     for (const player of team.starters) contributions.set(player.id, createContribution(player, true));
     for (const player of team.substitutes) contributions.set(player.id, createContribution(player, false));
   }
 
   for (let minute = 1; minute <= c.matchMinutes; minute += 1) {
+    if (homeStats.goals > awayStats.goals) gameStateDiagnostics.scoreStateMinutes.homeLeading += 1;
+    else if (homeStats.goals < awayStats.goals) gameStateDiagnostics.scoreStateMinutes.awayLeading += 1;
+    else gameStateDiagnostics.scoreStateMinutes.level += 1;
+
     const homeProfile = teamProfile(input.home, homeRuntime);
     const awayProfile = teamProfile(input.away, awayRuntime);
     const retentionDelta = (homeProfile.retention - awayProfile.retention) / c.retentionDeltaDivisor;
@@ -331,15 +349,23 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const attackStats = homeHasBall ? homeStats : awayStats;
     const defenceStats = homeHasBall ? awayStats : homeStats;
     const style = c.style[attackingTeam.tactics.style];
+    const attackingScoreState = scoreState(attackStats.goals, defenceStats.goals);
+    const gameStateProgressionAdd = attackingScoreState === "trailing"
+      ? c.gameState.progressionProbabilityShift
+      : attackingScoreState === "leading"
+        ? -c.gameState.progressionProbabilityShift
+        : 0;
     attackStats.possessionTicks += 1;
+    gameStateDiagnostics.attackingState[attackingScoreState].possessions += 1;
 
-    const progressionProbability = clamp(c.progression.base + (homeHasBall ? homeProgressionProbabilityBoost : 0) + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
+    const progressionProbability = clamp(c.progression.base + (homeHasBall ? homeProgressionProbabilityBoost : 0) + gameStateProgressionAdd + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
     if (!random.chance(progressionProbability)) {
       creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
       advanceFatigue(homeRuntime, input.home, minute);
       advanceFatigue(awayRuntime, input.away, minute);
       continue;
     }
+    gameStateDiagnostics.attackingState[attackingScoreState].progressions += 1;
 
     const creator = chooseCreator(random, attackingTeam, attackRuntime);
     contributionFor(contributions, creator).progressionActions += 1;
@@ -444,6 +470,11 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     diagnostics: {
       homeAdvantage: { applied: homeAdvantageApplied, homeProgressionProbabilityBoost, awayTravelConditionPenalty, awayDefendingFoulProbabilityAdd },
       fatigue: { applied: true, baseConditionLossPerMinute: c.fatigue.baseConditionLossPerMinute, minimumCondition: c.fatigue.minimumCondition },
+      gameState: {
+        progressionProbabilityShift: c.gameState.progressionProbabilityShift,
+        scoreStateMinutes: gameStateDiagnostics.scoreStateMinutes,
+        attackingState: gameStateDiagnostics.attackingState,
+      },
     },
   };
 }
