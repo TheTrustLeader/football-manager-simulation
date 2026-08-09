@@ -1,14 +1,6 @@
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { SeededRandom } from "./random.js";
-import type {
-  MatchEvent,
-  MatchInput,
-  MatchOutput,
-  Player,
-  PlayerContribution,
-  TeamInput,
-  TeamStats,
-} from "./types.js";
+import type { MatchEvent, MatchInput, MatchOutput, Player, PlayerContribution, TeamInput, TeamStats } from "./types.js";
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
@@ -39,17 +31,15 @@ function teamProfile(team: TeamInput) {
   const goalkeeper = effectiveAttribute(goalkeeperPlayer, "goalkeeping");
 
   let retention = passing * c.profileWeights.retention.passing + creativity * c.profileWeights.retention.creativity;
-  let progression = passing * c.profileWeights.progression.passing
-    + creativity * c.profileWeights.progression.creativity
-    + pace * c.profileWeights.progression.pace
-    + aerial * c.profileWeights.progression.aerial;
-  let attack = creativity * c.profileWeights.attack.creativity
-    + pace * c.profileWeights.attack.pace
-    + finishing * c.profileWeights.attack.finishing
-    + aerial * c.profileWeights.attack.aerial;
-  let defence = defending * c.profileWeights.defence.defending
-    + pace * c.profileWeights.defence.pace
-    + aerial * c.profileWeights.defence.aerial;
+  let progression = passing * c.profileWeights.progression.passing + creativity * c.profileWeights.progression.creativity + pace * c.profileWeights.progression.pace + aerial * c.profileWeights.progression.aerial;
+  let attack = creativity * c.profileWeights.attack.creativity + pace * c.profileWeights.attack.pace + finishing * c.profileWeights.attack.finishing + aerial * c.profileWeights.attack.aerial;
+  let defence = defending * c.profileWeights.defence.defending + pace * c.profileWeights.defence.pace + aerial * c.profileWeights.defence.aerial;
+
+  const formation = c.formation[team.tactics.formation];
+  retention *= formation.retention;
+  progression *= formation.progression;
+  attack *= formation.attack;
+  defence *= formation.defence;
 
   const style = c.style[team.tactics.style];
   retention *= style.retention;
@@ -57,57 +47,23 @@ function teamProfile(team: TeamInput) {
   attack *= style.attack;
 
   if (team.tactics.style === "direct") {
-    progression *= 1 + clamp(
-      (aerial - c.style.attributeBaseline) / c.style.attributeDivisor,
-      c.style.attributeMin,
-      c.style.attributeMax,
-    );
+    progression *= 1 + clamp((aerial - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
   } else if (team.tactics.style === "counter") {
-    attack *= 1 + clamp(
-      (pace - c.style.attributeBaseline) / c.style.attributeDivisor,
-      c.style.attributeMin,
-      c.style.attributeMax,
-    );
+    attack *= 1 + clamp((pace - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
   }
 
   const approach = c.approach[team.tactics.approach];
   attack *= approach.attack;
   defence *= approach.defence;
-
   return { retention, progression, attack, defence, goalkeeper };
 }
 
 function emptyStats(): TeamStats {
-  return {
-    goals: 0,
-    shots: 0,
-    shotsOnTarget: 0,
-    chances: 0,
-    possessionTicks: 0,
-    fouls: 0,
-    yellowCards: 0,
-    redCards: 0,
-  };
+  return { goals: 0, shots: 0, shotsOnTarget: 0, chances: 0, possessionTicks: 0, fouls: 0, yellowCards: 0, redCards: 0 };
 }
 
 function createContribution(player: Player, starter: boolean): PlayerContribution {
-  return {
-    playerId: player.id,
-    minutesPlayed: starter ? ENGINE_CONFIG.matchMinutes : 0,
-    goals: 0,
-    assists: 0,
-    shots: 0,
-    shotsOnTarget: 0,
-    chancesCreated: 0,
-    progressionActions: 0,
-    defensiveActions: 0,
-    saves: 0,
-    fouls: 0,
-    yellowCards: 0,
-    redCards: 0,
-    majorErrors: 0,
-    rating: ENGINE_CONFIG.ratings.baseline,
-  };
+  return { playerId: player.id, minutesPlayed: starter ? ENGINE_CONFIG.matchMinutes : 0, goals: 0, assists: 0, shots: 0, shotsOnTarget: 0, chancesCreated: 0, progressionActions: 0, defensiveActions: 0, saves: 0, fouls: 0, yellowCards: 0, redCards: 0, majorErrors: 0, rating: ENGINE_CONFIG.ratings.baseline };
 }
 
 function contributionFor(contributions: Map<string, PlayerContribution>, player: Player): PlayerContribution {
@@ -140,7 +96,6 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   const awayStats = emptyStats();
   const events: MatchEvent[] = [{ minute: 0, type: "kick-off", detail: "Kick-off" }];
   const contributions = new Map<string, PlayerContribution>();
-
   for (const team of [input.home, input.away]) {
     for (const player of team.starters) contributions.set(player.id, createContribution(player, true));
     for (const player of team.substitutes) contributions.set(player.id, createContribution(player, false));
@@ -158,23 +113,13 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const defenceStats = homeHasBall ? awayStats : homeStats;
     attackStats.possessionTicks += 1;
 
-    const progressionProbability = clamp(
-      c.progression.base + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor,
-      c.progression.min,
-      c.progression.max,
-    );
+    const progressionProbability = clamp(c.progression.base + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
     if (!random.chance(progressionProbability)) continue;
-
     const creator = chooseCreator(random, attackingTeam);
     contributionFor(contributions, creator).progressionActions += 1;
 
-    const chanceProbability = clamp(
-      c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor,
-      c.chance.min,
-      c.chance.max,
-    );
+    const chanceProbability = clamp(c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor, c.chance.min, c.chance.max);
     if (!random.chance(chanceProbability)) continue;
-
     attackStats.chances += 1;
     contributionFor(contributions, creator).chancesCreated += 1;
     events.push({ minute, type: "chance", teamId: attackingTeam.id, playerId: creator.id, detail: `${attackingTeam.name} create a chance` });
@@ -183,12 +128,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const shooterContribution = contributionFor(contributions, shooter);
     attackStats.shots += 1;
     shooterContribution.shots += 1;
-
-    const onTargetProbability = clamp(
-      c.onTarget.base + (effectiveAttribute(shooter, "finishing") - c.onTarget.finishingBaseline) / c.onTarget.finishingDivisor,
-      c.onTarget.min,
-      c.onTarget.max,
-    );
+    const onTargetProbability = clamp(c.onTarget.base + (effectiveAttribute(shooter, "finishing") - c.onTarget.finishingBaseline) / c.onTarget.finishingDivisor, c.onTarget.min, c.onTarget.max);
     if (!random.chance(onTargetProbability)) {
       events.push({ minute, type: "shot", teamId: attackingTeam.id, playerId: shooter.id, detail: `${shooter.name} shoots wide` });
       continue;
@@ -196,12 +136,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
     attackStats.shotsOnTarget += 1;
     shooterContribution.shotsOnTarget += 1;
-    const goalProbability = clamp(
-      c.goal.base + (effectiveAttribute(shooter, "finishing") - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor,
-      c.goal.min,
-      c.goal.max,
-    );
-
+    const goalProbability = clamp(c.goal.base + (effectiveAttribute(shooter, "finishing") - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor, c.goal.min, c.goal.max);
     if (random.chance(goalProbability)) {
       attackStats.goals += 1;
       shooterContribution.goals += 1;
@@ -214,11 +149,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       events.push({ minute, type: "save", teamId: defendingTeam.id, playerId: keeper.id, secondaryPlayerId: shooter.id, detail: `${keeper.name} makes the save` });
     }
 
-    const foulProbability = defendingTeam.tactics.tackling === "hard"
-      ? c.tackling.hardFoul
-      : defendingTeam.tactics.tackling === "careful"
-        ? c.tackling.carefulFoul
-        : c.tackling.normalFoul;
+    const foulProbability = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardFoul : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulFoul : c.tackling.normalFoul;
     if (random.chance(foulProbability)) {
       const outfield = defendingTeam.starters.filter((player) => player.primaryPosition !== "GK");
       if (outfield.length === 0) throw new Error(`${defendingTeam.name} has no outfield players`);
@@ -227,12 +158,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       defenceStats.fouls += 1;
       defenderContribution.fouls += 1;
       events.push({ minute, type: "foul", teamId: defendingTeam.id, playerId: defender.id, detail: `${defender.name} commits a foul` });
-
-      const cardProbability = defendingTeam.tactics.tackling === "hard"
-        ? c.tackling.hardCard
-        : defendingTeam.tactics.tackling === "careful"
-          ? c.tackling.carefulCard
-          : c.tackling.normalCard;
+      const cardProbability = defendingTeam.tactics.tackling === "hard" ? c.tackling.hardCard : defendingTeam.tactics.tackling === "careful" ? c.tackling.carefulCard : c.tackling.normalCard;
       if (random.chance(cardProbability)) {
         defenceStats.yellowCards += 1;
         defenderContribution.yellowCards += 1;
@@ -243,33 +169,12 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
   for (const contribution of contributions.values()) {
     const r = c.ratings;
-    const raw = r.baseline
-      + contribution.goals * r.goal
-      + contribution.assists * r.assist
-      + contribution.shotsOnTarget * r.shotOnTarget
-      + contribution.chancesCreated * r.chanceCreated
-      + contribution.progressionActions * r.progressionAction
-      + contribution.defensiveActions * r.defensiveAction
-      + contribution.saves * r.save
-      + contribution.majorErrors * r.majorError
-      + contribution.redCards * r.redCard
-      + contribution.yellowCards * r.yellowCard;
+    const raw = r.baseline + contribution.goals * r.goal + contribution.assists * r.assist + contribution.shotsOnTarget * r.shotOnTarget + contribution.chancesCreated * r.chanceCreated + contribution.progressionActions * r.progressionAction + contribution.defensiveActions * r.defensiveAction + contribution.saves * r.save + contribution.majorErrors * r.majorError + contribution.redCards * r.redCard + contribution.yellowCards * r.yellowCard;
     contribution.rating = Math.round(clamp(raw, r.min, r.max) * r.precision) / r.precision;
   }
 
   events.push({ minute: c.matchMinutes, type: "full-time", detail: `Full-time: ${input.home.name} ${homeStats.goals}-${awayStats.goals} ${input.away.name}` });
-
-  return {
-    seed: input.seed,
-    engineConfigVersion: c.version,
-    engineConfigHash: ENGINE_CONFIG_HASH,
-    homeTeamId: input.home.id,
-    awayTeamId: input.away.id,
-    home: homeStats,
-    away: awayStats,
-    events,
-    contributions: [...contributions.values()],
-  };
+  return { seed: input.seed, engineConfigVersion: c.version, engineConfigHash: ENGINE_CONFIG_HASH, homeTeamId: input.home.id, awayTeamId: input.away.id, home: homeStats, away: awayStats, events, contributions: [...contributions.values()] };
 }
 
 export function validateMatchInput(input: MatchInput): void {
