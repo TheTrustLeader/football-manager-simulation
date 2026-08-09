@@ -29,8 +29,8 @@ jobs:
       - name: Print deterministic golden-output hash
         run: npm run golden:print
 
-      - name: Run temporary game-state tuning sweep
-        run: npm run game-state:sweep -- 10000
+      - name: Run temporary post-game-state home recalibration sweep
+        run: npm run home-recalibration:sweep -- 10000
 
       - name: Run tuning-seed CI evidence gate
         id: evidence
