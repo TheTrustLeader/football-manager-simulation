@@ -30,7 +30,7 @@ jobs:
         run: npm run golden:print
 
       - name: Run temporary tuning-seed calibration sweep
-        run: npm run calibration:sweep -- 5000
+        run: npm run calibration:sweep -- 10000
 
       - name: Run tuning-seed evidence gate
         id: evidence
