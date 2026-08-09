@@ -33,6 +33,7 @@ export interface PlayerState {
 export interface Player {
   id: string;
   name: string;
+  age: number;
   primaryPosition: Position;
   attributes: Attributes;
   hidden: HiddenTraits;
