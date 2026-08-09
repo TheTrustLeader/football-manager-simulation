@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.3.2",
+  version: "match-engine-config-0.3.3",
   matchMinutes: 90,
   neutralPossession: 0.5,
   homePossessionBase: 0.515,
@@ -36,6 +36,7 @@ export const ENGINE_CONFIG = {
   onTarget: { base: 0.45, finishingBaseline: 10, finishingDivisor: 80, min: 0.28, max: 0.68 },
   goal: { base: 0.28, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
   creator: { designatedShare: 0.35 },
+  defending: { stopCreditShare: 0.7, majorErrorChance: 0.006 },
   tackling: {
     hardFoul: 0.055,
     normalFoul: 0.038,
@@ -43,11 +44,15 @@ export const ENGINE_CONFIG = {
     hardCard: 0.28,
     normalCard: 0.18,
     carefulCard: 0.11,
+    hardRed: 0.04,
+    normalRed: 0.025,
+    carefulRed: 0.012,
   },
   ratings: {
     baseline: 6,
     goal: 0.9,
     assist: 0.45,
+    shot: 0.01,
     shotOnTarget: 0.04,
     chanceCreated: 0.08,
     progressionAction: 0.015,
