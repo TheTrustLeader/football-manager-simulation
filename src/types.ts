@@ -124,6 +124,11 @@ export interface MatchDiagnostics {
     awayTravelConditionPenalty: number;
     awayDefendingFoulProbabilityAdd: number;
   };
+  fatigue: {
+    applied: boolean;
+    baseConditionLossPerMinute: number;
+    minimumCondition: number;
+  };
 }
 
 export interface MatchOutput {
@@ -136,5 +141,6 @@ export interface MatchOutput {
   away: TeamStats;
   events: MatchEvent[];
   contributions: PlayerContribution[];
+  finalCondition: Record<string, number>;
   diagnostics: MatchDiagnostics;
 }
