@@ -6,22 +6,9 @@ export const ENGINE_CONFIG = {
   possessionMin: 0.38,
   possessionMax: 0.62,
   retentionDeltaDivisor: 120,
-  condition: {
-    base: 0.78,
-    range: 0.22,
-    scale: 100,
-  },
-  form: {
-    maxMagnitude: 1,
-    effect: 0.025,
-  },
-  morale: {
-    "very-low": 0.94,
-    low: 0.97,
-    steady: 1,
-    good: 1.02,
-    high: 1.04,
-  },
+  condition: { base: 0.78, range: 0.22, scale: 100 },
+  form: { maxMagnitude: 1, effect: 0.025 },
+  morale: { "very-low": 0.94, low: 0.97, steady: 1, good: 1.02, high: 1.04 },
   profileWeights: {
     retention: { passing: 0.65, creativity: 0.35 },
     progression: { passing: 0.35, creativity: 0.3, pace: 0.2, aerial: 0.15 },
@@ -43,39 +30,12 @@ export const ENGINE_CONFIG = {
     balanced: { attack: 1, defence: 1 },
     attacking: { attack: 1.08, defence: 0.95 },
   },
-  progression: {
-    base: 0.42,
-    differenceDivisor: 170,
-    min: 0.24,
-    max: 0.6,
-  },
-  chance: {
-    base: 0.5,
-    differenceDivisor: 180,
-    min: 0.28,
-    max: 0.68,
-  },
-  shot: {
-    base: 0.82,
-    min: 0.55,
-    max: 0.96,
-  },
-  onTarget: {
-    base: 0.45,
-    finishingBaseline: 10,
-    finishingDivisor: 80,
-    min: 0.28,
-    max: 0.68,
-  },
-  goal: {
-    base: 0.28,
-    finishingGoalkeeperDivisor: 90,
-    min: 0.14,
-    max: 0.44,
-  },
-  creator: {
-    designatedShare: 0.35,
-  },
+  progression: { base: 0.42, differenceDivisor: 170, min: 0.24, max: 0.6 },
+  chance: { base: 0.5, differenceDivisor: 180, min: 0.28, max: 0.68 },
+  shot: { base: 0.82, min: 0.55, max: 0.96 },
+  onTarget: { base: 0.45, finishingBaseline: 10, finishingDivisor: 80, min: 0.28, max: 0.68 },
+  goal: { base: 0.28, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
+  creator: { designatedShare: 0.35 },
   tackling: {
     hardFoul: 0.055,
     normalFoul: 0.038,
@@ -126,14 +86,15 @@ export const ENGINE_CONFIG = {
   },
 } as const;
 
-function canonicalise(value: unknown): string {
+export function canonicalise(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalise).join(",")}]`;
   const object = value as Record<string, unknown>;
   return `{${Object.keys(object).sort().map((key) => `${JSON.stringify(key)}:${canonicalise(object[key])}`).join(",")}}`;
 }
 
-function fnv1a64(text: string): string {
+export function stableHash(value: unknown): string {
+  const text = typeof value === "string" ? value : canonicalise(value);
   let hash = 0xcbf29ce484222325n;
   const prime = 0x100000001b3n;
   const mask = 0xffffffffffffffffn;
@@ -141,7 +102,7 @@ function fnv1a64(text: string): string {
     hash ^= BigInt(character.codePointAt(0) ?? 0);
     hash = (hash * prime) & mask;
   }
-  return hash.toString(16).padStart(16, "0");
+  return `fnv1a64:${hash.toString(16).padStart(16, "0")}`;
 }
 
-export const ENGINE_CONFIG_HASH = `fnv1a64:${fnv1a64(canonicalise(ENGINE_CONFIG))}`;
+export const ENGINE_CONFIG_HASH = stableHash(ENGINE_CONFIG);
