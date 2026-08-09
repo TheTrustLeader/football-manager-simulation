@@ -9,7 +9,6 @@
     "test:watch": "vitest",
     "simulate": "tsx src/simulate.ts",
     "evidence": "tsx src/evidence.ts",
-    "calibration:sweep": "tsx src/calibration-sweep.ts",
     "golden:print": "tsx src/print-golden.ts"
   },
   "devDependencies": {
