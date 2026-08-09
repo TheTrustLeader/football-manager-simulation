@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.5.1",
+  version: "match-engine-config-0.6.0",
   matchMinutes: 90,
   possessionBase: 0.5,
   possessionMin: 0.38,
@@ -11,7 +11,7 @@ export const ENGINE_CONFIG = {
     awayDefendingFoulProbabilityAdd: 0.003,
   },
   fatigue: {
-    baseConditionLossPerMinute: 0.135,
+    baseConditionLossPerMinute: 0.675,
     staminaBaseline: 10,
     staminaSensitivity: 0.025,
     minimumCondition: 35,
@@ -53,7 +53,8 @@ export const ENGINE_CONFIG = {
   onTarget: { base: 0.45, finishingBaseline: 10, finishingDivisor: 80, min: 0.28, max: 0.68 },
   goal: { base: 0.28, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
   creator: { designatedShare: 0.35 },
-  defending: { stopCreditShare: 0.7, majorErrorChance: 0.006 },
+  defending: { stopCreditShare: 0.7, stopCreditWeightFloor: 1, majorErrorChance: 0.006 },
+  dismissal: { baselinePlayers: 11, profileExponent: 0.75 },
   tackling: {
     hardFoul: 0.055,
     normalFoul: 0.038,
@@ -98,10 +99,12 @@ export const ENGINE_CONFIG = {
   },
   ciGuardrails: {
     sampleMatches: 20000,
-    goalsPerMatchMin: 2.2,
-    goalsPerMatchMax: 2.9,
-    drawRateMin: 0.23,
-    drawRateMax: 0.33,
+    goalsPerMatchMin: 2.4,
+    goalsPerMatchMax: 2.7,
+    drawRateMin: 0.27,
+    drawRateMax: 0.31,
+    homeWinRateMin: 0.41,
+    homeWinRateMax: 0.47,
     mirrorWinRateTolerance: 0.025,
     abilityStrongWinRateMin: 0.42,
     abilityWeakWinRateMax: 0.18,
