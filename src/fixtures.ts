@@ -20,6 +20,7 @@ function player(teamId: string, index: number, level: number, position: Position
   return {
     id: `${teamId}-p${index + 1}`,
     name: `${teamId.toUpperCase()} Player ${index + 1}`,
+    age: 27,
     primaryPosition: position,
     attributes: attributes(level, position),
     hidden: {
