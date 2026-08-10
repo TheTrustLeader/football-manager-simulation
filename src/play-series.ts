@@ -12,7 +12,7 @@ const styles: Style[] = ["balanced", "passing", "direct", "counter"];
 const approaches: Approach[] = ["cautious", "balanced", "attacking"];
 const tacklingOptions: Tackling[] = ["careful", "normal", "hard"];
 
-type EarnedJudgement = "yes" | "no" | "unsure";
+type HumanJudgement = "yes" | "no" | "unsure";
 
 interface SeriesMatchRecord {
   match: number;
@@ -45,7 +45,7 @@ interface SeriesMatchRecord {
     redCards: number;
   };
   averageFinalCondition: number;
-  judgement: EarnedJudgement;
+  scorelineBelievable: HumanJudgement;
   note: string;
 }
 
@@ -61,6 +61,16 @@ async function choose<T extends string>(title: string, options: readonly T[], la
     const index = Number.parseInt(answer, 10) - 1;
     if (Number.isInteger(index) && index >= 0 && index < options.length) return options[index]!;
     console.log("Choose one of the numbered options.");
+  }
+}
+
+async function yesNoUnsure(question: string): Promise<HumanJudgement> {
+  while (true) {
+    const answer = (await rl.question(`${question} (y/n/u): `)).trim().toLowerCase();
+    if (answer === "y" || answer === "yes") return "yes";
+    if (answer === "n" || answer === "no") return "no";
+    if (answer === "u" || answer === "unsure") return "unsure";
+    console.log("Type y, n or u.");
   }
 }
 
@@ -99,16 +109,6 @@ function resultLetter(managedGoals: number, opponentGoals: number): "W" | "D" | 
   return "D";
 }
 
-async function judgementForMatch(): Promise<EarnedJudgement> {
-  while (true) {
-    const answer = (await rl.question("Did that result feel earned from what you chose? (y/n/u): ")).trim().toLowerCase();
-    if (answer === "y" || answer === "yes") return "yes";
-    if (answer === "n" || answer === "no") return "no";
-    if (answer === "u" || answer === "unsure") return "unsure";
-    console.log("Type y, n or u.");
-  }
-}
-
 function printMatchRecord(record: SeriesMatchRecord): void {
   console.log(`\nMatch ${record.match}: ${record.managedClub} ${record.score.managed}-${record.score.opponent} ${record.opponent}  [${record.result}]`);
   console.log(`Seed: ${record.seed}`);
@@ -116,7 +116,7 @@ function printMatchRecord(record: SeriesMatchRecord): void {
   console.log(`Average final condition: ${record.averageFinalCondition.toFixed(1)}`);
 }
 
-function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput): string {
+function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput, tacticsPatternRecognisable: HumanJudgement, seriesNote: string): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const path = `evidence/human-playtest-series-${timestamp}.json`;
   mkdirSync("evidence", { recursive: true });
@@ -124,7 +124,7 @@ function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput): string
   const draws = records.filter((record) => record.result === "D").length;
   const losses = records.filter((record) => record.result === "L").length;
   const evidence = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: new Date().toISOString(),
     purpose: "Gate 1 human playtest — eight-match same-side engine sequence",
     engineConfigVersion: ENGINE_CONFIG.version,
@@ -145,12 +145,14 @@ function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput): string
       losses,
       goalsFor: records.reduce((sum, record) => sum + record.score.managed, 0),
       goalsAgainst: records.reduce((sum, record) => sum + record.score.opponent, 0),
-      earnedYes: records.filter((record) => record.judgement === "yes").length,
-      earnedNo: records.filter((record) => record.judgement === "no").length,
-      earnedUnsure: records.filter((record) => record.judgement === "unsure").length,
+      believableYes: records.filter((record) => record.scorelineBelievable === "yes").length,
+      believableNo: records.filter((record) => record.scorelineBelievable === "no").length,
+      believableUnsure: records.filter((record) => record.scorelineBelievable === "unsure").length,
+      tacticsPatternRecognisable,
+      seriesNote,
     },
     matches: records,
-    limitation: "This series is human judgement evidence only. It is not the sealed validation run and not the 12-question matrix.",
+    limitation: "Human judgement is split deliberately: per-match questions assess whether the scoreline looks believable from the displayed match stats; the end-of-series question assesses whether the fixed tactical setup produced a recognisable pattern across eight results. This is not the sealed validation run and not the 12-question matrix.",
   };
   writeFileSync(path, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
   return path;
@@ -162,7 +164,7 @@ async function main(): Promise<void> {
     console.log(line("="));
     console.log("              MATCH LAB — 8 MATCH ENGINE PLAYTEST");
     console.log(line("="));
-    console.log("Purpose: judge whether a short run of results feels earned, not whether the commentary is entertaining.");
+    console.log("Purpose: judge whether individual scorelines look believable, then judge the pattern across all eight matches.");
     console.log("Every seed and result will be saved automatically. Validation seeds remain sealed.\n");
 
     const managedChoice = await choose("Choose the club you will keep for all eight matches", ["northbridge", "redmere"] as const, {
@@ -234,17 +236,16 @@ async function main(): Promise<void> {
           redCards: opponentStats.redCards,
         },
         averageFinalCondition: managedCondition(managed, result.finalCondition),
-        judgement: "unsure",
+        scorelineBelievable: "unsure",
         note: "",
       };
 
       printMatchRecord(record);
-      record.judgement = await judgementForMatch();
+      record.scorelineBelievable = await yesNoUnsure("Does that scoreline look believable from the match stats shown?");
       record.note = (await rl.question("Optional short note (press Enter to skip): ")).trim();
       records.push(record);
     }
 
-    const path = writeEvidence(records, managedTemplate);
     const wins = records.filter((record) => record.result === "W").length;
     const draws = records.filter((record) => record.result === "D").length;
     const losses = records.filter((record) => record.result === "L").length;
@@ -254,9 +255,14 @@ async function main(): Promise<void> {
     console.log(line("="));
     console.log(`Record: ${wins}W ${draws}D ${losses}L`);
     console.log(`Goals: ${records.reduce((sum, record) => sum + record.score.managed, 0)} for, ${records.reduce((sum, record) => sum + record.score.opponent, 0)} against`);
-    console.log(`Felt earned: ${records.filter((record) => record.judgement === "yes").length} yes, ${records.filter((record) => record.judgement === "no").length} no, ${records.filter((record) => record.judgement === "unsure").length} unsure`);
+    console.log(`Scorelines believable: ${records.filter((record) => record.scorelineBelievable === "yes").length} yes, ${records.filter((record) => record.scorelineBelievable === "no").length} no, ${records.filter((record) => record.scorelineBelievable === "unsure").length} unsure`);
+
+    const tacticsPatternRecognisable = await yesNoUnsure("Across all eight matches, did your fixed tactics seem to produce a recognisable pattern?");
+    const seriesNote = (await rl.question("Optional overall note on the eight-match run (press Enter to skip): ")).trim();
+    const path = writeEvidence(records, managedTemplate, tacticsPatternRecognisable, seriesNote);
+
     console.log(`Evidence saved: ${path}`);
-    console.log("\nKeep this file. If any result felt wrong, its exact seed is recorded inside.\n");
+    console.log("\nKeep this file. If any scoreline looked wrong, its exact seed is recorded inside.\n");
   } finally {
     rl.close();
   }
