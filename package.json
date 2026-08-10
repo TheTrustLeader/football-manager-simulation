@@ -10,6 +10,7 @@
     "simulate": "tsx src/simulate.ts",
     "play": "tsx src/play.ts",
     "play:series": "tsx src/play-series.ts",
+    "play:perceptibility": "tsx src/play-perceptibility.ts",
     "playtest": "tsx src/play-series.ts",
     "evidence": "tsx src/evidence.ts",
     "review002:evidence": "tsx src/review-002-full-evidence.ts",
