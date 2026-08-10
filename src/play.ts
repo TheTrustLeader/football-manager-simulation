@@ -2,7 +2,7 @@ import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
-import type { Approach, Formation, MatchEvent, Style, Tackling, TeamInput } from "./types.js";
+import type { Approach, Formation, MatchEvent, MatchOutput, Player, Style, Tackling, TeamInput } from "./types.js";
 
 const rl = createInterface({ input, output });
 
@@ -10,10 +10,20 @@ const formations: Formation[] = ["4-4-2", "4-3-3", "4-5-1", "3-5-2", "5-3-2"];
 const styles: Style[] = ["balanced", "passing", "direct", "counter"];
 const approaches: Approach[] = ["cautious", "balanced", "attacking"];
 const tacklingOptions: Tackling[] = ["careful", "normal", "hard"];
+const paceOptions = ["relaxed", "normal", "quick"] as const;
+type CommentaryPace = typeof paceOptions[number];
+
+const targetDurationMs: Record<CommentaryPace, number> = {
+  relaxed: 180_000,
+  normal: 120_000,
+  quick: 60_000,
+};
 
 function line(char = "-", width = 68): string {
   return char.repeat(width);
 }
+
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function choose<T extends string>(title: string, options: readonly T[], labels?: Partial<Record<T, string>>): Promise<T> {
   while (true) {
@@ -51,39 +61,139 @@ function printSquad(team: TeamInput): void {
   });
 }
 
-function eventLabel(event: MatchEvent): string {
+function playerLookup(home: TeamInput, away: TeamInput): Map<string, Player> {
+  return new Map([...home.starters, ...home.substitutes, ...away.starters, ...away.substitutes].map((player) => [player.id, player]));
+}
+
+function teamName(event: MatchEvent, home: TeamInput, away: TeamInput): string {
+  if (event.teamId === home.id) return home.name;
+  if (event.teamId === away.id) return away.name;
+  return "The team";
+}
+
+function playerName(id: string | undefined, players: Map<string, Player>, fallback = "a player"): string {
+  return id ? players.get(id)?.name ?? fallback : fallback;
+}
+
+function phraseIndex(event: MatchEvent, size: number): number {
+  const text = `${event.minute}:${event.type}:${event.playerId ?? ""}:${event.secondaryPlayerId ?? ""}`;
+  let value = 0;
+  for (const character of text) value = (value * 31 + character.charCodeAt(0)) >>> 0;
+  return value % size;
+}
+
+function pickPhrase(event: MatchEvent, phrases: string[]): string {
+  return phrases[phraseIndex(event, phrases.length)]!;
+}
+
+function commentaryFor(event: MatchEvent, home: TeamInput, away: TeamInput, players: Map<string, Player>): string {
+  const team = teamName(event, home, away);
+  const player = playerName(event.playerId, players);
+  const other = playerName(event.secondaryPlayerId, players);
+
   switch (event.type) {
-    case "goal": return "GOAL";
-    case "save": return "SAVE";
-    case "yellow-card": return "BOOKING";
-    case "red-card": return "SENT OFF";
-    case "injury": return "INJURY";
-    case "substitution": return "SUB";
-    case "tactical-change": return "TACTICS";
-    case "chance": return "CHANCE";
-    case "shot": return "SHOT";
-    case "attack": return "ATTACK";
-    case "foul": return "FOUL";
-    default: return event.type.toUpperCase();
+    case "attack":
+      return pickPhrase(event, [
+        `${team} are beginning to find some space.`,
+        `${team} push forward and ask a question of the defence.`,
+        `${team} build patiently and move into a dangerous area.`,
+      ]);
+    case "chance":
+      return pickPhrase(event, [
+        `${player} opens things up for ${team} — this could be a chance.`,
+        `${team} have worked an opening, with ${player} at the heart of it.`,
+        `${player} finds the gap. ${team} are in a promising position.`,
+      ]);
+    case "shot":
+      return pickPhrase(event, [
+        `${player} tries his luck, but sends it wide.`,
+        `${player} gets the shot away — not quite accurate enough.`,
+        `${player} goes for goal, but it drifts past the target.`,
+      ]);
+    case "save":
+      return pickPhrase(event, [
+        `${player} is equal to it and makes the save.`,
+        `${other} tests the goalkeeper, but ${player} keeps it out.`,
+        `Good stop from ${player}. ${other} had made that dangerous.`,
+      ]);
+    case "goal":
+      return pickPhrase(event, [
+        `GOAL! ${player} finishes it for ${team}!`,
+        `GOAL! ${team} have the breakthrough — ${player} with the finish!`,
+        `GOAL! ${player} makes it count for ${team}!`,
+      ]);
+    case "yellow-card":
+      return `${player} goes into the book.`;
+    case "red-card":
+      return `RED CARD! ${player} is sent off. ${team} are down to ten.`;
+    case "injury":
+      return `${player} is in trouble here and needs attention.`;
+    case "substitution":
+      return `${team} make a change: ${event.detail}`;
+    case "tactical-change":
+      return `${team} change their approach: ${event.detail}`;
+    case "foul":
+      return `${player} concedes the free kick.`;
+    default:
+      return event.detail;
   }
 }
 
-function printMatchEvents(events: MatchEvent[]): void {
+function keyEvents(events: MatchEvent[]): MatchEvent[] {
+  const visible = new Set(["goal", "save", "yellow-card", "red-card", "injury", "substitution", "tactical-change", "chance", "shot", "attack"]);
+  return events.filter((event) => visible.has(event.type));
+}
+
+async function playMatchCommentary(result: MatchOutput, home: TeamInput, away: TeamInput, pace: CommentaryPace): Promise<void> {
   console.log("\nMATCH COMMENTARY");
   console.log(line());
-  const keyTypes = new Set(["goal", "save", "yellow-card", "red-card", "injury", "substitution", "tactical-change", "chance", "shot", "attack"]);
+  console.log(" 0'  And we're underway.");
+
+  const players = playerLookup(home, away);
+  const events = keyEvents(result.events);
+  let previousMinute = 0;
+  let halfTimeShown = false;
+  let homeGoals = 0;
+  let awayGoals = 0;
+  const msPerMatchMinute = targetDurationMs[pace] / 90;
+
   for (const event of events) {
-    if (event.type === "kick-off") {
-      console.log(" 0'  KICK-OFF");
-      continue;
+    if (!halfTimeShown && event.minute > 45) {
+      const waitToHalf = Math.max(150, (45 - previousMinute) * msPerMatchMinute);
+      await sleep(Math.min(waitToHalf, 7_000));
+      console.log(`\n45'  HALF-TIME — ${home.name} ${homeGoals}-${awayGoals} ${away.name}\n`);
+      halfTimeShown = true;
+      previousMinute = 45;
+      await sleep(pace === "quick" ? 800 : 1_800);
     }
-    if (event.type === "full-time") continue;
-    if (!keyTypes.has(event.type)) continue;
-    console.log(`${String(event.minute).padStart(2)}'  ${eventLabel(event).padEnd(9)} ${event.detail}`);
+
+    const minuteGap = Math.max(1, event.minute - previousMinute);
+    await sleep(Math.min(Math.max(180, minuteGap * msPerMatchMinute), 7_000));
+
+    if (event.type === "goal") {
+      if (event.teamId === home.id) homeGoals += 1;
+      if (event.teamId === away.id) awayGoals += 1;
+    }
+
+    console.log(`${String(event.minute).padStart(2)}'  ${commentaryFor(event, home, away, players)}`);
+    if (event.type === "goal") {
+      console.log(`     SCORE: ${home.name} ${homeGoals}-${awayGoals} ${away.name}`);
+      await sleep(pace === "quick" ? 600 : 1_500);
+    }
+    previousMinute = event.minute;
   }
+
+  if (!halfTimeShown) {
+    console.log(`\n45'  HALF-TIME — ${home.name} ${homeGoals}-${awayGoals} ${away.name}\n`);
+    await sleep(pace === "quick" ? 500 : 1_200);
+  }
+
+  const waitToFullTime = Math.max(250, (90 - previousMinute) * msPerMatchMinute);
+  await sleep(Math.min(waitToFullTime, 7_000));
+  console.log(`\n90'  FULL-TIME — ${home.name} ${result.home.goals}-${result.away.goals} ${away.name}`);
 }
 
-function printRatings(team: TeamInput, contributions: ReturnType<typeof simulateMatch>["contributions"], finalCondition: Record<string, number>): void {
+function printRatings(team: TeamInput, contributions: MatchOutput["contributions"], finalCondition: Record<string, number>): void {
   const byId = new Map(contributions.map((contribution) => [contribution.playerId, contribution]));
   console.log(`\n${team.name} — PLAYER RATINGS`);
   console.log(line());
@@ -135,6 +245,11 @@ async function playOne(): Promise<void> {
 
   printSquad(managedTeam);
   await configureManagedTeam(managedTeam);
+  const pace = await choose("Match pace", paceOptions, {
+    relaxed: "Relaxed — about 3 minutes",
+    normal: "Normal — about 2 minutes",
+    quick: "Quick — about 1 minute",
+  });
   const seed = await chooseSeed();
 
   console.log("\nYOUR TACTICS");
@@ -144,14 +259,15 @@ async function playOne(): Promise<void> {
   console.log(`Style:     ${managedTeam.tactics.style}`);
   console.log(`Approach:  ${managedTeam.tactics.approach}`);
   console.log(`Tackling:  ${managedTeam.tactics.tackling}`);
+  console.log(`Pace:      ${pace}`);
   console.log(`Seed:      ${seed}`);
   await rl.question("\nPress Enter to kick off...");
 
   const result = simulateMatch({ seed, home: northbridge, away: redmere });
-  printMatchEvents(result.events);
+  await playMatchCommentary(result, northbridge, redmere, pace);
 
   console.log(`\n${line("=")}`);
-  console.log(`FULL-TIME: NORTHBRIDGE ${result.home.goals}-${result.away.goals} REDMERE`);
+  console.log(`FINAL SCORE: ${northbridge.name} ${result.home.goals}-${result.away.goals} ${redmere.name}`);
   console.log(line("="));
   console.log(`Chances:       ${result.home.chances}-${result.away.chances}`);
   console.log(`Shots:         ${result.home.shots}-${result.away.shots}`);
@@ -164,11 +280,12 @@ async function playOne(): Promise<void> {
   printRatings(redmere, result.contributions, result.finalCondition);
 
   console.log("\nPLAYTEST NOTES TO THINK ABOUT");
+  console.log("• Did it feel like a match rather than a data dump?");
   console.log("• Did your tactical choice seem to show up in the match?");
   console.log("• Did the score and chances feel believable?");
   console.log("• Did late-match condition look sensible?");
   console.log("• Did the ratings broadly match what happened?");
-  console.log("• Was anything obviously silly or too repetitive?");
+  console.log("• Was the commentary repetitive, confusing or too sparse?");
 }
 
 async function main(): Promise<void> {
