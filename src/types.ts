@@ -4,6 +4,7 @@ export type Approach = "cautious" | "balanced" | "attacking";
 export type Tackling = "careful" | "normal" | "hard";
 export type Position = "GK" | "DF" | "MF" | "FW";
 export type Morale = "very-low" | "low" | "steady" | "good" | "high";
+export type ScoreState = "level" | "leading" | "trailing";
 
 export interface Attributes {
   defending: number;
@@ -33,6 +34,7 @@ export interface PlayerState {
 export interface Player {
   id: string;
   name: string;
+  age: number;
   primaryPosition: Position;
   attributes: Attributes;
   hidden: HiddenTraits;
@@ -111,17 +113,50 @@ export interface TeamStats {
   shots: number;
   shotsOnTarget: number;
   chances: number;
+  possessionTicks: number;
   fouls: number;
   yellowCards: number;
   redCards: number;
 }
 
+export interface ScoreStateDiagnostic {
+  possessions: number;
+  progressions: number;
+}
+
+export interface MatchDiagnostics {
+  homeAdvantage: {
+    applied: boolean;
+    homeProgressionProbabilityBoost: number;
+    awayTravelConditionPenalty: number;
+    awayDefendingFoulProbabilityAdd: number;
+  };
+  fatigue: {
+    applied: boolean;
+    baseConditionLossPerMinute: number;
+    minimumCondition: number;
+  };
+  gameState: {
+    progressionProbabilityShift: number;
+    scoreStateMinutes: {
+      level: number;
+      homeLeading: number;
+      awayLeading: number;
+    };
+    attackingState: Record<ScoreState, ScoreStateDiagnostic>;
+  };
+}
+
 export interface MatchOutput {
   seed: number;
+  engineConfigVersion: string;
+  engineConfigHash: string;
   homeTeamId: string;
   awayTeamId: string;
   home: TeamStats;
   away: TeamStats;
   events: MatchEvent[];
   contributions: PlayerContribution[];
+  finalCondition: Record<string, number>;
+  diagnostics: MatchDiagnostics;
 }
