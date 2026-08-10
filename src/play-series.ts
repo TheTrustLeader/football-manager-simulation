@@ -4,6 +4,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
+import { printRunProvenance, readGitProvenance, type GitProvenance } from "./provenance.js";
 import type { Approach, Formation, Style, Tackling, TeamInput } from "./types.js";
 
 const rl = createInterface({ input, output });
@@ -116,7 +117,7 @@ function printMatchRecord(record: SeriesMatchRecord): void {
   console.log(`Average final condition: ${record.averageFinalCondition.toFixed(1)}`);
 }
 
-function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput, tacticsPatternRecognisable: HumanJudgement, seriesNote: string): string {
+function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput, tacticsPatternRecognisable: HumanJudgement, seriesNote: string, provenance: GitProvenance): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const path = `evidence/human-playtest-series-${timestamp}.json`;
   mkdirSync("evidence", { recursive: true });
@@ -124,9 +125,11 @@ function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput, tactics
   const draws = records.filter((record) => record.result === "D").length;
   const losses = records.filter((record) => record.result === "L").length;
   const evidence = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     generatedAt: new Date().toISOString(),
     purpose: "Gate 1 human playtest — eight-match same-side engine sequence",
+    gitCommit: provenance.gitCommit,
+    dirtyTree: provenance.dirtyTree,
     engineConfigVersion: ENGINE_CONFIG.version,
     engineConfigHash: ENGINE_CONFIG_HASH,
     validationSeedsUsed: false,
@@ -159,11 +162,13 @@ function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput, tactics
 }
 
 async function main(): Promise<void> {
+  const provenance = readGitProvenance();
   try {
     console.clear();
     console.log(line("="));
     console.log("              MATCH LAB — 8 MATCH ENGINE PLAYTEST");
     console.log(line("="));
+    printRunProvenance("EIGHT-MATCH HUMAN PLAYTEST", provenance);
     console.log("Purpose: judge whether individual scorelines look believable, then judge the pattern across all eight matches.");
     console.log("Every seed and result will be saved automatically. Validation seeds remain sealed.\n");
 
@@ -259,7 +264,7 @@ async function main(): Promise<void> {
 
     const tacticsPatternRecognisable = await yesNoUnsure("Across all eight matches, did your fixed tactics seem to produce a recognisable pattern?");
     const seriesNote = (await rl.question("Optional overall note on the eight-match run (press Enter to skip): ")).trim();
-    const path = writeEvidence(records, managedTemplate, tacticsPatternRecognisable, seriesNote);
+    const path = writeEvidence(records, managedTemplate, tacticsPatternRecognisable, seriesNote, provenance);
 
     console.log(`Evidence saved: ${path}`);
     console.log("\nKeep this file. If any scoreline looked wrong, its exact seed is recorded inside.\n");

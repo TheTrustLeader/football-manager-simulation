@@ -1,8 +1,11 @@
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
+import { printRunProvenance, readGitProvenance } from "./provenance.js";
 
 const requested = Number.parseInt(process.argv[2] ?? "1000", 10);
 const count = Number.isFinite(requested) && requested > 0 ? requested : 1000;
+const provenance = readGitProvenance();
+printRunProvenance("MATCH LAB SIMULATION", provenance);
 
 let homeWins = 0;
 let draws = 0;

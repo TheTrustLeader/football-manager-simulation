@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
+import { printRunProvenance, readGitProvenance } from "./provenance.js";
 import { seedRange, type SeedPoolName } from "./seed-pools.js";
 import type { Formation, ScoreState, Style } from "./types.js";
 
@@ -83,6 +84,8 @@ const count = Number.parseInt(process.argv[2] ?? `${ENGINE_CONFIG.ciGuardrails.s
 const pool = (process.argv[3] ?? "tuning") as SeedPoolName;
 const outputPath = process.argv[4] ?? "evidence/match-lab-evidence.json";
 if (pool !== "tuning" && pool !== "validation") throw new Error(`Unknown seed pool: ${pool}`);
+const provenance = readGitProvenance();
+printRunProvenance("MATCH LAB EVIDENCE RUN", provenance);
 const seeds = seedRange(pool, count);
 
 const baseline = emptyAggregate();
@@ -274,9 +277,11 @@ const poissonReference = Object.fromEntries(poissonCells.map((scoreline) => {
 
 const simulatedMatches = count * 11;
 const evidence = {
-  schemaVersion: 4,
+  schemaVersion: 5,
   generatedAt: new Date().toISOString(),
-  buildVersion: process.env.GITHUB_SHA ?? "local-uncommitted",
+  buildVersion: provenance.gitCommit,
+  gitCommit: provenance.gitCommit,
+  dirtyTree: provenance.dirtyTree,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
   command: `npm run evidence -- ${count} ${pool} ${outputPath}`,
@@ -323,7 +328,7 @@ const evidence = {
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
-console.log(JSON.stringify({ buildVersion: evidence.buildVersion, configHash: ENGINE_CONFIG_HASH, calibrationChecks, ciChecks, gameState: evidence.gameState, performance: evidence.performance }, null, 2));
+console.log(JSON.stringify({ buildVersion: evidence.buildVersion, gitCommit: evidence.gitCommit, dirtyTree: evidence.dirtyTree, configHash: ENGINE_CONFIG_HASH, calibrationChecks, ciChecks, gameState: evidence.gameState, performance: evidence.performance }, null, 2));
 
 const failedChecks = Object.entries(ciChecks).filter(([, value]) => !value.pass).map(([name]) => name);
 if (failedChecks.length > 0) {

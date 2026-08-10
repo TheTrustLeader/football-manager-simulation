@@ -7,7 +7,14 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "simulate": "tsx src/simulate.ts"
+    "simulate": "tsx src/simulate.ts",
+    "play": "tsx src/play.ts",
+    "play:series": "tsx src/play-series.ts",
+    "playtest": "tsx src/play-series.ts",
+    "evidence": "tsx src/evidence.ts",
+    "review002:evidence": "tsx src/review-002-full-evidence.ts",
+    "game-state:evidence": "tsx src/game-state-full-evidence.ts",
+    "golden:print": "tsx src/print-golden.ts"
   },
   "devDependencies": {
     "@types/node": "^24.2.1",

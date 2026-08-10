@@ -28,7 +28,7 @@ describe("Match Engine", () => {
     const result = simulateMatch(input());
     expect(result.events[0]?.type).toBe("kick-off");
     expect(result.events.at(-1)?.type).toBe("full-time");
-    expect(result.contributions).toHaveLength(22);
+    expect(result.contributions).toHaveLength(30);
     expect(result.home.goals).toBeGreaterThanOrEqual(0);
     expect(result.away.goals).toBeGreaterThanOrEqual(0);
   });

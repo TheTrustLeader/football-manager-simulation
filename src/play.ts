@@ -2,6 +2,7 @@ import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
+import { printRunProvenance, readGitProvenance, type GitProvenance } from "./provenance.js";
 import type { Approach, Formation, MatchEvent, MatchOutput, Player, Style, Tackling, TeamInput } from "./types.js";
 
 const rl = createInterface({ input, output });
@@ -400,11 +401,12 @@ async function configureManagedTeam(team: TeamInput): Promise<void> {
   });
 }
 
-async function playOne(): Promise<void> {
+async function playOne(provenance: GitProvenance): Promise<void> {
   console.clear();
   console.log(line("="));
   console.log("             FOOTBALL MANAGER SIMULATION — MATCH LAB");
   console.log(line("="));
+  printRunProvenance("HUMAN PLAYTEST", provenance);
   console.log("Human playtest harness. Match outcomes come from the real Match Lab engine.");
   console.log("Pitch locations and move descriptions are presentation-only at this stage.");
 
@@ -463,10 +465,11 @@ async function playOne(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  const provenance = readGitProvenance();
   try {
     let again = true;
     while (again) {
-      await playOne();
+      await playOne(provenance);
       const answer = (await rl.question("\nPlay another match? (y/n): ")).trim().toLowerCase();
       again = answer === "y" || answer === "yes";
     }
