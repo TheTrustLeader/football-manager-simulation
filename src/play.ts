@@ -19,6 +19,24 @@ const targetDurationMs: Record<CommentaryPace, number> = {
   quick: 60_000,
 };
 
+const readPauseMs: Record<CommentaryPace, number> = {
+  relaxed: 2_700,
+  normal: 2_000,
+  quick: 900,
+};
+
+const outcomePauseMs: Record<CommentaryPace, number> = {
+  relaxed: 3_400,
+  normal: 2_600,
+  quick: 1_200,
+};
+
+const goalHoldMs: Record<CommentaryPace, number> = {
+  relaxed: 3_800,
+  normal: 3_000,
+  quick: 1_400,
+};
+
 function line(char = "-", width = 68): string {
   return char.repeat(width);
 }
@@ -204,10 +222,13 @@ function renderClock(matchSecond: number, home: TeamInput, away: TeamInput, home
   output.write(` ${formatClock(matchSecond)}   ${home.name} ${homeGoals}-${awayGoals} ${away.name}`);
 }
 
+async function pauseForReading(pace: CommentaryPace, multiplier = 1): Promise<void> {
+  await sleep(readPauseMs[pace] * multiplier);
+}
+
 async function suspensePause(pace: CommentaryPace): Promise<void> {
-  const delay = pace === "quick" ? 550 : pace === "normal" ? 1_250 : 1_750;
   output.write("        ...");
-  await sleep(delay);
+  await sleep(outcomePauseMs[pace]);
   clearClockLine();
 }
 
@@ -238,39 +259,52 @@ async function describeEvent(event: MatchEvent, home: TeamInput, away: TeamInput
   switch (event.type) {
     case "attack":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 8)}  ${attackCommentary(event, home, away, players)}`);
+      await pauseForReading(pace);
       break;
     case "chance":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 20)}  ${chanceCommentary(event, home, away, players)}`);
+      await pauseForReading(pace, 1.15);
       break;
     case "shot":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 32)}  ${player} shoots ${shotLocationFor(event)}...`);
+      await pauseForReading(pace, 0.7);
       await suspensePause(pace);
       console.log(` ${formatClock((event.minute - 1) * 60 + 38)}  WIDE. ${player} can't quite find the target.`);
+      await pauseForReading(pace, 1.1);
       break;
     case "save":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 32)}  ${other} shoots ${shotLocationFor(event)}...`);
+      await pauseForReading(pace, 0.7);
       await suspensePause(pace);
       console.log(` ${formatClock((event.minute - 1) * 60 + 38)}  SAVED! ${player} gets behind it.`);
+      await pauseForReading(pace, 1.1);
       break;
     case "goal":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 32)}  ${player} shoots ${shotLocationFor(event)}...`);
+      await pauseForReading(pace, 0.7);
       await suspensePause(pace);
       console.log(` ${formatClock((event.minute - 1) * 60 + 38)}  GOAL! ${player} scores for ${team}!`);
+      await sleep(goalHoldMs[pace]);
       break;
     case "yellow-card":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 28)}  BOOKING. ${player} goes into the referee's notebook.`);
+      await pauseForReading(pace);
       break;
     case "red-card":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 28)}  RED CARD! ${player} is sent off. ${team} are down to ten.`);
+      await pauseForReading(pace, 1.35);
       break;
     case "injury":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 28)}  ${player} is down and needs attention.`);
+      await pauseForReading(pace, 1.15);
       break;
     case "substitution":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 28)}  ${team} make a change: ${event.detail}`);
+      await pauseForReading(pace);
       break;
     case "tactical-change":
       console.log(`\n ${formatClock((event.minute - 1) * 60 + 28)}  ${team} change their approach: ${event.detail}`);
+      await pauseForReading(pace);
       break;
     default:
       break;
@@ -280,7 +314,7 @@ async function describeEvent(event: MatchEvent, home: TeamInput, away: TeamInput
 async function playMatchCommentary(result: MatchOutput, home: TeamInput, away: TeamInput, pace: CommentaryPace): Promise<void> {
   console.log("\nLIVE MATCH");
   console.log(line());
-  console.log("The clock keeps moving. Key moments will interrupt the live line below.\n");
+  console.log("The clock keeps moving. Key moments slow down so you can follow the action.\n");
 
   const players = playerLookup(home, away);
   const events = scheduleEvents(result.events);
@@ -306,7 +340,7 @@ async function playMatchCommentary(result: MatchOutput, home: TeamInput, away: T
       clearClockLine();
       console.log(`\n 45:00  HALF-TIME — ${home.name} ${homeGoals}-${awayGoals} ${away.name}\n`);
       halfTimeShown = true;
-      await sleep(pace === "quick" ? 700 : 1_500);
+      await sleep(pace === "quick" ? 900 : pace === "normal" ? 2_400 : 3_200);
       lastReal = performance.now();
     }
 
@@ -318,6 +352,7 @@ async function playMatchCommentary(result: MatchOutput, home: TeamInput, away: T
         if (scheduled.event.teamId === home.id) homeGoals += 1;
         if (scheduled.event.teamId === away.id) awayGoals += 1;
         console.log(`        SCORE: ${home.name} ${homeGoals}-${awayGoals} ${away.name}\n`);
+        await pauseForReading(pace, 0.8);
       }
       eventIndex += 1;
       lastReal = performance.now();
@@ -385,9 +420,9 @@ async function playOne(): Promise<void> {
   printSquad(managedTeam);
   await configureManagedTeam(managedTeam);
   const pace = await choose("Match pace", paceOptions, {
-    relaxed: "Relaxed — about 3 minutes",
-    normal: "Normal — about 2 minutes",
-    quick: "Quick — about 1 minute",
+    relaxed: "Relaxed — about 3 minutes plus event pauses",
+    normal: "Normal — about 2 minutes plus event pauses",
+    quick: "Quick — about 1 minute plus event pauses",
   });
   const seed = await chooseSeed();
 
@@ -419,7 +454,7 @@ async function playOne(): Promise<void> {
   printRatings(redmere, result.contributions, result.finalCondition);
 
   console.log("\nPLAYTEST NOTES TO THINK ABOUT");
-  console.log("• Did the running clock make quiet periods feel better?");
+  console.log("• Could you comfortably read each event before the next one arrived?");
   console.log("• Did the attack/chance/shot sequences feel like football?");
   console.log("• Could you recognise your chosen style in the commentary?");
   console.log("• Were the suspense pauses enjoyable or irritating?");
