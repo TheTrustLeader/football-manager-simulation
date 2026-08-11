@@ -38,6 +38,10 @@ const starterPositions = generationConfig.roster.starters as readonly Position[]
 const substitutePositions = generationConfig.roster.substitutes as readonly Position[];
 const clubProfiles = generationConfig.clubProfiles as Record<string, ResolvedSquadGeneration>;
 const identityBiases = generationConfig.identityBiases as Record<PlayingIdentity, AttributeModifiers>;
+const identityParityAdjustments = generationConfig.identityParity.interimAdjustmentsUntilCrossingIsConsumed as unknown as Record<PlayingIdentity, {
+  outfield: AttributeModifiers;
+  goalkeeper: AttributeModifiers;
+}>;
 const positionBases = generationConfig.positionBases as Record<Position, AttributeModifiers>;
 const playerTypes = generationConfig.playerTypes as unknown as Record<Position, readonly PlayerTypeProfile[]>;
 
@@ -105,10 +109,13 @@ function makeAttributes(
 ): GoalkeeperAttributes | OutfieldAttributes {
   const keys = position === "GK" ? goalkeeperAttributeKeys : outfieldAttributeKeys;
   const identityBias = position === "GK" ? {} : identityBiases[identity];
+  const parityAdjustment = position === "GK"
+    ? identityParityAdjustments[identity].goalkeeper
+    : identityParityAdjustments[identity].outfield;
   const base = positionBases[position];
   return Object.fromEntries(keys.map((key) => [
     key,
-    clampAttribute(level + (base[key] ?? 0) + (identityBias[key] ?? 0) + (profile.attributes[key] ?? 0) + correlated[key]),
+    clampAttribute(level + (base[key] ?? 0) + (identityBias[key] ?? 0) + (parityAdjustment[key] ?? 0) + (profile.attributes[key] ?? 0) + correlated[key]),
   ])) as unknown as GoalkeeperAttributes | OutfieldAttributes;
 }
 
@@ -132,6 +139,7 @@ function makePlayer(
   mentality: number,
   adaptability: number,
   injuryVariance: number,
+  potentialVariance: number,
   random: SeededRandom,
 ): Player {
   const attributes = makeAttributes(level, position, identity, profile, attributeModifiers(quality, technical, physical, mentality));
@@ -143,6 +151,7 @@ function makePlayer(
       consistency: clampAttribute(generationConfig.hiddenBaseline + quality + mentality + (profile.hidden?.consistency ?? 0)),
       injurySusceptibility: clampAttribute(generationConfig.hiddenBaseline - physical + injuryVariance),
       temperament: clampAttribute(generationConfig.hiddenBaseline + mentality + (profile.hidden?.temperament ?? 0)),
+      potential: clampAttribute(generationConfig.hiddenBaseline + quality + potentialVariance),
       adaptability: clampAttribute(generationConfig.hiddenBaseline + adaptability + (profile.hidden?.adaptability ?? 0)),
     },
     state: {
@@ -171,6 +180,7 @@ export function makeTeam(id: string, level = 10, overrides: Partial<Tactics> = {
   const mentalityDeck = balancedDeck(random, rosterSize, variation.mentality);
   const adaptabilityDeck = balancedDeck(random, rosterSize, variation.adaptability);
   const injuryDeck = balancedDeck(random, rosterSize, variation.injurySusceptibility);
+  const potentialDeck = balancedDeck(random, rosterSize, variation.potential);
   let rosterIndex = 0;
 
   function create(position: Position, idSuffix: string, label: string): Player {
@@ -190,6 +200,7 @@ export function makeTeam(id: string, level = 10, overrides: Partial<Tactics> = {
       mentalityDeck[rosterIndex]!,
       adaptabilityDeck[rosterIndex]!,
       injuryDeck[rosterIndex]!,
+      potentialDeck[rosterIndex]!,
       random,
     );
     rosterIndex += 1;

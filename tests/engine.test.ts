@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ENGINE_CONFIG } from "../src/engine-config.js";
 import { simulateMatch, validateMatchInput } from "../src/engine.js";
 import { makeTeam } from "../src/fixtures.js";
 
@@ -59,5 +60,29 @@ describe("Match Engine", () => {
     }
 
     expect(strongPoints).toBeGreaterThan(weakPoints);
+  });
+
+  it("makes attacking approach score and concede materially more than cautious", () => {
+    const opponent = makeTeam("approach-opponent", 10, { approach: "balanced" }, { seed: 9912, identity: "balanced" });
+    const attacking = makeTeam("approach-team", 10, { approach: "attacking" }, { seed: 8821, identity: "balanced" });
+    const cautious = makeTeam("approach-team", 10, { approach: "cautious" }, { seed: 8821, identity: "balanced" });
+    let attackingGoalsFor = 0;
+    let attackingGoalsAgainst = 0;
+    let cautiousGoalsFor = 0;
+    let cautiousGoalsAgainst = 0;
+    const matches = 5000;
+
+    for (let seed = 1; seed <= matches; seed += 1) {
+      const attackingResult = simulateMatch({ seed, neutralVenue: true, home: attacking, away: opponent });
+      const cautiousResult = simulateMatch({ seed, neutralVenue: true, home: cautious, away: opponent });
+      attackingGoalsFor += attackingResult.home.goals;
+      attackingGoalsAgainst += attackingResult.away.goals;
+      cautiousGoalsFor += cautiousResult.home.goals;
+      cautiousGoalsAgainst += cautiousResult.away.goals;
+    }
+
+    const acceptance = ENGINE_CONFIG.approachAcceptance;
+    expect((attackingGoalsFor - cautiousGoalsFor) / matches).toBeGreaterThan(acceptance.minimumAttackingVsCautiousGoalsForPerMatchDelta);
+    expect((attackingGoalsAgainst - cautiousGoalsAgainst) / matches).toBeGreaterThan(acceptance.minimumAttackingVsCautiousGoalsAgainstPerMatchDelta);
   });
 });

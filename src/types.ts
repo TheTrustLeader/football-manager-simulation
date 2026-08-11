@@ -37,6 +37,7 @@ export interface HiddenTraits {
   consistency: number;
   injurySusceptibility: number;
   temperament: number;
+  potential: number;
   adaptability: number;
 }
 

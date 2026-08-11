@@ -13,11 +13,6 @@ function mean(team: TeamInput, key: OutfieldAttribute): number {
   return players.reduce((total, player) => total + player.attributes[key], 0) / players.length;
 }
 
-function outfieldAttributeTotal(team: TeamInput): number {
-  const keys = ENGINE_CONFIG.squadGeneration.attributeKeys.outfield;
-  return outfield(team).reduce((total, player) => total + keys.reduce((sum, key) => sum + player.attributes[key], 0), 0);
-}
-
 describe("approved player data model", () => {
   it("uses six positions and carries natural cover for every formation", () => {
     const team = makeTeam("coverage", 10, {}, { seed: 9182, identity: "balanced" });
@@ -85,7 +80,7 @@ describe("seeded squad generation", () => {
     expect(keepers.some((player) => player.attributes.kicking - player.attributes.shotStopping >= 4)).toBe(true);
   });
 
-  it("gives equal-level clubs different playing identities without adding aggregate ability", () => {
+  it("gives equal-level clubs different playing identities", () => {
     const passing = makeTeam("passing-shape", 10, {}, { seed: 4312, identity: "passing" });
     const direct = makeTeam("direct-shape", 10, {}, { seed: 4312, identity: "direct" });
 
@@ -95,7 +90,6 @@ describe("seeded squad generation", () => {
     expect(mean(direct, "aerial")).toBeGreaterThan(mean(passing, "aerial"));
     expect(mean(direct, "crossing")).toBeGreaterThan(mean(passing, "crossing"));
     expect(mean(direct, "finishing")).toBeGreaterThan(mean(passing, "finishing"));
-    expect(outfieldAttributeTotal(passing)).toBe(outfieldAttributeTotal(direct));
   });
 
   it("defaults Northbridge to passing and Redmere to direct identities", () => {
@@ -116,15 +110,54 @@ describe("seeded squad generation", () => {
     const team = makeTeam("hidden", 10, {}, { seed: 5109, identity: "defensive" });
     const players = roster(team);
     const adaptability = players.map((player) => player.hidden.adaptability);
+    const potential = players.map((player) => player.hidden.potential);
 
     expect(new Set(adaptability).size).toBeGreaterThanOrEqual(6);
     expect(Math.max(...adaptability) - Math.min(...adaptability)).toBeGreaterThanOrEqual(6);
+    expect(new Set(potential).size).toBeGreaterThanOrEqual(4);
     for (const player of players) {
       for (const value of [...Object.values(player.attributes), ...Object.values(player.hidden)]) {
         expect(value).toBeGreaterThanOrEqual(1);
         expect(value).toBeLessThanOrEqual(20);
       }
     }
+  });
+
+  it("keeps different level-10 identities within the stated points tolerance", () => {
+    const control = ENGINE_CONFIG.squadGeneration.identityParity;
+    const northbridge = makeTeam("northbridge", 10, { style: "passing", approach: "balanced" });
+    const redmere = makeTeam("redmere", 10, { style: "direct", approach: "balanced" });
+    let northbridgePoints = 0;
+    let redmerePoints = 0;
+
+    for (let seed = 1; seed <= control.sampleMatches; seed += 1) {
+      const northbridgeHome = seed % 2 === 1;
+      const result = simulateMatch({
+        seed,
+        home: northbridgeHome ? northbridge : redmere,
+        away: northbridgeHome ? redmere : northbridge,
+      });
+      const northbridgeGoals = northbridgeHome ? result.home.goals : result.away.goals;
+      const redmereGoals = northbridgeHome ? result.away.goals : result.home.goals;
+      if (northbridgeGoals > redmereGoals) northbridgePoints += 3;
+      else if (northbridgeGoals < redmereGoals) redmerePoints += 3;
+      else {
+        northbridgePoints += 1;
+        redmerePoints += 1;
+      }
+    }
+
+    const difference = Math.abs(northbridgePoints - redmerePoints) / control.sampleMatches;
+    expect(difference).toBeLessThanOrEqual(control.pointsPerMatchTolerance);
+  });
+});
+
+describe("age-curve seam", () => {
+  it("defines ageing as season-rollover-only data without match-time mutation", () => {
+    expect(ENGINE_CONFIG.ageCurves.applicationPoint).toBe("season-rollover-only");
+    expect(ENGINE_CONFIG.ageCurves.attributesConstantDuringMatch).toBe(true);
+    expect(ENGINE_CONFIG.ageCurves.curves.injurySusceptibility.higherIsWorse).toBe(true);
+    expect(ENGINE_CONFIG.ageCurves.curves.aerial.relativeRate).toBe(0.5);
   });
 });
 

@@ -37,9 +37,11 @@ interface TacticalSetup {
   approach: Approach;
 }
 
+type ManagedClub = "northbridge" | "redmere";
+
 const outfieldAttributeKeys = ENGINE_CONFIG.squadGeneration.attributeKeys.outfield as readonly OutfieldAttribute[];
 const goalkeeperAttributeKeys = ENGINE_CONFIG.squadGeneration.attributeKeys.goalkeeper as readonly GoalkeeperAttribute[];
-const hiddenKeys = ["consistency", "injurySusceptibility", "temperament", "adaptability"] as const;
+const hiddenKeys = ["consistency", "injurySusceptibility", "temperament", "potential", "adaptability"] as const;
 const formationPositionRequirements = ENGINE_CONFIG.squadGeneration.formationPositionRequirements as Record<string, Partial<Record<Position, number>>>;
 const setups: TacticalSetup[] = [
   { style: "direct", approach: "attacking" },
@@ -128,16 +130,24 @@ function metrics(aggregate: Aggregate) {
   };
 }
 
-function playSeed(seed: number, northbridge: TeamInput, redmere: TeamInput): { result: MatchOutput; managedHome: boolean } {
+function playSeed(seed: number, managed: TeamInput, opponent: TeamInput): { result: MatchOutput; managedHome: boolean } {
   const managedHome = seed % 2 === 1;
   return {
     managedHome,
     result: simulateMatch({
       seed,
-      home: managedHome ? northbridge : redmere,
-      away: managedHome ? redmere : northbridge,
+      home: managedHome ? managed : opponent,
+      away: managedHome ? opponent : managed,
     }),
   };
+}
+
+function pointsPerMatch(aggregate: Aggregate): number {
+  return divide(aggregate.wins * 3 + aggregate.draws, aggregate.matches);
+}
+
+function opponentPointsPerMatch(aggregate: Aggregate): number {
+  return divide(aggregate.losses * 3 + aggregate.draws, aggregate.matches);
 }
 
 function range(values: number[]) {
@@ -193,22 +203,28 @@ function squadEvidence(id: string) {
 }
 
 const count = Number.parseInt(process.argv[2] ?? "30000", 10);
-const outputPath = process.argv[3] ?? "evidence/gate-1a-squad-variation-rebaseline.json";
+const managedClub = (process.argv[4] ?? "northbridge") as ManagedClub;
+const opponentClub: ManagedClub = managedClub === "northbridge" ? "redmere" : "northbridge";
+const outputPath = process.argv[3] ?? `evidence/gate-1a-${managedClub}-managed.json`;
 if (!Number.isInteger(count) || count <= 0) throw new Error("Match count must be a positive integer");
+if (managedClub !== "northbridge" && managedClub !== "redmere") throw new Error("Managed club must be northbridge or redmere");
 const command = process.argv[1]?.endsWith(".js")
-  ? `node dist/src/gate-1a-squad-variation-evidence.js ${count} ${outputPath}`
-  : `npm run gate1a:evidence -- ${count} ${outputPath}`;
+  ? `node dist/src/gate-1a-squad-variation-evidence.js ${count} ${outputPath} ${managedClub}`
+  : `npm run gate1a:evidence -- ${count} ${outputPath} ${managedClub}`;
 const seeds = seedRange("tuning", count);
 const provenance = readGitProvenance();
-printRunProvenance("GATE 1A SQUAD VARIATION RE-BASELINE", provenance);
+printRunProvenance(`GATE 1A ${managedClub.toUpperCase()} MANAGED`, provenance);
 
 const baseline = emptyAggregate();
-const baselineNorthbridge = makeTeam("northbridge", 10);
-const baselineRedmere = makeTeam("redmere", 10);
+const identityParity = emptyAggregate();
+const baselineManaged = makeTeam(managedClub, 10);
+const baselineOpponent = makeTeam(opponentClub, 10);
+const parityNorthbridge = makeTeam("northbridge", 10, { style: "passing", approach: "balanced" });
+const parityRedmere = makeTeam("redmere", 10, { style: "direct", approach: "balanced" });
 const setupAggregates = Object.fromEntries(setups.map((setup) => [`${setup.style}/${setup.approach}`, emptyAggregate()])) as Record<string, Aggregate>;
 const setupTeams = Object.fromEntries(setups.map((setup) => [
   `${setup.style}/${setup.approach}`,
-  makeTeam("northbridge", 10, {
+  makeTeam(managedClub, 10, {
     formation: "4-4-2",
     style: setup.style,
     approach: setup.approach,
@@ -218,25 +234,59 @@ const setupTeams = Object.fromEntries(setups.map((setup) => [
 const started = performance.now();
 
 for (const seed of seeds) {
-  const baselineMatch = playSeed(seed, baselineNorthbridge, baselineRedmere);
+  const baselineMatch = playSeed(seed, baselineManaged, baselineOpponent);
   addMatch(baseline, baselineMatch.result, baselineMatch.managedHome);
+  const parityMatch = playSeed(seed, parityNorthbridge, parityRedmere);
+  addMatch(identityParity, parityMatch.result, parityMatch.managedHome);
   for (const setup of setups) {
     const key = `${setup.style}/${setup.approach}`;
-    const setupMatch = playSeed(seed, setupTeams[key]!, baselineRedmere);
+    const setupMatch = playSeed(seed, setupTeams[key]!, baselineOpponent);
     addMatch(setupAggregates[key]!, setupMatch.result, setupMatch.managedHome);
   }
 }
 
 const elapsedMs = performance.now() - started;
-const simulatedMatches = count * (1 + setups.length);
+const simulatedMatches = count * (2 + setups.length);
 const sixSetupTable = setups.map((setup) => {
   const key = `${setup.style}/${setup.approach}`;
   return { setup: key, style: setup.style, approach: setup.approach, ...metrics(setupAggregates[key]!) };
 });
+const setupByKey = Object.fromEntries(sixSetupTable.map((row) => [row.setup, row])) as Record<string, (typeof sixSetupTable)[number]>;
+const expectedStyle = resolveSquadGeneration(managedClub, 10).identity === "passing" ? "passing" : "direct";
+const otherStyle = expectedStyle === "passing" ? "direct" : "passing";
+const styleFitComparisons = (["attacking", "balanced", "cautious"] as Approach[]).map((approach) => ({
+  approach,
+  expectedStyle,
+  expectedStylePointsPerMatch: setupByKey[`${expectedStyle}/${approach}`]!.managed.pointsPerMatch,
+  otherStylePointsPerMatch: setupByKey[`${otherStyle}/${approach}`]!.managed.pointsPerMatch,
+  expectedMinusOther: setupByKey[`${expectedStyle}/${approach}`]!.managed.pointsPerMatch
+    - setupByKey[`${otherStyle}/${approach}`]!.managed.pointsPerMatch,
+}));
+const approachBestByStyle = (["direct", "passing"] as const).map((style) => {
+  const rows = sixSetupTable.filter((row) => row.style === style);
+  const best = rows.reduce((winner, row) => row.managed.pointsPerMatch > winner.managed.pointsPerMatch ? row : winner);
+  return { style, bestApproach: best.approach, bestPointsPerMatch: best.managed.pointsPerMatch };
+});
+const riskReward = (["direct", "passing"] as const).map((style) => {
+  const attacking = setupByKey[`${style}/attacking`]!;
+  const cautious = setupByKey[`${style}/cautious`]!;
+  const goalsForDelta = attacking.managed.goalsForPerMatch - cautious.managed.goalsForPerMatch;
+  const goalsAgainstDelta = attacking.managed.goalsAgainstPerMatch - cautious.managed.goalsAgainstPerMatch;
+  return {
+    style,
+    attackingMinusCautious: { goalsForPerMatch: goalsForDelta, goalsAgainstPerMatch: goalsAgainstDelta },
+    pass: goalsForDelta >= ENGINE_CONFIG.approachAcceptance.minimumAttackingVsCautiousGoalsForPerMatchDelta
+      && goalsAgainstDelta >= ENGINE_CONFIG.approachAcceptance.minimumAttackingVsCautiousGoalsAgainstPerMatchDelta,
+  };
+});
+const parityNorthbridgePoints = pointsPerMatch(identityParity);
+const parityRedmerePoints = opponentPointsPerMatch(identityParity);
+const parityDifference = Math.abs(parityNorthbridgePoints - parityRedmerePoints);
+const parityControl = ENGINE_CONFIG.squadGeneration.identityParity;
 const evidence = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   generatedAt: new Date().toISOString(),
-  purpose: "Gate 1A item 1 squad-variation re-baseline and REVIEW-006 section 2 six-setup replay",
+  purpose: `Gate 1A REVIEW-007 correction run with ${managedClub} managed`,
   command,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
@@ -254,20 +304,29 @@ const evidence = {
     seedRange: { start: seeds[0], end: seeds.at(-1), count: seeds.length },
     validationSeedsUsed: false,
     twelveQuestionMatrixRun: false,
-    alternatingVenue: "Northbridge home on odd seeds and away on even seeds",
-    engineTuned: false,
+    managedClub,
+    managedClubIdentity: resolveSquadGeneration(managedClub, 10).identity,
+    opponentClub,
+    opponentClubIdentity: resolveSquadGeneration(opponentClub, 10).identity,
+    alternatingVenue: `${managedClub} home on odd seeds and away on even seeds`,
+    approachRiskRewardChanged: true,
+    identityGenerationChanged: true,
+    styleFitCoefficientsChanged: false,
     conditionOrFatigueChanged: false,
+    ageCurvesApplied: false,
   },
   inputs: {
     level: 10,
     baseline: {
-      northbridgeTactics: baselineNorthbridge.tactics,
-      redmereTactics: baselineRedmere.tactics,
+      managedClub,
+      managedClubTactics: baselineManaged.tactics,
+      opponentClub,
+      opponentClubTactics: baselineOpponent.tactics,
     },
     sixSetupControls: {
       formation: "4-4-2",
       tackling: "normal",
-      redmereTactics: baselineRedmere.tactics,
+      opponentTactics: baselineOpponent.tactics,
     },
     squads: {
       northbridge: squadEvidence("northbridge"),
@@ -276,6 +335,37 @@ const evidence = {
   },
   baseline: metrics(baseline),
   sixSetupTable,
+  styleFitComparisons,
+  directionalStyleFitPass: styleFitComparisons.every((row) => row.expectedMinusOther > 0),
+  approachRiskReward: {
+    acceptance: ENGINE_CONFIG.approachAcceptance,
+    comparisons: riskReward,
+    pass: riskReward.every((row) => row.pass),
+    bestByStyle: approachBestByStyle,
+  },
+  identityParity: {
+    control: parityControl.control,
+    matches: identityParity.matches,
+    northbridgePointsPerMatch: parityNorthbridgePoints,
+    redmerePointsPerMatch: parityRedmerePoints,
+    absoluteDifference: parityDifference,
+    tolerance: parityControl.pointsPerMatchTolerance,
+    pass: parityDifference <= parityControl.pointsPerMatchTolerance,
+  },
+  ageCurveSeam: {
+    applicationPoint: ENGINE_CONFIG.ageCurves.applicationPoint,
+    attributesConstantDuringMatch: ENGINE_CONFIG.ageCurves.attributesConstantDuringMatch,
+    appliedByThisBuild: false,
+  },
+  calibrationBandProvenance: {
+    band: { goalsPerMatchMinimum: 2.4, goalsPerMatchMaximum: 2.7 },
+    projectRecord: "02_Research-and-Period-Rules/PERIOD-MATCH-CALIBRATION_v1_2026-08-09.md",
+    source: "RSSSF Football Statistics Archive English Division One tables for 1987-88, 1988-89 and 1989-90",
+    derivation: "The project record derives 2,997 goals in 1,180 matches, or 2.54 per match, then sets the broad 2.4-2.7 initial calibration band.",
+    isSpecificToEnglishLeagueFootball1988_89: false,
+    season1988_89ObservedRate: "962 goals in 380 matches, or 2.5316 per match",
+    status: "Broad three-season calibration anchor; not a 1988-89-specific band and not adjusted by this build.",
+  },
   performance: {
     elapsedMs,
     simulatedMatches,
@@ -284,7 +374,9 @@ const evidence = {
   limitations: [
     "This run uses tuning seeds only. The validation seed pool remains sealed.",
     "The 12-question matrix was not run.",
-    "Figures are observations after squad variation and the D1 goalkeeper-curve repair; no tuning or threshold change was made.",
+    "Approach risk/reward and generator identity parity changed under REVIEW-007; style-fit coefficients did not change.",
+    "Crossing remains unconsumed until Gate 1B, so the direct identity carries an explicit interim parity adjustment that must be rechecked when crossing is introduced.",
+    "Age curves are configuration only and are not applied in a match or elsewhere by this build.",
     "H3 perceptibility was not rerun because it is outside this bounded Gate 1A item.",
   ],
 };
@@ -299,5 +391,8 @@ console.log(JSON.stringify({
   seedRange: evidence.controls.seedRange,
   baseline: evidence.baseline,
   sixSetupTable: evidence.sixSetupTable,
+  directionalStyleFitPass: evidence.directionalStyleFitPass,
+  approachRiskReward: evidence.approachRiskReward,
+  identityParity: evidence.identityParity,
   performance: evidence.performance,
 }, null, 2));

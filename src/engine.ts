@@ -368,6 +368,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const attackStats = homeHasBall ? homeStats : awayStats;
     const defenceStats = homeHasBall ? awayStats : homeStats;
     const style = c.style[attackingTeam.tactics.style];
+    const attackingApproach = c.approach[attackingTeam.tactics.approach];
+    const defendingApproach = c.approach[defendingTeam.tactics.approach];
     const attackingScoreState = scoreState(attackStats.goals, defenceStats.goals);
     const gameStateProgressionAdd = attackingScoreState === "trailing"
       ? c.gameState.progressionProbabilityShift
@@ -377,7 +379,16 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     attackStats.possessionTicks += 1;
     gameStateDiagnostics.attackingState[attackingScoreState].possessions += 1;
 
-    const progressionProbability = clamp(c.progression.base + (homeHasBall ? homeProgressionProbabilityBoost : 0) + gameStateProgressionAdd + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
+    const progressionProbability = clamp(
+      c.progression.base
+        + (homeHasBall ? homeProgressionProbabilityBoost : 0)
+        + gameStateProgressionAdd
+        + attackingApproach.territorialProgressionAdd
+        + defendingApproach.spaceBehindProgressionAdd
+        + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor,
+      c.progression.min,
+      c.progression.max,
+    );
     if (!random.chance(progressionProbability)) {
       creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
       advanceFatigue(homeRuntime, input.home, minute);

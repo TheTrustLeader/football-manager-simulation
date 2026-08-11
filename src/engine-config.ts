@@ -1,5 +1,5 @@
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.8.0",
+  version: "match-engine-config-0.9.0",
   matchMinutes: 90,
   possessionBase: 0.5,
   possessionMin: 0.38,
@@ -51,9 +51,13 @@ export const ENGINE_CONFIG = {
     attributeMax: 0.05,
   },
   approach: {
-    cautious: { attack: 0.92, defence: 1.05 },
-    balanced: { attack: 1, defence: 1 },
-    attacking: { attack: 1.08, defence: 0.95 },
+    cautious: { attack: 0.92, defence: 1.05, territorialProgressionAdd: -0.02, spaceBehindProgressionAdd: -0.015 },
+    balanced: { attack: 1, defence: 1, territorialProgressionAdd: 0, spaceBehindProgressionAdd: 0 },
+    attacking: { attack: 1.08, defence: 0.95, territorialProgressionAdd: 0.04, spaceBehindProgressionAdd: 0.045 },
+  },
+  approachAcceptance: {
+    minimumAttackingVsCautiousGoalsForPerMatchDelta: 0.08,
+    minimumAttackingVsCautiousGoalsAgainstPerMatchDelta: 0.08,
   },
   progression: { base: 0.42, differenceDivisor: 170, min: 0.24, max: 0.6 },
   chance: { base: 0.5, differenceDivisor: 180, min: 0.28, max: 0.68 },
@@ -99,7 +103,7 @@ export const ENGINE_CONFIG = {
     "5-3-2": { retention: 0.96, progression: 0.94, attack: 0.9, defence: 1.1 },
   },
   squadGeneration: {
-    version: "squad-generation-2.0.0",
+    version: "squad-generation-2.1.0",
     attributeMinimum: 1,
     attributeMaximum: 20,
     defaultCondition: 100,
@@ -137,6 +141,20 @@ export const ENGINE_CONFIG = {
       direct: { pace: 2, aerial: 2, crossing: 2, finishing: 1, passing: -3, creativity: -3, defending: -1 },
       defensive: { defending: 2, aerial: 2, creativity: -2, finishing: -2 },
       balanced: {},
+    },
+    identityParity: {
+      sampleMatches: 10000,
+      pointsPerMatchTolerance: 0.1,
+      control: "matching identity style, balanced approach, 4-4-2, normal tackling, alternating venue",
+      interimAdjustmentsUntilCrossingIsConsumed: {
+        passing: { outfield: {}, goalkeeper: {} },
+        direct: {
+          outfield: { finishing: 1 },
+          goalkeeper: { shotStopping: 6, handling: 1, kicking: 1, aerial: 1, leadership: 1 },
+        },
+        defensive: { outfield: {}, goalkeeper: {} },
+        balanced: { outfield: {}, goalkeeper: {} },
+      },
     },
     positionBases: {
       GK: { shotStopping: 3, handling: 2, kicking: 0, aerial: 1, leadership: 0 },
@@ -189,6 +207,23 @@ export const ENGINE_CONFIG = {
       mentality: [-1, 0, 1],
       adaptability: [-2, -1, 0, 1, 2],
       injurySusceptibility: [-2, -1, 0, 1, 2],
+      potential: [-2, -1, 0, 1, 2],
+    },
+  },
+  ageCurves: {
+    applicationPoint: "season-rollover-only",
+    attributesConstantDuringMatch: true,
+    curves: {
+      pace: { pattern: "physical-decline", startsAroundAge: 30, relativeRate: 1 },
+      stamina: { pattern: "physical-decline", startsAroundAge: 30, relativeRate: 1 },
+      injurySusceptibility: { pattern: "risk-increase", startsAroundAge: 30, relativeRate: 1, higherIsWorse: true },
+      aerial: { pattern: "physical-decline", startsAroundAge: 30, relativeRate: 0.5 },
+      passing: { pattern: "hold-or-improve-into-thirties" },
+      creativity: { pattern: "hold-or-improve-into-thirties" },
+      leadership: { pattern: "hold-or-improve-into-thirties" },
+      defending: { pattern: "broad-plateau" },
+      finishing: { pattern: "broad-plateau" },
+      crossing: { pattern: "broad-plateau" },
     },
   },
   presenceTests: {
