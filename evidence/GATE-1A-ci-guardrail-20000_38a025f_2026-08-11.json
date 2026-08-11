@@ -1,0 +1,637 @@
+{
+  "schemaVersion": 5,
+  "generatedAt": "2026-08-11T19:30:49.508Z",
+  "buildVersion": "38a025fdad7c7eaec983c554db557a88822aa4ba",
+  "gitCommit": "38a025fdad7c7eaec983c554db557a88822aa4ba",
+  "dirtyTree": false,
+  "engineConfigVersion": "match-engine-config-0.9.2",
+  "engineConfigHash": "fnv1a64:144619f235f54904",
+  "command": "npm run evidence -- 20000 tuning evidence/GATE-1A-ci-guardrail-20000_38a025f_2026-08-11.json",
+  "seedPool": "tuning",
+  "seedRange": {
+    "start": 1,
+    "end": 20000,
+    "count": 20000
+  },
+  "calibrationSource": "02_Research-and-Period-Rules/PERIOD-MATCH-CALIBRATION_v1_2026-08-09.md",
+  "calibrationTargets": {
+    "goalsPerMatchMin": 2.4,
+    "goalsPerMatchMax": 2.7,
+    "drawRateMin": 0.27,
+    "drawRateMax": 0.31,
+    "homeWinRateMin": 0.41,
+    "homeWinRateMax": 0.47
+  },
+  "ciGuardrails": {
+    "sampleMatches": 20000,
+    "goalsPerMatchMin": 2.375,
+    "goalsPerMatchMax": 2.725,
+    "drawRateMin": 0.263,
+    "drawRateMax": 0.317,
+    "homeWinRateMin": 0.403,
+    "homeWinRateMax": 0.477,
+    "mirrorWinRateTolerance": 0.025,
+    "abilityStrongWinRateMin": 0.42,
+    "abilityWeakWinRateMax": 0.18
+  },
+  "calibrationChecks": {
+    "goalsPerMatch": {
+      "min": 2.4,
+      "max": 2.7,
+      "actual": 2.7104,
+      "pass": false
+    },
+    "drawRate": {
+      "min": 0.27,
+      "max": 0.31,
+      "actual": 0.2731,
+      "pass": true
+    },
+    "homeWinRate": {
+      "min": 0.41,
+      "max": 0.47,
+      "actual": 0.4246,
+      "pass": true
+    }
+  },
+  "ciChecks": {
+    "goalsPerMatch": {
+      "min": 2.375,
+      "max": 2.725,
+      "actual": 2.7104,
+      "pass": true
+    },
+    "drawRate": {
+      "min": 0.263,
+      "max": 0.317,
+      "actual": 0.2731,
+      "pass": true
+    },
+    "homeWinRate": {
+      "min": 0.403,
+      "max": 0.477,
+      "actual": 0.4246,
+      "pass": true
+    },
+    "mirrorFairness": {
+      "tolerance": 0.025,
+      "actualDifference": 0.0021000000000000463,
+      "pass": true
+    },
+    "abilityStrongWinRate": {
+      "min": 0.42,
+      "actual": 0.70735,
+      "pass": true
+    },
+    "abilityWeakWinRate": {
+      "max": 0.18,
+      "actual": 0.10645,
+      "pass": true
+    },
+    "formationPresence": {
+      "pass": true,
+      "failing": []
+    },
+    "stylePresence": {
+      "pass": true,
+      "failing": []
+    },
+    "gameStateOrdering": {
+      "trailingRate": 0.4994801266106138,
+      "levelRate": 0.4648238406576995,
+      "leadingRate": 0.43039025277475224,
+      "pass": true
+    },
+    "invariants": {
+      "failingSeedCount": 0,
+      "pass": true
+    }
+  },
+  "presenceThresholds": {
+    "sampleMatches": 2000,
+    "formationMinimumGoalRateDelta": 0.02,
+    "styleMinimumChanceRateDelta": 0.03,
+    "styleMinimumConversionDelta": 0.002,
+    "ratingCoverageMatches": 1000
+  },
+  "baseline": {
+    "goalsPerMatch": 2.7104,
+    "homeGoalsPerMatch": 1.47925,
+    "awayGoalsPerMatch": 1.23115,
+    "homeChancesPerMatch": 11.6861,
+    "homeShotConversion": 0.14060175746256243,
+    "homeWinRate": 0.4246,
+    "drawRate": 0.2731,
+    "awayWinRate": 0.3023,
+    "counts": {
+      "matches": 20000,
+      "homeWins": 8492,
+      "draws": 5462,
+      "awayWins": 6046,
+      "homeGoals": 29585,
+      "awayGoals": 24623,
+      "homeChances": 233722,
+      "homeShots": 210417,
+      "scorelines": {
+        "2-0": 1369,
+        "2-1": 1975,
+        "0-2": 912,
+        "1-1": 2604,
+        "1-2": 1577,
+        "1-3": 536,
+        "1-0": 1985,
+        "0-1": 1627,
+        "2-2": 1254,
+        "3-2": 629,
+        "2-3": 488,
+        "0-0": 1280,
+        "3-1": 864,
+        "4-0": 209,
+        "0-3": 331,
+        "5-2": 65,
+        "1-4": 167,
+        "1-5": 26,
+        "5-1": 81,
+        "4-1": 278,
+        "4-2": 188,
+        "3-0": 620,
+        "3-4": 72,
+        "2-4": 144,
+        "4-3": 98,
+        "3-3": 290,
+        "0-4": 85,
+        "6-1": 16,
+        "5-0": 56,
+        "5-3": 19,
+        "4-4": 32,
+        "6-0": 13,
+        "5-4": 7,
+        "3-5": 9,
+        "2-6": 5,
+        "2-7": 2,
+        "0-5": 22,
+        "2-5": 20,
+        "1-6": 7,
+        "4-5": 7,
+        "6-2": 9,
+        "6-5": 1,
+        "7-2": 1,
+        "1-7": 1,
+        "8-1": 1,
+        "4-6": 1,
+        "5-5": 2,
+        "6-3": 5,
+        "0-6": 3,
+        "5-6": 1,
+        "3-6": 3,
+        "7-0": 1,
+        "7-1": 2
+      }
+    },
+    "scorelineMatrix": {
+      "2-0": 1369,
+      "2-1": 1975,
+      "0-2": 912,
+      "1-1": 2604,
+      "1-2": 1577,
+      "1-3": 536,
+      "1-0": 1985,
+      "0-1": 1627,
+      "2-2": 1254,
+      "3-2": 629,
+      "2-3": 488,
+      "0-0": 1280,
+      "3-1": 864,
+      "4-0": 209,
+      "0-3": 331,
+      "5-2": 65,
+      "1-4": 167,
+      "1-5": 26,
+      "5-1": 81,
+      "4-1": 278,
+      "4-2": 188,
+      "3-0": 620,
+      "3-4": 72,
+      "2-4": 144,
+      "4-3": 98,
+      "3-3": 290,
+      "0-4": 85,
+      "6-1": 16,
+      "5-0": 56,
+      "5-3": 19,
+      "4-4": 32,
+      "6-0": 13,
+      "5-4": 7,
+      "3-5": 9,
+      "2-6": 5,
+      "2-7": 2,
+      "0-5": 22,
+      "2-5": 20,
+      "1-6": 7,
+      "4-5": 7,
+      "6-2": 9,
+      "6-5": 1,
+      "7-2": 1,
+      "1-7": 1,
+      "8-1": 1,
+      "4-6": 1,
+      "5-5": 2,
+      "6-3": 5,
+      "0-6": 3,
+      "5-6": 1,
+      "3-6": 3,
+      "7-0": 1,
+      "7-1": 2
+    }
+  },
+  "neutralMirror": {
+    "goalsPerMatch": 2.67885,
+    "homeGoalsPerMatch": 1.33925,
+    "awayGoalsPerMatch": 1.3396,
+    "homeChancesPerMatch": 9.60285,
+    "homeShotConversion": 0.15495288067152999,
+    "homeWinRate": 0.35755,
+    "drawRate": 0.2828,
+    "awayWinRate": 0.35965,
+    "counts": {
+      "matches": 20000,
+      "homeWins": 7151,
+      "draws": 5656,
+      "awayWins": 7193,
+      "homeGoals": 26785,
+      "awayGoals": 26792,
+      "homeChances": 192057,
+      "homeShots": 172859,
+      "scorelines": {
+        "2-1": 1805,
+        "1-0": 1836,
+        "1-2": 1850,
+        "1-1": 2708,
+        "0-2": 1117,
+        "2-0": 1098,
+        "0-1": 1815,
+        "2-3": 563,
+        "3-2": 522,
+        "3-1": 699,
+        "0-0": 1329,
+        "3-0": 436,
+        "5-2": 37,
+        "3-3": 256,
+        "2-2": 1333,
+        "0-5": 37,
+        "1-4": 199,
+        "0-3": 425,
+        "3-4": 105,
+        "0-4": 147,
+        "5-1": 55,
+        "4-0": 123,
+        "4-1": 210,
+        "2-5": 35,
+        "4-2": 144,
+        "1-3": 652,
+        "4-3": 94,
+        "2-4": 146,
+        "6-0": 8,
+        "4-4": 26,
+        "5-0": 42,
+        "5-4": 5,
+        "7-1": 2,
+        "5-3": 14,
+        "5-5": 4,
+        "6-1": 11,
+        "1-5": 47,
+        "2-6": 7,
+        "3-5": 15,
+        "4-5": 6,
+        "6-2": 7,
+        "6-3": 1,
+        "4-6": 2,
+        "3-6": 1,
+        "1-6": 11,
+        "0-6": 5,
+        "7-0": 1,
+        "0-9": 1,
+        "6-5": 1,
+        "2-7": 2,
+        "0-7": 1,
+        "5-6": 1,
+        "1-7": 2,
+        "1-9": 1
+      }
+    }
+  },
+  "abilitySignal": {
+    "goalsPerMatch": 3.2516,
+    "homeGoalsPerMatch": 2.34915,
+    "awayGoalsPerMatch": 0.90245,
+    "homeChancesPerMatch": 11.94115,
+    "homeShotConversion": 0.2185235486181524,
+    "homeWinRate": 0.70735,
+    "drawRate": 0.1862,
+    "awayWinRate": 0.10645,
+    "counts": {
+      "matches": 20000,
+      "homeWins": 14147,
+      "draws": 3724,
+      "awayWins": 2129,
+      "homeGoals": 46983,
+      "awayGoals": 18049,
+      "homeChances": 238823,
+      "homeShots": 215002,
+      "scorelines": {
+        "2-0": 2139,
+        "3-0": 1646,
+        "3-2": 764,
+        "1-1": 1705,
+        "4-0": 877,
+        "2-1": 2112,
+        "5-1": 398,
+        "3-3": 256,
+        "0-2": 234,
+        "1-2": 672,
+        "1-0": 1922,
+        "7-2": 19,
+        "6-1": 133,
+        "4-2": 467,
+        "5-0": 426,
+        "0-0": 732,
+        "6-0": 160,
+        "4-1": 870,
+        "3-1": 1600,
+        "2-4": 51,
+        "2-2": 997,
+        "4-3": 124,
+        "0-1": 568,
+        "5-2": 188,
+        "1-3": 174,
+        "8-1": 11,
+        "5-3": 58,
+        "2-3": 267,
+        "0-4": 14,
+        "6-2": 63,
+        "4-4": 33,
+        "7-0": 45,
+        "7-1": 52,
+        "6-3": 19,
+        "0-5": 2,
+        "0-3": 54,
+        "9-1": 2,
+        "3-4": 39,
+        "8-0": 13,
+        "3-5": 8,
+        "4-5": 7,
+        "6-4": 6,
+        "1-4": 27,
+        "9-0": 3,
+        "7-3": 8,
+        "7-5": 1,
+        "8-2": 4,
+        "5-4": 14,
+        "1-5": 2,
+        "5-5": 1,
+        "8-3": 3,
+        "2-5": 8,
+        "2-6": 1,
+        "1-6": 1
+      }
+    },
+    "strongLevel": 14,
+    "weakLevel": 8
+  },
+  "gameState": {
+    "progressionProbabilityShift": 0.04,
+    "scoreStateMinutes": {
+      "level": 843668,
+      "homeLeading": 544126,
+      "awayLeading": 412206
+    },
+    "progressionRates": {
+      "level": {
+        "possessions": 843668,
+        "progressions": 392157,
+        "rate": 0.4648238406576995
+      },
+      "leading": {
+        "possessions": 478331,
+        "progressions": 205869,
+        "rate": 0.43039025277475224
+      },
+      "trailing": {
+        "possessions": 478001,
+        "progressions": 238752,
+        "rate": 0.4994801266106138
+      }
+    },
+    "independentPoissonDrawRate": 0.25531266911730005,
+    "observedDrawRate": 0.2731,
+    "drawExcessOverPoisson": 0.01778733088269996
+  },
+  "presence": {
+    "formation": {
+      "baseline": {
+        "goalsPerMatch": 2.3685,
+        "homeGoalsPerMatch": 1.1846,
+        "awayGoalsPerMatch": 1.1839,
+        "homeChancesPerMatch": 9.842,
+        "homeShotConversion": 0.13370882268286763,
+        "homeWinRate": 0.35015,
+        "drawRate": 0.29655,
+        "awayWinRate": 0.3533
+      },
+      "candidates": {
+        "4-3-3": {
+          "goalsScoredDelta": 0.02574999999999994,
+          "goalsConcededDelta": 0.01605000000000012,
+          "twoSidedDelta": 0.02574999999999994,
+          "minimumDelta": 0.02,
+          "pass": true,
+          "rates": {
+            "goalsPerMatch": 2.4103,
+            "homeGoalsPerMatch": 1.21035,
+            "awayGoalsPerMatch": 1.19995,
+            "homeChancesPerMatch": 10.0354,
+            "homeShotConversion": 0.13398312964930925,
+            "homeWinRate": 0.35225,
+            "drawRate": 0.29835,
+            "awayWinRate": 0.3494
+          }
+        },
+        "4-5-1": {
+          "goalsScoredDelta": 0.009149999999999991,
+          "goalsConcededDelta": 0.03139999999999987,
+          "twoSidedDelta": 0.03139999999999987,
+          "minimumDelta": 0.02,
+          "pass": true,
+          "rates": {
+            "goalsPerMatch": 2.32795,
+            "homeGoalsPerMatch": 1.17545,
+            "awayGoalsPerMatch": 1.1525,
+            "homeChancesPerMatch": 9.76575,
+            "homeShotConversion": 0.13373343193583254,
+            "homeWinRate": 0.3551,
+            "drawRate": 0.29885,
+            "awayWinRate": 0.34605
+          }
+        },
+        "3-5-2": {
+          "goalsScoredDelta": 0.026799999999999935,
+          "goalsConcededDelta": 0.0018500000000001293,
+          "twoSidedDelta": 0.026799999999999935,
+          "minimumDelta": 0.02,
+          "pass": true,
+          "rates": {
+            "goalsPerMatch": 2.39715,
+            "homeGoalsPerMatch": 1.2114,
+            "awayGoalsPerMatch": 1.18575,
+            "homeChancesPerMatch": 10.0438,
+            "homeShotConversion": 0.13397700691783207,
+            "homeWinRate": 0.35765,
+            "drawRate": 0.2963,
+            "awayWinRate": 0.34605
+          }
+        },
+        "5-3-2": {
+          "goalsScoredDelta": 0.03325,
+          "goalsConcededDelta": 0.01649999999999996,
+          "twoSidedDelta": 0.03325,
+          "minimumDelta": 0.02,
+          "pass": true,
+          "rates": {
+            "goalsPerMatch": 2.31875,
+            "homeGoalsPerMatch": 1.15135,
+            "awayGoalsPerMatch": 1.1674,
+            "homeChancesPerMatch": 9.5714,
+            "homeShotConversion": 0.13368359941944846,
+            "homeWinRate": 0.3449,
+            "drawRate": 0.29885,
+            "awayWinRate": 0.35625
+          }
+        }
+      }
+    },
+    "style": {
+      "baseline": {
+        "goalsPerMatch": 2.16955,
+        "homeGoalsPerMatch": 1.08825,
+        "awayGoalsPerMatch": 1.0813,
+        "homeChancesPerMatch": 9.5212,
+        "homeShotConversion": 0.12691554124973758,
+        "homeWinRate": 0.3454,
+        "drawRate": 0.31535,
+        "awayWinRate": 0.33925
+      },
+      "candidates": {
+        "passing": {
+          "chanceRateDelta": 0.5914999999999999,
+          "conversionDelta": 0.010825814834680925,
+          "minimumChanceRateDelta": 0.03,
+          "minimumConversionDelta": 0.002,
+          "pass": true,
+          "rates": {
+            "goalsPerMatch": 2.2343,
+            "homeGoalsPerMatch": 1.16565,
+            "awayGoalsPerMatch": 1.06865,
+            "homeChancesPerMatch": 10.1127,
+            "homeShotConversion": 0.1377413560844185,
+            "homeWinRate": 0.37025,
+            "drawRate": 0.3136,
+            "awayWinRate": 0.31615
+          }
+        },
+        "direct": {
+          "chanceRateDelta": 0.6656999999999993,
+          "conversionDelta": 0.0049976070004735945,
+          "minimumChanceRateDelta": 0.03,
+          "minimumConversionDelta": 0.002,
+          "pass": true,
+          "rates": {
+            "goalsPerMatch": 2.28705,
+            "homeGoalsPerMatch": 1.19265,
+            "awayGoalsPerMatch": 1.0944,
+            "homeChancesPerMatch": 10.1869,
+            "homeShotConversion": 0.12191793424926399,
+            "homeWinRate": 0.3731,
+            "drawRate": 0.30875,
+            "awayWinRate": 0.31815
+          }
+        },
+        "counter": {
+          "chanceRateDelta": 0.6750000000000007,
+          "conversionDelta": 0.015787500969935808,
+          "minimumChanceRateDelta": 0.03,
+          "minimumConversionDelta": 0.002,
+          "pass": true,
+          "rates": {
+            "goalsPerMatch": 2.13725,
+            "homeGoalsPerMatch": 1.0451,
+            "awayGoalsPerMatch": 1.09215,
+            "homeChancesPerMatch": 8.8462,
+            "homeShotConversion": 0.1427030422196734,
+            "homeWinRate": 0.327,
+            "drawRate": 0.3207,
+            "awayWinRate": 0.3523
+          }
+        }
+      }
+    }
+  },
+  "poissonReference": {
+    "0-0": {
+      "observed": 0.064,
+      "expected": 0.06651019731456573,
+      "delta": -0.0025101973145657264
+    },
+    "1-0": {
+      "observed": 0.09925,
+      "expected": 0.09838520937757135,
+      "delta": 0.0008647906224286545
+    },
+    "0-1": {
+      "observed": 0.08135,
+      "expected": 0.0818840294238276,
+      "delta": -0.0005340294238275894
+    },
+    "1-1": {
+      "observed": 0.1302,
+      "expected": 0.12112695052519697,
+      "delta": 0.009073049474803044
+    },
+    "2-0": {
+      "observed": 0.06845,
+      "expected": 0.07276816048588622,
+      "delta": -0.004318160485886222
+    },
+    "0-2": {
+      "observed": 0.0456,
+      "expected": 0.05040576141257267,
+      "delta": -0.004805761412572669
+    },
+    "2-1": {
+      "observed": 0.09875,
+      "expected": 0.08958852078219881,
+      "delta": 0.009161479217801194
+    },
+    "1-2": {
+      "observed": 0.07885,
+      "expected": 0.07456272256954811,
+      "delta": 0.0042872774304518885
+    }
+  },
+  "failingSeeds": {
+    "invariants": []
+  },
+  "performance": {
+    "elapsedMs": 41503.953547000005,
+    "simulatedMatches": 220000,
+    "matchesPerSecond": 5300.699841784159
+  },
+  "limitations": [
+    "The sourced goals, draw and home-win bands remain the football calibration targets.",
+    "The 20,000-match CI safety bounds include the narrow sampling allowance recorded in Decision 004; a target miss remains visible in calibrationChecks even when ciChecks pass.",
+    "Final calibration acceptance is judged on the larger 500,000–1,000,000 tuning-seed run against calibrationTargets, not the buffered CI bounds.",
+    "Game-state response is evidenced by trailing > level > leading attacking progression and the observed draw excess over an independent Poisson reference.",
+    "Formation and style presence are mechanism-presence checks, not claims that their final magnitudes are balanced.",
+    "The 12-question simulation matrix remains blocked pending independent re-review.",
+    "Validation seeds remain sealed during tuning."
+  ]
+}

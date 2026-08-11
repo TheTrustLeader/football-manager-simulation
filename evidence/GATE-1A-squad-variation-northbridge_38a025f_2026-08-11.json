@@ -1,0 +1,1735 @@
+{
+  "schemaVersion": 5,
+  "generatedAt": "2026-08-11T19:29:33.230Z",
+  "purpose": "Gate 1A squad-variation baseline with northbridge managed after DECISION-001 D8 deferral",
+  "command": "npm run gate1a:evidence -- 30000 evidence/GATE-1A-squad-variation-northbridge_38a025f_2026-08-11.json northbridge",
+  "gitCommit": "38a025fdad7c7eaec983c554db557a88822aa4ba",
+  "dirtyTree": false,
+  "compensationState": {
+    "state": "out",
+    "includedInMeasuredResults": false,
+    "configPath": "ENGINE_CONFIG.squadGeneration.identityParity.compensationAdjustments",
+    "activeIdentities": [],
+    "adjustments": {
+      "passing": {
+        "outfield": {},
+        "goalkeeper": {}
+      },
+      "direct": {
+        "outfield": {},
+        "goalkeeper": {}
+      },
+      "defensive": {
+        "outfield": {},
+        "goalkeeper": {}
+      },
+      "balanced": {
+        "outfield": {},
+        "goalkeeper": {}
+      }
+    }
+  },
+  "engineConfigVersion": "match-engine-config-0.9.2",
+  "engineConfigHash": "fnv1a64:144619f235f54904",
+  "squadGenerationVersion": "squad-generation-2.2.0",
+  "squadGenerationHash": "fnv1a64:7f207b31041265de",
+  "runtime": {
+    "nodeVersion": "v24.14.0",
+    "platform": "linux",
+    "architecture": "x64"
+  },
+  "controls": {
+    "seedPool": "tuning-v1",
+    "seedRange": {
+      "start": 1,
+      "end": 30000,
+      "count": 30000
+    },
+    "validationSeedsUsed": false,
+    "twelveQuestionMatrixRun": false,
+    "managedClub": "northbridge",
+    "managedClubIdentity": "passing",
+    "opponentClub": "redmere",
+    "opponentClubIdentity": "direct",
+    "alternatingVenue": "northbridge home on odd seeds and away on even seeds",
+    "approachRiskRewardChanged": true,
+    "identityGenerationChanged": true,
+    "styleFitCoefficientsChanged": false,
+    "conditionOrFatigueChanged": false,
+    "ageCurvesApplied": false
+  },
+  "inputs": {
+    "level": 10,
+    "baseline": {
+      "managedClub": "northbridge",
+      "managedClubTactics": {
+        "formation": "4-4-2",
+        "style": "balanced",
+        "approach": "balanced",
+        "tackling": "normal",
+        "captainId": "northbridge-p2",
+        "creatorId": "northbridge-p6",
+        "targetForwardId": "northbridge-p10"
+      },
+      "opponentClub": "redmere",
+      "opponentClubTactics": {
+        "formation": "4-4-2",
+        "style": "balanced",
+        "approach": "balanced",
+        "tackling": "normal",
+        "captainId": "redmere-p2",
+        "creatorId": "redmere-p6",
+        "targetForwardId": "redmere-p10"
+      }
+    },
+    "sixSetupControls": {
+      "formation": "4-4-2",
+      "tackling": "normal",
+      "opponentTactics": {
+        "formation": "4-4-2",
+        "style": "balanced",
+        "approach": "balanced",
+        "tackling": "normal",
+        "captainId": "redmere-p2",
+        "creatorId": "redmere-p6",
+        "targetForwardId": "redmere-p10"
+      }
+    },
+    "squads": {
+      "northbridge": {
+        "generation": {
+          "seed": 198808091,
+          "identity": "passing"
+        },
+        "outfieldAttributeMeans": {
+          "defending": 9.7,
+          "passing": 11.9,
+          "creativity": 12.5,
+          "pace": 10.1,
+          "aerial": 6.7,
+          "finishing": 9.1,
+          "stamina": 12,
+          "leadership": 10.2,
+          "crossing": 9.9
+        },
+        "goalkeeperAttributeMeans": {
+          "shotStopping": 11.5,
+          "handling": 12,
+          "kicking": 8.5,
+          "aerial": 8.5,
+          "leadership": 10
+        },
+        "hiddenRanges": {
+          "consistency": {
+            "minimum": 8,
+            "maximum": 13
+          },
+          "injurySusceptibility": {
+            "minimum": 7,
+            "maximum": 13
+          },
+          "temperament": {
+            "minimum": 9,
+            "maximum": 11
+          },
+          "potential": {
+            "minimum": 7,
+            "maximum": 13
+          },
+          "adaptability": {
+            "minimum": 7,
+            "maximum": 15
+          }
+        },
+        "positionCounts": {
+          "GK": 2,
+          "CB": 4,
+          "FB": 4,
+          "CM": 4,
+          "WM": 4,
+          "FW": 4
+        },
+        "formationCoverageWithNaturalPositionSubstitute": {
+          "4-4-2": true,
+          "4-3-3": true,
+          "4-5-1": true,
+          "3-5-2": true,
+          "5-3-2": true
+        },
+        "outfieldRosterAttributeCount": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
+        "goalkeeperAttributeCount": [
+          5,
+          5
+        ],
+        "starters": [
+          {
+            "id": "northbridge-p1",
+            "name": "NORTHBRIDGE Player 1",
+            "age": 30,
+            "position": "GK",
+            "attributes": {
+              "shotStopping": 14,
+              "handling": 12,
+              "kicking": 4,
+              "aerial": 11,
+              "leadership": 10
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 13,
+              "temperament": 9,
+              "potential": 12,
+              "adaptability": 7
+            }
+          },
+          {
+            "id": "northbridge-p2",
+            "name": "NORTHBRIDGE Player 2",
+            "age": 25,
+            "position": "CB",
+            "attributes": {
+              "defending": 10,
+              "passing": 16,
+              "creativity": 15,
+              "pace": 10,
+              "aerial": 10,
+              "finishing": 8,
+              "stamina": 11,
+              "leadership": 10,
+              "crossing": 11
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 10,
+              "temperament": 9,
+              "potential": 12,
+              "adaptability": 10
+            }
+          },
+          {
+            "id": "northbridge-p3",
+            "name": "NORTHBRIDGE Player 3",
+            "age": 23,
+            "position": "CB",
+            "attributes": {
+              "defending": 15,
+              "passing": 11,
+              "creativity": 9,
+              "pace": 7,
+              "aerial": 13,
+              "finishing": 6,
+              "stamina": 13,
+              "leadership": 15,
+              "crossing": 6
+            },
+            "hidden": {
+              "consistency": 13,
+              "injurySusceptibility": 9,
+              "temperament": 10,
+              "potential": 11,
+              "adaptability": 10
+            }
+          },
+          {
+            "id": "northbridge-p4",
+            "name": "NORTHBRIDGE Player 4",
+            "age": 23,
+            "position": "FB",
+            "attributes": {
+              "defending": 13,
+              "passing": 10,
+              "creativity": 11,
+              "pace": 12,
+              "aerial": 4,
+              "finishing": 7,
+              "stamina": 14,
+              "leadership": 9,
+              "crossing": 11
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 9,
+              "temperament": 10,
+              "potential": 8,
+              "adaptability": 11
+            }
+          },
+          {
+            "id": "northbridge-p5",
+            "name": "NORTHBRIDGE Player 5",
+            "age": 29,
+            "position": "FB",
+            "attributes": {
+              "defending": 11,
+              "passing": 17,
+              "creativity": 16,
+              "pace": 8,
+              "aerial": 5,
+              "finishing": 9,
+              "stamina": 11,
+              "leadership": 13,
+              "crossing": 16
+            },
+            "hidden": {
+              "consistency": 12,
+              "injurySusceptibility": 12,
+              "temperament": 11,
+              "potential": 10,
+              "adaptability": 12
+            }
+          },
+          {
+            "id": "northbridge-p6",
+            "name": "NORTHBRIDGE Player 6",
+            "age": 23,
+            "position": "CM",
+            "attributes": {
+              "defending": 12,
+              "passing": 16,
+              "creativity": 15,
+              "pace": 4,
+              "aerial": 4,
+              "finishing": 7,
+              "stamina": 9,
+              "leadership": 12,
+              "crossing": 7
+            },
+            "hidden": {
+              "consistency": 11,
+              "injurySusceptibility": 11,
+              "temperament": 11,
+              "potential": 7,
+              "adaptability": 9
+            }
+          },
+          {
+            "id": "northbridge-p7",
+            "name": "NORTHBRIDGE Player 7",
+            "age": 29,
+            "position": "CM",
+            "attributes": {
+              "defending": 11,
+              "passing": 12,
+              "creativity": 11,
+              "pace": 9,
+              "aerial": 4,
+              "finishing": 10,
+              "stamina": 13,
+              "leadership": 9,
+              "crossing": 7
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 10,
+              "temperament": 11,
+              "potential": 10,
+              "adaptability": 10
+            }
+          },
+          {
+            "id": "northbridge-p8",
+            "name": "NORTHBRIDGE Player 8",
+            "age": 27,
+            "position": "WM",
+            "attributes": {
+              "defending": 4,
+              "passing": 9,
+              "creativity": 12,
+              "pace": 12,
+              "aerial": 4,
+              "finishing": 6,
+              "stamina": 12,
+              "leadership": 7,
+              "crossing": 14
+            },
+            "hidden": {
+              "consistency": 8,
+              "injurySusceptibility": 8,
+              "temperament": 9,
+              "potential": 10,
+              "adaptability": 8
+            }
+          },
+          {
+            "id": "northbridge-p9",
+            "name": "NORTHBRIDGE Player 9",
+            "age": 29,
+            "position": "WM",
+            "attributes": {
+              "defending": 7,
+              "passing": 9,
+              "creativity": 10,
+              "pace": 13,
+              "aerial": 5,
+              "finishing": 7,
+              "stamina": 14,
+              "leadership": 8,
+              "crossing": 13
+            },
+            "hidden": {
+              "consistency": 9,
+              "injurySusceptibility": 8,
+              "temperament": 9,
+              "potential": 10,
+              "adaptability": 13
+            }
+          },
+          {
+            "id": "northbridge-p10",
+            "name": "NORTHBRIDGE Player 10",
+            "age": 30,
+            "position": "FW",
+            "attributes": {
+              "defending": 7,
+              "passing": 9,
+              "creativity": 12,
+              "pace": 13,
+              "aerial": 11,
+              "finishing": 16,
+              "stamina": 13,
+              "leadership": 10,
+              "crossing": 7
+            },
+            "hidden": {
+              "consistency": 11,
+              "injurySusceptibility": 7,
+              "temperament": 9,
+              "potential": 9,
+              "adaptability": 11
+            }
+          },
+          {
+            "id": "northbridge-p11",
+            "name": "NORTHBRIDGE Player 11",
+            "age": 27,
+            "position": "FW",
+            "attributes": {
+              "defending": 7,
+              "passing": 10,
+              "creativity": 14,
+              "pace": 13,
+              "aerial": 7,
+              "finishing": 15,
+              "stamina": 10,
+              "leadership": 9,
+              "crossing": 7
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 12,
+              "temperament": 10,
+              "potential": 10,
+              "adaptability": 13
+            }
+          }
+        ],
+        "substitutes": [
+          {
+            "id": "northbridge-sub-p1",
+            "name": "NORTHBRIDGE Substitute 1",
+            "age": 31,
+            "position": "GK",
+            "attributes": {
+              "shotStopping": 9,
+              "handling": 12,
+              "kicking": 13,
+              "aerial": 6,
+              "leadership": 10
+            },
+            "hidden": {
+              "consistency": 9,
+              "injurySusceptibility": 13,
+              "temperament": 10,
+              "potential": 11,
+              "adaptability": 11
+            }
+          },
+          {
+            "id": "northbridge-sub-p2",
+            "name": "NORTHBRIDGE Substitute 2",
+            "age": 28,
+            "position": "CB",
+            "attributes": {
+              "defending": 14,
+              "passing": 8,
+              "creativity": 9,
+              "pace": 3,
+              "aerial": 12,
+              "finishing": 6,
+              "stamina": 9,
+              "leadership": 11,
+              "crossing": 6
+            },
+            "hidden": {
+              "consistency": 9,
+              "injurySusceptibility": 9,
+              "temperament": 9,
+              "potential": 11,
+              "adaptability": 9
+            }
+          },
+          {
+            "id": "northbridge-sub-p3",
+            "name": "NORTHBRIDGE Substitute 3",
+            "age": 24,
+            "position": "CB",
+            "attributes": {
+              "defending": 13,
+              "passing": 12,
+              "creativity": 10,
+              "pace": 11,
+              "aerial": 6,
+              "finishing": 6,
+              "stamina": 12,
+              "leadership": 10,
+              "crossing": 7
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 12,
+              "temperament": 9,
+              "potential": 9,
+              "adaptability": 13
+            }
+          },
+          {
+            "id": "northbridge-sub-p4",
+            "name": "NORTHBRIDGE Substitute 4",
+            "age": 23,
+            "position": "FB",
+            "attributes": {
+              "defending": 8,
+              "passing": 11,
+              "creativity": 12,
+              "pace": 13,
+              "aerial": 5,
+              "finishing": 6,
+              "stamina": 14,
+              "leadership": 8,
+              "crossing": 15
+            },
+            "hidden": {
+              "consistency": 9,
+              "injurySusceptibility": 11,
+              "temperament": 10,
+              "potential": 8,
+              "adaptability": 14
+            }
+          },
+          {
+            "id": "northbridge-sub-p5",
+            "name": "NORTHBRIDGE Substitute 5",
+            "age": 29,
+            "position": "FB",
+            "attributes": {
+              "defending": 12,
+              "passing": 10,
+              "creativity": 10,
+              "pace": 8,
+              "aerial": 7,
+              "finishing": 6,
+              "stamina": 12,
+              "leadership": 9,
+              "crossing": 9
+            },
+            "hidden": {
+              "consistency": 8,
+              "injurySusceptibility": 10,
+              "temperament": 9,
+              "potential": 8,
+              "adaptability": 7
+            }
+          },
+          {
+            "id": "northbridge-sub-p6",
+            "name": "NORTHBRIDGE Substitute 6",
+            "age": 27,
+            "position": "CM",
+            "attributes": {
+              "defending": 15,
+              "passing": 11,
+              "creativity": 9,
+              "pace": 7,
+              "aerial": 6,
+              "finishing": 6,
+              "stamina": 14,
+              "leadership": 11,
+              "crossing": 6
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 8,
+              "temperament": 10,
+              "potential": 11,
+              "adaptability": 7
+            }
+          },
+          {
+            "id": "northbridge-sub-p7",
+            "name": "NORTHBRIDGE Substitute 7",
+            "age": 24,
+            "position": "CM",
+            "attributes": {
+              "defending": 10,
+              "passing": 18,
+              "creativity": 18,
+              "pace": 7,
+              "aerial": 5,
+              "finishing": 10,
+              "stamina": 10,
+              "leadership": 10,
+              "crossing": 11
+            },
+            "hidden": {
+              "consistency": 11,
+              "injurySusceptibility": 9,
+              "temperament": 11,
+              "potential": 9,
+              "adaptability": 10
+            }
+          },
+          {
+            "id": "northbridge-sub-p8",
+            "name": "NORTHBRIDGE Substitute 8",
+            "age": 28,
+            "position": "WM",
+            "attributes": {
+              "defending": 8,
+              "passing": 15,
+              "creativity": 17,
+              "pace": 8,
+              "aerial": 4,
+              "finishing": 9,
+              "stamina": 10,
+              "leadership": 13,
+              "crossing": 16
+            },
+            "hidden": {
+              "consistency": 12,
+              "injurySusceptibility": 10,
+              "temperament": 11,
+              "potential": 13,
+              "adaptability": 10
+            }
+          },
+          {
+            "id": "northbridge-sub-p9",
+            "name": "NORTHBRIDGE Substitute 9",
+            "age": 29,
+            "position": "WM",
+            "attributes": {
+              "defending": 6,
+              "passing": 11,
+              "creativity": 14,
+              "pace": 10,
+              "aerial": 2,
+              "finishing": 12,
+              "stamina": 8,
+              "leadership": 9,
+              "crossing": 14
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 11,
+              "temperament": 11,
+              "potential": 9,
+              "adaptability": 10
+            }
+          },
+          {
+            "id": "northbridge-sub-p10",
+            "name": "NORTHBRIDGE Substitute 10",
+            "age": 29,
+            "position": "FW",
+            "attributes": {
+              "defending": 8,
+              "passing": 16,
+              "creativity": 18,
+              "pace": 11,
+              "aerial": 10,
+              "finishing": 13,
+              "stamina": 11,
+              "leadership": 12,
+              "crossing": 9
+            },
+            "hidden": {
+              "consistency": 11,
+              "injurySusceptibility": 8,
+              "temperament": 10,
+              "potential": 9,
+              "adaptability": 15
+            }
+          },
+          {
+            "id": "northbridge-sub-p11",
+            "name": "NORTHBRIDGE Substitute 11",
+            "age": 24,
+            "position": "FW",
+            "attributes": {
+              "defending": 7,
+              "passing": 11,
+              "creativity": 13,
+              "pace": 7,
+              "aerial": 13,
+              "finishing": 15,
+              "stamina": 10,
+              "leadership": 12,
+              "crossing": 8
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 8,
+              "temperament": 10,
+              "potential": 9,
+              "adaptability": 10
+            }
+          }
+        ]
+      },
+      "redmere": {
+        "generation": {
+          "seed": 198808092,
+          "identity": "direct"
+        },
+        "outfieldAttributeMeans": {
+          "defending": 9.1,
+          "passing": 7.6,
+          "creativity": 8.2,
+          "pace": 14.4,
+          "aerial": 10.3,
+          "finishing": 10.1,
+          "stamina": 12.1,
+          "leadership": 10.4,
+          "crossing": 12.4
+        },
+        "goalkeeperAttributeMeans": {
+          "shotStopping": 12,
+          "handling": 12,
+          "kicking": 9,
+          "aerial": 10.5,
+          "leadership": 10
+        },
+        "hiddenRanges": {
+          "consistency": {
+            "minimum": 8,
+            "maximum": 12
+          },
+          "injurySusceptibility": {
+            "minimum": 7,
+            "maximum": 13
+          },
+          "temperament": {
+            "minimum": 9,
+            "maximum": 11
+          },
+          "potential": {
+            "minimum": 7,
+            "maximum": 13
+          },
+          "adaptability": {
+            "minimum": 6,
+            "maximum": 15
+          }
+        },
+        "positionCounts": {
+          "GK": 2,
+          "CB": 4,
+          "FB": 4,
+          "CM": 4,
+          "WM": 4,
+          "FW": 4
+        },
+        "formationCoverageWithNaturalPositionSubstitute": {
+          "4-4-2": true,
+          "4-3-3": true,
+          "4-5-1": true,
+          "3-5-2": true,
+          "5-3-2": true
+        },
+        "outfieldRosterAttributeCount": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
+        "goalkeeperAttributeCount": [
+          5,
+          5
+        ],
+        "starters": [
+          {
+            "id": "redmere-p1",
+            "name": "REDMERE Player 1",
+            "age": 26,
+            "position": "GK",
+            "attributes": {
+              "shotStopping": 14,
+              "handling": 12,
+              "kicking": 4,
+              "aerial": 12,
+              "leadership": 10
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 7,
+              "temperament": 10,
+              "potential": 7,
+              "adaptability": 7
+            }
+          },
+          {
+            "id": "redmere-p2",
+            "name": "REDMERE Player 2",
+            "age": 30,
+            "position": "CB",
+            "attributes": {
+              "defending": 13,
+              "passing": 5,
+              "creativity": 3,
+              "pace": 7,
+              "aerial": 13,
+              "finishing": 6,
+              "stamina": 9,
+              "leadership": 14,
+              "crossing": 7
+            },
+            "hidden": {
+              "consistency": 12,
+              "injurySusceptibility": 9,
+              "temperament": 11,
+              "potential": 9,
+              "adaptability": 10
+            }
+          },
+          {
+            "id": "redmere-p3",
+            "name": "REDMERE Player 3",
+            "age": 24,
+            "position": "CB",
+            "attributes": {
+              "defending": 13,
+              "passing": 9,
+              "creativity": 7,
+              "pace": 16,
+              "aerial": 11,
+              "finishing": 9,
+              "stamina": 13,
+              "leadership": 11,
+              "crossing": 11
+            },
+            "hidden": {
+              "consistency": 11,
+              "injurySusceptibility": 9,
+              "temperament": 10,
+              "potential": 11,
+              "adaptability": 15
+            }
+          },
+          {
+            "id": "redmere-p4",
+            "name": "REDMERE Player 4",
+            "age": 28,
+            "position": "FB",
+            "attributes": {
+              "defending": 12,
+              "passing": 7,
+              "creativity": 8,
+              "pace": 18,
+              "aerial": 10,
+              "finishing": 10,
+              "stamina": 16,
+              "leadership": 9,
+              "crossing": 15
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 8,
+              "temperament": 9,
+              "potential": 12,
+              "adaptability": 9
+            }
+          },
+          {
+            "id": "redmere-p5",
+            "name": "REDMERE Player 5",
+            "age": 25,
+            "position": "FB",
+            "attributes": {
+              "defending": 10,
+              "passing": 6,
+              "creativity": 7,
+              "pace": 18,
+              "aerial": 10,
+              "finishing": 7,
+              "stamina": 15,
+              "leadership": 11,
+              "crossing": 17
+            },
+            "hidden": {
+              "consistency": 12,
+              "injurySusceptibility": 10,
+              "temperament": 11,
+              "potential": 13,
+              "adaptability": 14
+            }
+          },
+          {
+            "id": "redmere-p6",
+            "name": "REDMERE Player 6",
+            "age": 23,
+            "position": "CM",
+            "attributes": {
+              "defending": 8,
+              "passing": 6,
+              "creativity": 5,
+              "pace": 13,
+              "aerial": 8,
+              "finishing": 10,
+              "stamina": 13,
+              "leadership": 7,
+              "crossing": 8
+            },
+            "hidden": {
+              "consistency": 8,
+              "injurySusceptibility": 10,
+              "temperament": 9,
+              "potential": 10,
+              "adaptability": 11
+            }
+          },
+          {
+            "id": "redmere-p7",
+            "name": "REDMERE Player 7",
+            "age": 27,
+            "position": "CM",
+            "attributes": {
+              "defending": 7,
+              "passing": 13,
+              "creativity": 13,
+              "pace": 10,
+              "aerial": 8,
+              "finishing": 11,
+              "stamina": 9,
+              "leadership": 8,
+              "crossing": 13
+            },
+            "hidden": {
+              "consistency": 9,
+              "injurySusceptibility": 13,
+              "temperament": 9,
+              "potential": 12,
+              "adaptability": 9
+            }
+          },
+          {
+            "id": "redmere-p8",
+            "name": "REDMERE Player 8",
+            "age": 29,
+            "position": "WM",
+            "attributes": {
+              "defending": 7,
+              "passing": 10,
+              "creativity": 12,
+              "pace": 12,
+              "aerial": 8,
+              "finishing": 10,
+              "stamina": 10,
+              "leadership": 13,
+              "crossing": 18
+            },
+            "hidden": {
+              "consistency": 12,
+              "injurySusceptibility": 12,
+              "temperament": 11,
+              "potential": 9,
+              "adaptability": 12
+            }
+          },
+          {
+            "id": "redmere-p9",
+            "name": "REDMERE Player 9",
+            "age": 30,
+            "position": "WM",
+            "attributes": {
+              "defending": 9,
+              "passing": 7,
+              "creativity": 8,
+              "pace": 19,
+              "aerial": 11,
+              "finishing": 11,
+              "stamina": 16,
+              "leadership": 11,
+              "crossing": 18
+            },
+            "hidden": {
+              "consistency": 12,
+              "injurySusceptibility": 8,
+              "temperament": 11,
+              "potential": 10,
+              "adaptability": 13
+            }
+          },
+          {
+            "id": "redmere-p10",
+            "name": "REDMERE Player 10",
+            "age": 24,
+            "position": "FW",
+            "attributes": {
+              "defending": 6,
+              "passing": 8,
+              "creativity": 10,
+              "pace": 14,
+              "aerial": 13,
+              "finishing": 11,
+              "stamina": 10,
+              "leadership": 11,
+              "crossing": 8
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 9,
+              "temperament": 10,
+              "potential": 8,
+              "adaptability": 14
+            }
+          },
+          {
+            "id": "redmere-p11",
+            "name": "REDMERE Player 11",
+            "age": 31,
+            "position": "FW",
+            "attributes": {
+              "defending": 6,
+              "passing": 5,
+              "creativity": 9,
+              "pace": 17,
+              "aerial": 11,
+              "finishing": 16,
+              "stamina": 10,
+              "leadership": 9,
+              "crossing": 9
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 11,
+              "temperament": 10,
+              "potential": 9,
+              "adaptability": 10
+            }
+          }
+        ],
+        "substitutes": [
+          {
+            "id": "redmere-sub-p1",
+            "name": "REDMERE Substitute 1",
+            "age": 26,
+            "position": "GK",
+            "attributes": {
+              "shotStopping": 10,
+              "handling": 12,
+              "kicking": 14,
+              "aerial": 9,
+              "leadership": 10
+            },
+            "hidden": {
+              "consistency": 9,
+              "injurySusceptibility": 8,
+              "temperament": 9,
+              "potential": 10,
+              "adaptability": 12
+            }
+          },
+          {
+            "id": "redmere-sub-p2",
+            "name": "REDMERE Substitute 2",
+            "age": 29,
+            "position": "CB",
+            "attributes": {
+              "defending": 9,
+              "passing": 9,
+              "creativity": 8,
+              "pace": 14,
+              "aerial": 14,
+              "finishing": 7,
+              "stamina": 11,
+              "leadership": 10,
+              "crossing": 11
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 8,
+              "temperament": 9,
+              "potential": 13,
+              "adaptability": 11
+            }
+          },
+          {
+            "id": "redmere-sub-p3",
+            "name": "REDMERE Substitute 3",
+            "age": 26,
+            "position": "CB",
+            "attributes": {
+              "defending": 15,
+              "passing": 3,
+              "creativity": 4,
+              "pace": 7,
+              "aerial": 16,
+              "finishing": 7,
+              "stamina": 9,
+              "leadership": 13,
+              "crossing": 8
+            },
+            "hidden": {
+              "consistency": 11,
+              "injurySusceptibility": 13,
+              "temperament": 11,
+              "potential": 9,
+              "adaptability": 6
+            }
+          },
+          {
+            "id": "redmere-sub-p4",
+            "name": "REDMERE Substitute 4",
+            "age": 26,
+            "position": "FB",
+            "attributes": {
+              "defending": 12,
+              "passing": 5,
+              "creativity": 5,
+              "pace": 11,
+              "aerial": 10,
+              "finishing": 7,
+              "stamina": 11,
+              "leadership": 10,
+              "crossing": 11
+            },
+            "hidden": {
+              "consistency": 9,
+              "injurySusceptibility": 11,
+              "temperament": 10,
+              "potential": 8,
+              "adaptability": 9
+            }
+          },
+          {
+            "id": "redmere-sub-p5",
+            "name": "REDMERE Substitute 5",
+            "age": 26,
+            "position": "FB",
+            "attributes": {
+              "defending": 7,
+              "passing": 8,
+              "creativity": 7,
+              "pace": 11,
+              "aerial": 8,
+              "finishing": 6,
+              "stamina": 10,
+              "leadership": 10,
+              "crossing": 14
+            },
+            "hidden": {
+              "consistency": 9,
+              "injurySusceptibility": 9,
+              "temperament": 10,
+              "potential": 11,
+              "adaptability": 14
+            }
+          },
+          {
+            "id": "redmere-sub-p6",
+            "name": "REDMERE Substitute 6",
+            "age": 23,
+            "position": "CM",
+            "attributes": {
+              "defending": 10,
+              "passing": 11,
+              "creativity": 10,
+              "pace": 9,
+              "aerial": 9,
+              "finishing": 8,
+              "stamina": 10,
+              "leadership": 11,
+              "crossing": 9
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 8,
+              "temperament": 9,
+              "potential": 11,
+              "adaptability": 10
+            }
+          },
+          {
+            "id": "redmere-sub-p7",
+            "name": "REDMERE Substitute 7",
+            "age": 30,
+            "position": "CM",
+            "attributes": {
+              "defending": 15,
+              "passing": 9,
+              "creativity": 7,
+              "pace": 11,
+              "aerial": 10,
+              "finishing": 10,
+              "stamina": 14,
+              "leadership": 12,
+              "crossing": 11
+            },
+            "hidden": {
+              "consistency": 11,
+              "injurySusceptibility": 9,
+              "temperament": 9,
+              "potential": 9,
+              "adaptability": 8
+            }
+          },
+          {
+            "id": "redmere-sub-p8",
+            "name": "REDMERE Substitute 8",
+            "age": 25,
+            "position": "WM",
+            "attributes": {
+              "defending": 3,
+              "passing": 4,
+              "creativity": 7,
+              "pace": 16,
+              "aerial": 8,
+              "finishing": 7,
+              "stamina": 12,
+              "leadership": 7,
+              "crossing": 16
+            },
+            "hidden": {
+              "consistency": 8,
+              "injurySusceptibility": 11,
+              "temperament": 9,
+              "potential": 7,
+              "adaptability": 9
+            }
+          },
+          {
+            "id": "redmere-sub-p9",
+            "name": "REDMERE Substitute 9",
+            "age": 25,
+            "position": "WM",
+            "attributes": {
+              "defending": 6,
+              "passing": 7,
+              "creativity": 10,
+              "pace": 15,
+              "aerial": 7,
+              "finishing": 14,
+              "stamina": 9,
+              "leadership": 10,
+              "crossing": 17
+            },
+            "hidden": {
+              "consistency": 11,
+              "injurySusceptibility": 12,
+              "temperament": 11,
+              "potential": 10,
+              "adaptability": 10
+            }
+          },
+          {
+            "id": "redmere-sub-p10",
+            "name": "REDMERE Substitute 10",
+            "age": 30,
+            "position": "FW",
+            "attributes": {
+              "defending": 4,
+              "passing": 4,
+              "creativity": 7,
+              "pace": 13,
+              "aerial": 11,
+              "finishing": 17,
+              "stamina": 9,
+              "leadership": 8,
+              "crossing": 9
+            },
+            "hidden": {
+              "consistency": 9,
+              "injurySusceptibility": 13,
+              "temperament": 9,
+              "potential": 10,
+              "adaptability": 7
+            }
+          },
+          {
+            "id": "redmere-sub-p11",
+            "name": "REDMERE Substitute 11",
+            "age": 27,
+            "position": "FW",
+            "attributes": {
+              "defending": 6,
+              "passing": 5,
+              "creativity": 7,
+              "pace": 11,
+              "aerial": 17,
+              "finishing": 15,
+              "stamina": 10,
+              "leadership": 12,
+              "crossing": 9
+            },
+            "hidden": {
+              "consistency": 10,
+              "injurySusceptibility": 10,
+              "temperament": 11,
+              "potential": 8,
+              "adaptability": 10
+            }
+          }
+        ]
+      }
+    }
+  },
+  "baseline": {
+    "matches": 30000,
+    "goalsPerMatch": 2.8787,
+    "drawRate": 0.26366666666666666,
+    "shotAccuracy": 0.5021671367589151,
+    "managed": {
+      "shotsPerMatch": 10.2693,
+      "goalsForPerMatch": 1.6168666666666667,
+      "goalsAgainstPerMatch": 1.2618333333333334,
+      "pointsPerMatch": 1.6229666666666667,
+      "shotAccuracy": 0.5145303639650869,
+      "possessionPercent": 53.47918518518519,
+      "morePossessionRate": 0.7099333333333333,
+      "equalPossessionRate": 0.0707,
+      "minimumPossessionPercent": 33.333333333333336,
+      "maximumPossessionPercent": 73.33333333333333
+    },
+    "opposition": {
+      "shotsPerMatch": 9.064966666666667,
+      "shotAccuracy": 0.48816138320052654,
+      "possessionPercent": 46.52081481481481
+    },
+    "possessionTickSumFailures": 0,
+    "counts": {
+      "matches": 30000,
+      "wins": 13593,
+      "draws": 7910,
+      "losses": 8497,
+      "goalsFor": 48506,
+      "goalsAgainst": 37855,
+      "shotsFor": 308079,
+      "shotsAgainst": 271949,
+      "shotsOnTargetFor": 158516,
+      "shotsOnTargetAgainst": 132755,
+      "possessionTicksFor": 1443938,
+      "possessionTicksAgainst": 1256062,
+      "morePossession": 21298,
+      "equalPossession": 2121,
+      "minimumPossessionTicks": 30,
+      "maximumPossessionTicks": 66,
+      "possessionTickSumFailures": 0
+    }
+  },
+  "sixSetupTable": [
+    {
+      "setup": "direct/attacking",
+      "style": "direct",
+      "approach": "attacking",
+      "matches": 30000,
+      "goalsPerMatch": 3.3583666666666665,
+      "drawRate": 0.23506666666666667,
+      "shotAccuracy": 0.5030484844532366,
+      "managed": {
+        "shotsPerMatch": 12.8045,
+        "goalsForPerMatch": 1.9264666666666668,
+        "goalsAgainstPerMatch": 1.4319,
+        "pointsPerMatch": 1.7051666666666667,
+        "shotAccuracy": 0.5133117263462064,
+        "possessionPercent": 52.867037037037036,
+        "morePossessionRate": 0.6729666666666667,
+        "equalPossessionRate": 0.07233333333333333,
+        "minimumPossessionPercent": 33.333333333333336,
+        "maximumPossessionPercent": 75.55555555555556
+      },
+      "opposition": {
+        "shotsPerMatch": 10.196,
+        "shotAccuracy": 0.49015953968876685,
+        "possessionPercent": 47.132962962962964
+      },
+      "possessionTickSumFailures": 0,
+      "counts": {
+        "matches": 30000,
+        "wins": 14701,
+        "draws": 7052,
+        "losses": 8247,
+        "goalsFor": 57794,
+        "goalsAgainst": 42957,
+        "shotsFor": 384135,
+        "shotsAgainst": 305880,
+        "shotsOnTargetFor": 197181,
+        "shotsOnTargetAgainst": 149930,
+        "possessionTicksFor": 1427410,
+        "possessionTicksAgainst": 1272590,
+        "morePossession": 20189,
+        "equalPossession": 2170,
+        "minimumPossessionTicks": 30,
+        "maximumPossessionTicks": 68,
+        "possessionTickSumFailures": 0
+      }
+    },
+    {
+      "setup": "passing/attacking",
+      "style": "passing",
+      "approach": "attacking",
+      "matches": 30000,
+      "goalsPerMatch": 3.2797,
+      "drawRate": 0.23956666666666668,
+      "shotAccuracy": 0.5025888855999076,
+      "managed": {
+        "shotsPerMatch": 11.1492,
+        "goalsForPerMatch": 1.8939333333333332,
+        "goalsAgainstPerMatch": 1.3857666666666666,
+        "pointsPerMatch": 1.7167666666666668,
+        "shotAccuracy": 0.5143328669321565,
+        "possessionPercent": 54.227333333333334,
+        "morePossessionRate": 0.7590333333333333,
+        "equalPossessionRate": 0.0614,
+        "minimumPossessionPercent": 33.333333333333336,
+        "maximumPossessionPercent": 74.44444444444444
+      },
+      "opposition": {
+        "shotsPerMatch": 9.908766666666667,
+        "shotAccuracy": 0.48937472877552873,
+        "possessionPercent": 45.772666666666666
+      },
+      "possessionTickSumFailures": 0,
+      "counts": {
+        "matches": 30000,
+        "wins": 14772,
+        "draws": 7187,
+        "losses": 8041,
+        "goalsFor": 56818,
+        "goalsAgainst": 41573,
+        "shotsFor": 334476,
+        "shotsAgainst": 297263,
+        "shotsOnTargetFor": 172032,
+        "shotsOnTargetAgainst": 145473,
+        "possessionTicksFor": 1464138,
+        "possessionTicksAgainst": 1235862,
+        "morePossession": 22771,
+        "equalPossession": 1842,
+        "minimumPossessionTicks": 30,
+        "maximumPossessionTicks": 67,
+        "possessionTickSumFailures": 0
+      }
+    },
+    {
+      "setup": "direct/balanced",
+      "style": "direct",
+      "approach": "balanced",
+      "matches": 30000,
+      "goalsPerMatch": 3.0493,
+      "drawRate": 0.25153333333333333,
+      "shotAccuracy": 0.5028911694876311,
+      "managed": {
+        "shotsPerMatch": 11.6875,
+        "goalsForPerMatch": 1.7658333333333334,
+        "goalsAgainstPerMatch": 1.2834666666666668,
+        "pointsPerMatch": 1.7065333333333332,
+        "shotAccuracy": 0.5138595365418894,
+        "possessionPercent": 52.894481481481485,
+        "morePossessionRate": 0.6734,
+        "equalPossessionRate": 0.07123333333333333,
+        "minimumPossessionPercent": 33.333333333333336,
+        "maximumPossessionPercent": 73.33333333333333
+      },
+      "opposition": {
+        "shotsPerMatch": 9.2037,
+        "shotAccuracy": 0.4889627722184194,
+        "possessionPercent": 47.105518518518515
+      },
+      "possessionTickSumFailures": 0,
+      "counts": {
+        "matches": 30000,
+        "wins": 14550,
+        "draws": 7546,
+        "losses": 7904,
+        "goalsFor": 52975,
+        "goalsAgainst": 38504,
+        "shotsFor": 350625,
+        "shotsAgainst": 276111,
+        "shotsOnTargetFor": 180172,
+        "shotsOnTargetAgainst": 135008,
+        "possessionTicksFor": 1428151,
+        "possessionTicksAgainst": 1271849,
+        "morePossession": 20202,
+        "equalPossession": 2137,
+        "minimumPossessionTicks": 30,
+        "maximumPossessionTicks": 66,
+        "possessionTickSumFailures": 0
+      }
+    },
+    {
+      "setup": "passing/balanced",
+      "style": "passing",
+      "approach": "balanced",
+      "matches": 30000,
+      "goalsPerMatch": 2.984,
+      "drawRate": 0.252,
+      "shotAccuracy": 0.5022210052861147,
+      "managed": {
+        "shotsPerMatch": 10.168066666666666,
+        "goalsForPerMatch": 1.735,
+        "goalsAgainstPerMatch": 1.249,
+        "pointsPerMatch": 1.7114,
+        "shotAccuracy": 0.5143685131883479,
+        "possessionPercent": 54.26188888888889,
+        "morePossessionRate": 0.7605,
+        "equalPossessionRate": 0.059866666666666665,
+        "minimumPossessionPercent": 34.44444444444444,
+        "maximumPossessionPercent": 72.22222222222223
+      },
+      "opposition": {
+        "shotsPerMatch": 8.9449,
+        "shotAccuracy": 0.48841239141857373,
+        "possessionPercent": 45.73811111111111
+      },
+      "possessionTickSumFailures": 0,
+      "counts": {
+        "matches": 30000,
+        "wins": 14594,
+        "draws": 7560,
+        "losses": 7846,
+        "goalsFor": 52050,
+        "goalsAgainst": 37470,
+        "shotsFor": 305042,
+        "shotsAgainst": 268347,
+        "shotsOnTargetFor": 156904,
+        "shotsOnTargetAgainst": 131064,
+        "possessionTicksFor": 1465071,
+        "possessionTicksAgainst": 1234929,
+        "morePossession": 22815,
+        "equalPossession": 1796,
+        "minimumPossessionTicks": 31,
+        "maximumPossessionTicks": 65,
+        "possessionTickSumFailures": 0
+      }
+    },
+    {
+      "setup": "direct/cautious",
+      "style": "direct",
+      "approach": "cautious",
+      "matches": 30000,
+      "goalsPerMatch": 2.9045,
+      "drawRate": 0.25766666666666665,
+      "shotAccuracy": 0.5030424570185932,
+      "managed": {
+        "shotsPerMatch": 11.104,
+        "goalsForPerMatch": 1.6831333333333334,
+        "goalsAgainstPerMatch": 1.2213666666666667,
+        "pointsPerMatch": 1.7033666666666667,
+        "shotAccuracy": 0.514499279538905,
+        "possessionPercent": 52.92040740740741,
+        "morePossessionRate": 0.6756666666666666,
+        "equalPossessionRate": 0.07176666666666667,
+        "minimumPossessionPercent": 34.44444444444444,
+        "maximumPossessionPercent": 74.44444444444444
+      },
+      "opposition": {
+        "shotsPerMatch": 8.7922,
+        "shotAccuracy": 0.48857320503779866,
+        "possessionPercent": 47.07959259259259
+      },
+      "possessionTickSumFailures": 0,
+      "counts": {
+        "matches": 30000,
+        "wins": 14457,
+        "draws": 7730,
+        "losses": 7813,
+        "goalsFor": 50494,
+        "goalsAgainst": 36641,
+        "shotsFor": 333120,
+        "shotsAgainst": 263766,
+        "shotsOnTargetFor": 171390,
+        "shotsOnTargetAgainst": 128869,
+        "possessionTicksFor": 1428851,
+        "possessionTicksAgainst": 1271149,
+        "morePossession": 20270,
+        "equalPossession": 2153,
+        "minimumPossessionTicks": 31,
+        "maximumPossessionTicks": 67,
+        "possessionTickSumFailures": 0
+      }
+    },
+    {
+      "setup": "passing/cautious",
+      "style": "passing",
+      "approach": "cautious",
+      "matches": 30000,
+      "goalsPerMatch": 2.8407,
+      "drawRate": 0.26213333333333333,
+      "shotAccuracy": 0.502081818298386,
+      "managed": {
+        "shotsPerMatch": 9.650633333333333,
+        "goalsForPerMatch": 1.6517333333333333,
+        "goalsAgainstPerMatch": 1.1889666666666667,
+        "pointsPerMatch": 1.6985333333333332,
+        "shotAccuracy": 0.5147468732622038,
+        "possessionPercent": 54.29511111111111,
+        "morePossessionRate": 0.7626333333333334,
+        "equalPossessionRate": 0.06143333333333333,
+        "minimumPossessionPercent": 34.44444444444444,
+        "maximumPossessionPercent": 75.55555555555556
+      },
+      "opposition": {
+        "shotsPerMatch": 8.5466,
+        "shotAccuracy": 0.48778071591822086,
+        "possessionPercent": 45.70488888888889
+      },
+      "possessionTickSumFailures": 0,
+      "counts": {
+        "matches": 30000,
+        "wins": 14364,
+        "draws": 7864,
+        "losses": 7772,
+        "goalsFor": 49552,
+        "goalsAgainst": 35669,
+        "shotsFor": 289519,
+        "shotsAgainst": 256398,
+        "shotsOnTargetFor": 149029,
+        "shotsOnTargetAgainst": 125066,
+        "possessionTicksFor": 1465968,
+        "possessionTicksAgainst": 1234032,
+        "morePossession": 22879,
+        "equalPossession": 1843,
+        "minimumPossessionTicks": 31,
+        "maximumPossessionTicks": 68,
+        "possessionTickSumFailures": 0
+      }
+    }
+  ],
+  "styleFitComparisons": [
+    {
+      "approach": "attacking",
+      "expectedStyle": "passing",
+      "expectedStylePointsPerMatch": 1.7167666666666668,
+      "otherStylePointsPerMatch": 1.7051666666666667,
+      "expectedMinusOther": 0.011600000000000055
+    },
+    {
+      "approach": "balanced",
+      "expectedStyle": "passing",
+      "expectedStylePointsPerMatch": 1.7114,
+      "otherStylePointsPerMatch": 1.7065333333333332,
+      "expectedMinusOther": 0.004866666666666797
+    },
+    {
+      "approach": "cautious",
+      "expectedStyle": "passing",
+      "expectedStylePointsPerMatch": 1.6985333333333332,
+      "otherStylePointsPerMatch": 1.7033666666666667,
+      "expectedMinusOther": -0.004833333333333467
+    }
+  ],
+  "directionalStyleFitPass": false,
+  "approachRiskReward": {
+    "acceptance": {
+      "minimumAttackingVsCautiousGoalsForPerMatchDelta": 0.08,
+      "minimumAttackingVsCautiousGoalsAgainstPerMatchDelta": 0.08
+    },
+    "comparisons": [
+      {
+        "style": "direct",
+        "attackingMinusCautious": {
+          "goalsForPerMatch": 0.2433333333333334,
+          "goalsAgainstPerMatch": 0.21053333333333324
+        },
+        "pass": true
+      },
+      {
+        "style": "passing",
+        "attackingMinusCautious": {
+          "goalsForPerMatch": 0.24219999999999997,
+          "goalsAgainstPerMatch": 0.19679999999999986
+        },
+        "pass": true
+      }
+    ],
+    "pass": true,
+    "bestByStyle": [
+      {
+        "style": "direct",
+        "bestApproach": "balanced",
+        "bestPointsPerMatch": 1.7065333333333332
+      },
+      {
+        "style": "passing",
+        "bestApproach": "attacking",
+        "bestPointsPerMatch": 1.7167666666666668
+      }
+    ]
+  },
+  "ageCurveSeam": {
+    "applicationPoint": "season-rollover-only",
+    "attributesConstantDuringMatch": true,
+    "appliedByThisBuild": false
+  },
+  "calibrationBandProvenance": {
+    "band": {
+      "goalsPerMatchMinimum": 2.4,
+      "goalsPerMatchMaximum": 2.7
+    },
+    "projectRecord": "02_Research-and-Period-Rules/PERIOD-MATCH-CALIBRATION_v1_2026-08-09.md",
+    "source": "RSSSF Football Statistics Archive English Division One tables for 1987-88, 1988-89 and 1989-90",
+    "derivation": "The project record derives 2,997 goals in 1,180 matches, or 2.54 per match, then sets the broad 2.4-2.7 initial calibration band.",
+    "isSpecificToEnglishLeagueFootball1988_89": false,
+    "season1988_89ObservedRate": "962 goals in 380 matches, or 2.5316 per match",
+    "status": "Broad three-season calibration anchor; not a 1988-89-specific band and not adjusted by this build."
+  },
+  "performance": {
+    "elapsedMs": 18105.958863,
+    "simulatedMatches": 210000,
+    "matchesPerSecond": 11598.391534465512
+  },
+  "limitations": [
+    "This run uses tuning seeds only. The validation seed pool remains sealed.",
+    "The 12-question matrix was not run.",
+    "The superseded single-club identity-parity control is not run or reported. The paired estimator is the sole D8 measurement instrument.",
+    "Identity compensation is removed. The remaining paired identity gaps are recorded and deferred by DECISION-001, with no parity tolerance configured.",
+    "Age curves are configuration only and are not applied in a match or elsewhere by this build.",
+    "H3 perceptibility was not rerun because it is outside this bounded Gate 1A item."
+  ]
+}
