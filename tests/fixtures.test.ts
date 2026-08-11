@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { ENGINE_CONFIG } from "../src/engine-config.js";
 import { simulateMatch } from "../src/engine.js";
 import { makeTeam, resolveSquadGeneration } from "../src/fixtures.js";
+import { runIdentityParityControl } from "../src/gate-1a-identity-parity.js";
+import { seedRange } from "../src/seed-pools.js";
 import type { GoalkeeperPlayer, OutfieldAttribute, OutfieldPlayer, Player, Position, TeamInput } from "../src/types.js";
 
 const roster = (team: TeamInput): Player[] => [...team.starters, ...team.substitutes];
@@ -125,30 +127,9 @@ describe("seeded squad generation", () => {
 
   it("keeps different level-10 identities within the stated points tolerance", () => {
     const control = ENGINE_CONFIG.squadGeneration.identityParity;
-    const northbridge = makeTeam("northbridge", 10, { style: "passing", approach: "balanced" });
-    const redmere = makeTeam("redmere", 10, { style: "direct", approach: "balanced" });
-    let northbridgePoints = 0;
-    let redmerePoints = 0;
-
-    for (let seed = 1; seed <= control.sampleMatches; seed += 1) {
-      const northbridgeHome = seed % 2 === 1;
-      const result = simulateMatch({
-        seed,
-        home: northbridgeHome ? northbridge : redmere,
-        away: northbridgeHome ? redmere : northbridge,
-      });
-      const northbridgeGoals = northbridgeHome ? result.home.goals : result.away.goals;
-      const redmereGoals = northbridgeHome ? result.away.goals : result.home.goals;
-      if (northbridgeGoals > redmereGoals) northbridgePoints += 3;
-      else if (northbridgeGoals < redmereGoals) redmerePoints += 3;
-      else {
-        northbridgePoints += 1;
-        redmerePoints += 1;
-      }
-    }
-
-    const difference = Math.abs(northbridgePoints - redmerePoints) / control.sampleMatches;
-    expect(difference).toBeLessThanOrEqual(control.pointsPerMatchTolerance);
+    const result = runIdentityParityControl(seedRange("tuning", control.sampleMatches));
+    expect(result.combined.absolutePointsPerMatchDifference).toBeLessThanOrEqual(control.pointsPerMatchTolerance);
+    expect(result.combined.pass).toBe(true);
   });
 });
 
