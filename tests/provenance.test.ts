@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ENGINE_CONFIG } from "../src/engine-config.js";
 import { formatRunProvenance, readGitProvenance } from "../src/provenance.js";
 
 describe("run provenance", () => {
@@ -15,6 +16,6 @@ describe("run provenance", () => {
     });
     expect(text).toContain("Git commit: 0123456789abcdef0123456789abcdef01234567");
     expect(text).toContain("Dirty tree: true");
-    expect(text).toContain("Engine config: match-engine-config-0.7.1");
+    expect(text).toContain(`Engine config: ${ENGINE_CONFIG.version}`);
   });
 });

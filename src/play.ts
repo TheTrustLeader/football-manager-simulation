@@ -70,12 +70,16 @@ function printSquad(team: TeamInput): void {
   console.log("No  Pos  Player                         Cond  Key attributes");
   team.starters.forEach((player, index) => {
     const key = player.primaryPosition === "GK"
-      ? `GK ${player.attributes.goalkeeping}`
-      : player.primaryPosition === "DF"
-        ? `DEF ${player.attributes.defending}  PAC ${player.attributes.pace}`
-        : player.primaryPosition === "MF"
-          ? `PAS ${player.attributes.passing}  CRE ${player.attributes.creativity}`
-          : `FIN ${player.attributes.finishing}  PAC ${player.attributes.pace}`;
+      ? `SST ${player.attributes.shotStopping}  HAN ${player.attributes.handling}`
+      : player.primaryPosition === "CB"
+        ? `DEF ${player.attributes.defending}  AER ${player.attributes.aerial}`
+        : player.primaryPosition === "FB"
+          ? `DEF ${player.attributes.defending}  CRO ${player.attributes.crossing}`
+          : player.primaryPosition === "CM"
+            ? `PAS ${player.attributes.passing}  CRE ${player.attributes.creativity}`
+            : player.primaryPosition === "WM"
+              ? `PAC ${player.attributes.pace}  CRO ${player.attributes.crossing}`
+              : `FIN ${player.attributes.finishing}  AER ${player.attributes.aerial}`;
     console.log(`${String(index + 1).padStart(2)}  ${player.primaryPosition.padEnd(3)}  ${player.name.padEnd(29)} ${String(player.state.condition).padStart(3)}   ${key}`);
   });
 }

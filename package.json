@@ -13,6 +13,7 @@
     "play:perceptibility": "tsx src/play-perceptibility.ts",
     "playtest": "tsx src/play-series.ts",
     "evidence": "tsx src/evidence.ts",
+    "gate1a:evidence": "tsx src/gate-1a-squad-variation-evidence.ts",
     "review002:evidence": "tsx src/review-002-full-evidence.ts",
     "game-state:evidence": "tsx src/game-state-full-evidence.ts",
     "golden:print": "tsx src/print-golden.ts"

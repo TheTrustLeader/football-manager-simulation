@@ -110,9 +110,14 @@ const gameStateCounters = emptyStateCounters();
 const scoreStateMinutes = { level: 0, homeLeading: 0, awayLeading: 0 };
 const invariantFailingSeeds: number[] = [];
 const started = performance.now();
+const controlSeeds = ENGINE_CONFIG.squadGeneration.testControlSeeds;
 
 for (const seed of seeds) {
-  const baselineResult = simulateMatch({ seed, home: makeTeam("home", 10), away: makeTeam("away", 10) });
+  const baselineResult = simulateMatch({
+    seed,
+    home: makeTeam("home", 10, {}, { seed: controlSeeds.baseline, identity: "balanced" }),
+    away: makeTeam("away", 10, {}, { seed: controlSeeds.baseline, identity: "balanced" }),
+  });
   addResult(baseline, baselineResult);
   for (const state of ["level", "leading", "trailing"] as const) {
     gameStateCounters[state].possessions += baselineResult.diagnostics.gameState.attackingState[state].possessions;
@@ -122,41 +127,51 @@ for (const seed of seeds) {
   scoreStateMinutes.homeLeading += baselineResult.diagnostics.gameState.scoreStateMinutes.homeLeading;
   scoreStateMinutes.awayLeading += baselineResult.diagnostics.gameState.scoreStateMinutes.awayLeading;
 
-  const neutralResult = simulateMatch({ seed, neutralVenue: true, home: makeTeam("mirror-home", 10), away: makeTeam("mirror-away", 10) });
+  const neutralResult = simulateMatch({
+    seed,
+    neutralVenue: true,
+    home: makeTeam("mirror-home", 10, {}, { seed: controlSeeds.mirror, identity: "balanced" }),
+    away: makeTeam("mirror-away", 10, {}, { seed: controlSeeds.mirror, identity: "balanced" }),
+  });
   addResult(mirror, neutralResult);
 
-  const abilityResult = simulateMatch({ seed, neutralVenue: true, home: makeTeam("strong", 14), away: makeTeam("weak", 8) });
+  const abilityResult = simulateMatch({
+    seed,
+    neutralVenue: true,
+    home: makeTeam("strong", 14, {}, { seed: controlSeeds.ability, identity: "balanced" }),
+    away: makeTeam("weak", 8, {}, { seed: controlSeeds.ability, identity: "balanced" }),
+  });
   addResult(ability, abilityResult);
 
   const formationBaselineResult = simulateMatch({
     seed,
     neutralVenue: true,
-    home: makeTeam("formation-home", 10, { formation: "4-4-2" }),
-    away: makeTeam("formation-away", 10, { formation: "4-4-2" }),
+    home: makeTeam("formation-home", 10, { formation: "4-4-2" }, { seed: controlSeeds.formation, identity: "balanced" }),
+    away: makeTeam("formation-away", 10, { formation: "4-4-2" }, { seed: controlSeeds.formation, identity: "balanced" }),
   });
   addResult(formationBaseline, formationBaselineResult);
   for (const formation of ["4-3-3", "4-5-1", "3-5-2", "5-3-2"] as const) {
     addResult(formationCandidates[formation], simulateMatch({
       seed,
       neutralVenue: true,
-      home: makeTeam("formation-home", 10, { formation }),
-      away: makeTeam("formation-away", 10, { formation: "4-4-2" }),
+      home: makeTeam("formation-home", 10, { formation }, { seed: controlSeeds.formation, identity: "balanced" }),
+      away: makeTeam("formation-away", 10, { formation: "4-4-2" }, { seed: controlSeeds.formation, identity: "balanced" }),
     }));
   }
 
   const styleBaselineResult = simulateMatch({
     seed,
     neutralVenue: true,
-    home: makeTeam("style-home", 10, { style: "balanced" }),
-    away: makeTeam("style-away", 10, { style: "balanced" }),
+    home: makeTeam("style-home", 10, { style: "balanced" }, { seed: controlSeeds.style, identity: "balanced" }),
+    away: makeTeam("style-away", 10, { style: "balanced" }, { seed: controlSeeds.style, identity: "balanced" }),
   });
   addResult(styleBaseline, styleBaselineResult);
   for (const style of ["passing", "direct", "counter"] as const) {
     addResult(styleCandidates[style], simulateMatch({
       seed,
       neutralVenue: true,
-      home: makeTeam("style-home", 10, { style }),
-      away: makeTeam("style-away", 10, { style: "balanced" }),
+      home: makeTeam("style-home", 10, { style }, { seed: controlSeeds.style, identity: "balanced" }),
+      away: makeTeam("style-away", 10, { style: "balanced" }, { seed: controlSeeds.style, identity: "balanced" }),
     }));
   }
 

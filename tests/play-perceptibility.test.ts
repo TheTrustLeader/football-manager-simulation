@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ENGINE_CONFIG } from "../src/engine-config.js";
 import {
   assessResponses,
   assertCleanTree,
@@ -136,7 +137,7 @@ describe("H3 perceptibility harness", () => {
     expect(evidence).toMatchObject({
       gitCommit: "1".repeat(40),
       dirtyTree: false,
-      engineConfigVersion: "match-engine-config-0.7.1",
+      engineConfigVersion: ENGINE_CONFIG.version,
       controls: { seedPool: "tuning-v1", validationSeedsUsed: false },
       assessment: { correct: 1, verdict: "FAIL" },
     });
