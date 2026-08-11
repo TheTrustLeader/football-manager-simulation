@@ -8,6 +8,7 @@ import {
   SQUAD_GENERATION_HASH,
   SQUAD_GENERATION_VERSION,
 } from "./fixtures.js";
+import { readParityCompensationState } from "./gate-1a-compensation-state.js";
 import { printRunProvenance, readGitProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
 import type { Approach, GoalkeeperAttribute, MatchOutput, OutfieldAttribute, Player, Position, Style, TeamInput } from "./types.js";
@@ -283,13 +284,15 @@ const parityNorthbridgePoints = pointsPerMatch(identityParity);
 const parityRedmerePoints = opponentPointsPerMatch(identityParity);
 const parityDifference = Math.abs(parityNorthbridgePoints - parityRedmerePoints);
 const parityControl = ENGINE_CONFIG.squadGeneration.identityParity;
+const compensationState = readParityCompensationState();
 const evidence = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   generatedAt: new Date().toISOString(),
   purpose: `Gate 1A REVIEW-007 correction run with ${managedClub} managed`,
   command,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
+  compensationState,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
   squadGenerationVersion: SQUAD_GENERATION_VERSION,
@@ -386,6 +389,7 @@ writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
 console.log(JSON.stringify({
   gitCommit: evidence.gitCommit,
   dirtyTree: evidence.dirtyTree,
+  compensationState: evidence.compensationState,
   engineConfigHash: evidence.engineConfigHash,
   squadGenerationHash: evidence.squadGenerationHash,
   seedRange: evidence.controls.seedRange,

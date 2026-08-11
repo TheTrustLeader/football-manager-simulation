@@ -1,10 +1,44 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "generatedAt": "2026-08-11T14:25:06.499Z",
   "purpose": "REVIEW-011 replacement estimator for D8, which is invalid as originally designed",
   "command": "node dist/src/gate-1a-paired-identity-estimator-runner.js evidence/GATE-1A-D8-paired-identity-estimator_0dc7d57_2026-08-11.json",
   "gitCommit": "0dc7d57f681ad10fe12f7eb5524e53a2b131f0a0",
   "dirtyTree": false,
+  "compensationState": {
+    "state": "in",
+    "includedInMeasuredResults": true,
+    "configPath": "ENGINE_CONFIG.squadGeneration.identityParity.interimAdjustmentsUntilCrossingIsConsumed",
+    "activeIdentities": [
+      "direct"
+    ],
+    "adjustments": {
+      "passing": {
+        "outfield": {},
+        "goalkeeper": {}
+      },
+      "direct": {
+        "outfield": {
+          "finishing": 1
+        },
+        "goalkeeper": {
+          "shotStopping": 6,
+          "handling": 1,
+          "kicking": 1,
+          "aerial": 1,
+          "leadership": 1
+        }
+      },
+      "defensive": {
+        "outfield": {},
+        "goalkeeper": {}
+      },
+      "balanced": {
+        "outfield": {},
+        "goalkeeper": {}
+      }
+    }
+  },
   "engineConfigVersion": "match-engine-config-0.9.1",
   "engineConfigHash": "fnv1a64:40e64adaec0ce96c",
   "squadGenerationVersion": "squad-generation-2.1.0",
@@ -70,7 +104,6 @@
       "tackling": "normal"
     },
     "venueMethod": "First identity home on odd match seeds and second identity home on even match seeds",
-    "interimCompensationState": "unchanged from committed config and included in the measured identity effect",
     "toleranceSet": false
   },
   "result": {
@@ -5411,6 +5444,31 @@
       }
     ]
   },
+  "reviewCorrection": {
+    "recordedOn": "2026-08-11",
+    "measuredCondition": "compensation in",
+    "measuredStrengthOrder": [
+      "direct",
+      "passing",
+      "balanced",
+      "defensive"
+    ],
+    "interpretation": "The measured strength order applies only with the direct identity's interim compensation active. It is not the uncompensated identity order.",
+    "independentCompensationOutReference": {
+      "producedByThisEvidence": false,
+      "strengthOrder": [
+        "passing",
+        "balanced",
+        "direct",
+        "defensive"
+      ],
+      "approximateGaps": {
+        "directBelowPassingPointsPerMatch": 0.23,
+        "directBelowBalancedPointsPerMatch": 0.09
+      }
+    },
+    "reportingRequirement": "Report the paired estimator as a pair of compensation-in and compensation-out runs; never report either state alone."
+  },
   "performance": {
     "elapsedMs": 118570.15625599999,
     "simulatedMatches": 1440000,
@@ -5421,6 +5479,8 @@
     "The 12-question matrix was not run.",
     "No tolerance is applied or recommended by the runner.",
     "The committed interim compensation remains unchanged and is included in any pair involving the direct identity.",
+    "The measured strength order is compensation-specific and must not be read as the uncompensated identity order.",
+    "Report this estimator only with its matching compensation-out run; neither compensation state may be reported alone.",
     "Effect-weighted identity-budget units are not used as a tuning or calibration target."
   ]
 }

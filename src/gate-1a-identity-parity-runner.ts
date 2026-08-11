@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { SQUAD_GENERATION_HASH, SQUAD_GENERATION_VERSION } from "./fixtures.js";
+import { readParityCompensationState } from "./gate-1a-compensation-state.js";
 import { runIdentityParityControl } from "./gate-1a-identity-parity.js";
 import { printRunProvenance, readGitProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
@@ -15,18 +16,20 @@ const command = process.argv[1]?.endsWith(".js")
   : `npm run gate1a:identity-parity -- ${count} ${outputPath}`;
 const seeds = seedRange("tuning", count);
 const provenance = readGitProvenance();
+const compensationState = readParityCompensationState();
 printRunProvenance("GATE 1A IDENTITY PARITY CONTROL", provenance);
 const started = performance.now();
 const result = runIdentityParityControl(seeds);
 const elapsedMs = performance.now() - started;
 
 const evidence = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: new Date().toISOString(),
   purpose: "Named REVIEW-007 D8 identity-parity control",
   command,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
+  compensationState,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
   squadGenerationVersion: SQUAD_GENERATION_VERSION,
@@ -72,6 +75,7 @@ writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
 console.log(JSON.stringify({
   gitCommit: evidence.gitCommit,
   dirtyTree: evidence.dirtyTree,
+  compensationState: evidence.compensationState,
   controls: evidence.controls,
   blocks: evidence.result.blocks,
   combined: evidence.result.combined,

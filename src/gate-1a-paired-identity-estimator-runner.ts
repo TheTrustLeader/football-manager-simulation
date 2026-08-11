@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { SQUAD_GENERATION_HASH, SQUAD_GENERATION_VERSION } from "./fixtures.js";
+import { readParityCompensationState } from "./gate-1a-compensation-state.js";
 import {
   PAIRED_ESTIMATOR_GENERATOR_SEEDS,
   PAIRED_ESTIMATOR_IDENTITIES,
@@ -18,6 +19,7 @@ const command = process.argv[1]?.endsWith(".js")
   : `npm run gate1a:paired-identity-estimator -- ${outputPath}`;
 const matchSeeds = seedRange("tuning", MATCH_SEED_COUNT);
 const provenance = readGitProvenance();
+const compensationState = readParityCompensationState();
 printRunProvenance("GATE 1A D8 PAIRED IDENTITY ESTIMATOR", provenance);
 const started = performance.now();
 const result = runPairedIdentityEstimator(
@@ -32,12 +34,13 @@ const simulatedMatches = result.estimates.length
   * MATCH_SEED_COUNT;
 
 const evidence = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: new Date().toISOString(),
   purpose: "REVIEW-011 replacement estimator for D8, which is invalid as originally designed",
   command,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
+  compensationState,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
   squadGenerationVersion: SQUAD_GENERATION_VERSION,
@@ -64,7 +67,6 @@ const evidence = {
     identityPairCount: result.estimates.length,
     tactics: { formation: "4-4-2", style: "balanced", approach: "balanced", tackling: "normal" },
     venueMethod: result.venueMethod,
-    interimCompensationState: "unchanged from committed config and included in the measured identity effect",
     toleranceSet: false,
   },
   result,
@@ -78,6 +80,7 @@ const evidence = {
     "The 12-question matrix was not run.",
     "No tolerance is applied or recommended by the runner.",
     "The committed interim compensation remains unchanged and is included in any pair involving the direct identity.",
+    "Report this estimator only with its matching compensation-out run; neither compensation state may be reported alone.",
     "Effect-weighted identity-budget units are not used as a tuning or calibration target.",
   ],
 };
@@ -87,6 +90,7 @@ writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
 console.log(JSON.stringify({
   gitCommit: evidence.gitCommit,
   dirtyTree: evidence.dirtyTree,
+  compensationState: evidence.compensationState,
   controls: evidence.controls,
   estimates: evidence.result.estimates.map((estimate) => ({
     firstIdentity: estimate.firstIdentity,
