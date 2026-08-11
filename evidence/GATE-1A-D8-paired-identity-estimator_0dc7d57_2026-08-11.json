@@ -1,0 +1,5426 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-11T14:25:06.499Z",
+  "purpose": "REVIEW-011 replacement estimator for D8, which is invalid as originally designed",
+  "command": "node dist/src/gate-1a-paired-identity-estimator-runner.js evidence/GATE-1A-D8-paired-identity-estimator_0dc7d57_2026-08-11.json",
+  "gitCommit": "0dc7d57f681ad10fe12f7eb5524e53a2b131f0a0",
+  "dirtyTree": false,
+  "engineConfigVersion": "match-engine-config-0.9.1",
+  "engineConfigHash": "fnv1a64:40e64adaec0ce96c",
+  "squadGenerationVersion": "squad-generation-2.1.0",
+  "squadGenerationHash": "fnv1a64:42fe6220f065113d",
+  "runtime": {
+    "nodeVersion": "v24.14.0",
+    "platform": "linux",
+    "architecture": "x64"
+  },
+  "controls": {
+    "estimator": "Hold generator seed constant within each pair, vary only identity, use identical balanced tactics, and average signed PPM differences across generator seeds",
+    "generatorSeedPool": {
+      "name": "gate-1a-review-011-v1",
+      "seeds": [
+        198811001,
+        198811002,
+        198811003,
+        198811004,
+        198811005,
+        198811006,
+        198811007,
+        198811008
+      ],
+      "count": 8
+    },
+    "matchSeedPool": "tuning-v1",
+    "matchSeedRange": {
+      "start": 1,
+      "end": 30000,
+      "count": 30000
+    },
+    "blocks": [
+      {
+        "start": 1,
+        "end": 10000,
+        "count": 10000
+      },
+      {
+        "start": 10001,
+        "end": 20000,
+        "count": 10000
+      },
+      {
+        "start": 20001,
+        "end": 30000,
+        "count": 10000
+      }
+    ],
+    "validationSeedsUsed": false,
+    "twelveQuestionMatrixRun": false,
+    "level": 10,
+    "identities": [
+      "passing",
+      "direct",
+      "defensive",
+      "balanced"
+    ],
+    "identityPairCount": 6,
+    "tactics": {
+      "formation": "4-4-2",
+      "style": "balanced",
+      "approach": "balanced",
+      "tackling": "normal"
+    },
+    "venueMethod": "First identity home on odd match seeds and second identity home on even match seeds",
+    "interimCompensationState": "unchanged from committed config and included in the measured identity effect",
+    "toleranceSet": false
+  },
+  "result": {
+    "method": "Hold generator seed constant within each pair, vary only identity, use identical balanced tactics, and average signed PPM differences across generator seeds",
+    "venueMethod": "First identity home on odd match seeds and second identity home on even match seeds",
+    "blockSize": 10000,
+    "generatorSeeds": [
+      198811001,
+      198811002,
+      198811003,
+      198811004,
+      198811005,
+      198811006,
+      198811007,
+      198811008
+    ],
+    "matchSeedRange": {
+      "start": 1,
+      "end": 30000,
+      "count": 30000
+    },
+    "identities": [
+      "passing",
+      "direct",
+      "defensive",
+      "balanced"
+    ],
+    "estimates": [
+      {
+        "firstIdentity": "passing",
+        "secondIdentity": "direct",
+        "pairedSamples": [
+          {
+            "generatorSeed": 198811001,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3007,
+                  "draws": 2859,
+                  "losses": 4134,
+                  "points": 11880,
+                  "pointsPerMatch": 1.188
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4134,
+                  "draws": 2859,
+                  "losses": 3007,
+                  "points": 15261,
+                  "pointsPerMatch": 1.5261
+                },
+                "pointsPerMatchDifference": -0.33810000000000007,
+                "absolutePointsPerMatchDifference": 0.33810000000000007
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3082,
+                  "draws": 2927,
+                  "losses": 3991,
+                  "points": 12173,
+                  "pointsPerMatch": 1.2173
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 3991,
+                  "draws": 2927,
+                  "losses": 3082,
+                  "points": 14900,
+                  "pointsPerMatch": 1.49
+                },
+                "pointsPerMatchDifference": -0.27269999999999994,
+                "absolutePointsPerMatchDifference": 0.27269999999999994
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3017,
+                  "draws": 2926,
+                  "losses": 4057,
+                  "points": 11977,
+                  "pointsPerMatch": 1.1977
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4057,
+                  "draws": 2926,
+                  "losses": 3017,
+                  "points": 15097,
+                  "pointsPerMatch": 1.5097
+                },
+                "pointsPerMatchDifference": -0.31200000000000006,
+                "absolutePointsPerMatchDifference": 0.31200000000000006
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 9106,
+                "draws": 8712,
+                "losses": 12182,
+                "points": 36030,
+                "pointsPerMatch": 1.201
+              },
+              "second": {
+                "identity": "direct",
+                "wins": 12182,
+                "draws": 8712,
+                "losses": 9106,
+                "points": 45258,
+                "pointsPerMatch": 1.5086
+              },
+              "pointsPerMatchDifference": -0.3075999999999999,
+              "absolutePointsPerMatchDifference": 0.3075999999999999
+            }
+          },
+          {
+            "generatorSeed": 198811002,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3124,
+                  "draws": 2766,
+                  "losses": 4110,
+                  "points": 12138,
+                  "pointsPerMatch": 1.2138
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4110,
+                  "draws": 2766,
+                  "losses": 3124,
+                  "points": 15096,
+                  "pointsPerMatch": 1.5096
+                },
+                "pointsPerMatchDifference": -0.29580000000000006,
+                "absolutePointsPerMatchDifference": 0.29580000000000006
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3039,
+                  "draws": 2787,
+                  "losses": 4174,
+                  "points": 11904,
+                  "pointsPerMatch": 1.1904
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4174,
+                  "draws": 2787,
+                  "losses": 3039,
+                  "points": 15309,
+                  "pointsPerMatch": 1.5309
+                },
+                "pointsPerMatchDifference": -0.3405,
+                "absolutePointsPerMatchDifference": 0.3405
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3068,
+                  "draws": 2746,
+                  "losses": 4186,
+                  "points": 11950,
+                  "pointsPerMatch": 1.195
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4186,
+                  "draws": 2746,
+                  "losses": 3068,
+                  "points": 15304,
+                  "pointsPerMatch": 1.5304
+                },
+                "pointsPerMatchDifference": -0.3353999999999999,
+                "absolutePointsPerMatchDifference": 0.3353999999999999
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 9231,
+                "draws": 8299,
+                "losses": 12470,
+                "points": 35992,
+                "pointsPerMatch": 1.1997333333333333
+              },
+              "second": {
+                "identity": "direct",
+                "wins": 12470,
+                "draws": 8299,
+                "losses": 9231,
+                "points": 45709,
+                "pointsPerMatch": 1.5236333333333334
+              },
+              "pointsPerMatchDifference": -0.3239000000000001,
+              "absolutePointsPerMatchDifference": 0.3239000000000001
+            }
+          },
+          {
+            "generatorSeed": 198811003,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3231,
+                  "draws": 2566,
+                  "losses": 4203,
+                  "points": 12259,
+                  "pointsPerMatch": 1.2259
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4203,
+                  "draws": 2566,
+                  "losses": 3231,
+                  "points": 15175,
+                  "pointsPerMatch": 1.5175
+                },
+                "pointsPerMatchDifference": -0.2916000000000001,
+                "absolutePointsPerMatchDifference": 0.2916000000000001
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3216,
+                  "draws": 2641,
+                  "losses": 4143,
+                  "points": 12289,
+                  "pointsPerMatch": 1.2289
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4143,
+                  "draws": 2641,
+                  "losses": 3216,
+                  "points": 15070,
+                  "pointsPerMatch": 1.507
+                },
+                "pointsPerMatchDifference": -0.2780999999999998,
+                "absolutePointsPerMatchDifference": 0.2780999999999998
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3199,
+                  "draws": 2598,
+                  "losses": 4203,
+                  "points": 12195,
+                  "pointsPerMatch": 1.2195
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4203,
+                  "draws": 2598,
+                  "losses": 3199,
+                  "points": 15207,
+                  "pointsPerMatch": 1.5207
+                },
+                "pointsPerMatchDifference": -0.3011999999999999,
+                "absolutePointsPerMatchDifference": 0.3011999999999999
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 9646,
+                "draws": 7805,
+                "losses": 12549,
+                "points": 36743,
+                "pointsPerMatch": 1.2247666666666666
+              },
+              "second": {
+                "identity": "direct",
+                "wins": 12549,
+                "draws": 7805,
+                "losses": 9646,
+                "points": 45452,
+                "pointsPerMatch": 1.5150666666666666
+              },
+              "pointsPerMatchDifference": -0.2903,
+              "absolutePointsPerMatchDifference": 0.2903
+            }
+          },
+          {
+            "generatorSeed": 198811004,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 2899,
+                  "draws": 2852,
+                  "losses": 4249,
+                  "points": 11549,
+                  "pointsPerMatch": 1.1549
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4249,
+                  "draws": 2852,
+                  "losses": 2899,
+                  "points": 15599,
+                  "pointsPerMatch": 1.5599
+                },
+                "pointsPerMatchDifference": -0.405,
+                "absolutePointsPerMatchDifference": 0.405
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 2933,
+                  "draws": 2952,
+                  "losses": 4115,
+                  "points": 11751,
+                  "pointsPerMatch": 1.1751
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4115,
+                  "draws": 2952,
+                  "losses": 2933,
+                  "points": 15297,
+                  "pointsPerMatch": 1.5297
+                },
+                "pointsPerMatchDifference": -0.3546,
+                "absolutePointsPerMatchDifference": 0.3546
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 2897,
+                  "draws": 2943,
+                  "losses": 4160,
+                  "points": 11634,
+                  "pointsPerMatch": 1.1634
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4160,
+                  "draws": 2943,
+                  "losses": 2897,
+                  "points": 15423,
+                  "pointsPerMatch": 1.5423
+                },
+                "pointsPerMatchDifference": -0.3789,
+                "absolutePointsPerMatchDifference": 0.3789
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 8729,
+                "draws": 8747,
+                "losses": 12524,
+                "points": 34934,
+                "pointsPerMatch": 1.1644666666666668
+              },
+              "second": {
+                "identity": "direct",
+                "wins": 12524,
+                "draws": 8747,
+                "losses": 8729,
+                "points": 46319,
+                "pointsPerMatch": 1.5439666666666667
+              },
+              "pointsPerMatchDifference": -0.37949999999999995,
+              "absolutePointsPerMatchDifference": 0.37949999999999995
+            }
+          },
+          {
+            "generatorSeed": 198811005,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3241,
+                  "draws": 2487,
+                  "losses": 4272,
+                  "points": 12210,
+                  "pointsPerMatch": 1.221
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4272,
+                  "draws": 2487,
+                  "losses": 3241,
+                  "points": 15303,
+                  "pointsPerMatch": 1.5303
+                },
+                "pointsPerMatchDifference": -0.3092999999999999,
+                "absolutePointsPerMatchDifference": 0.3092999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3253,
+                  "draws": 2601,
+                  "losses": 4146,
+                  "points": 12360,
+                  "pointsPerMatch": 1.236
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4146,
+                  "draws": 2601,
+                  "losses": 3253,
+                  "points": 15039,
+                  "pointsPerMatch": 1.5039
+                },
+                "pointsPerMatchDifference": -0.2679,
+                "absolutePointsPerMatchDifference": 0.2679
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3236,
+                  "draws": 2541,
+                  "losses": 4223,
+                  "points": 12249,
+                  "pointsPerMatch": 1.2249
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4223,
+                  "draws": 2541,
+                  "losses": 3236,
+                  "points": 15210,
+                  "pointsPerMatch": 1.521
+                },
+                "pointsPerMatchDifference": -0.2960999999999998,
+                "absolutePointsPerMatchDifference": 0.2960999999999998
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 9730,
+                "draws": 7629,
+                "losses": 12641,
+                "points": 36819,
+                "pointsPerMatch": 1.2273
+              },
+              "second": {
+                "identity": "direct",
+                "wins": 12641,
+                "draws": 7629,
+                "losses": 9730,
+                "points": 45552,
+                "pointsPerMatch": 1.5184
+              },
+              "pointsPerMatchDifference": -0.2910999999999999,
+              "absolutePointsPerMatchDifference": 0.2910999999999999
+            }
+          },
+          {
+            "generatorSeed": 198811006,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3010,
+                  "draws": 2761,
+                  "losses": 4229,
+                  "points": 11791,
+                  "pointsPerMatch": 1.1791
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4229,
+                  "draws": 2761,
+                  "losses": 3010,
+                  "points": 15448,
+                  "pointsPerMatch": 1.5448
+                },
+                "pointsPerMatchDifference": -0.3656999999999999,
+                "absolutePointsPerMatchDifference": 0.3656999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3059,
+                  "draws": 2797,
+                  "losses": 4144,
+                  "points": 11974,
+                  "pointsPerMatch": 1.1974
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4144,
+                  "draws": 2797,
+                  "losses": 3059,
+                  "points": 15229,
+                  "pointsPerMatch": 1.5229
+                },
+                "pointsPerMatchDifference": -0.3254999999999999,
+                "absolutePointsPerMatchDifference": 0.3254999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3067,
+                  "draws": 2751,
+                  "losses": 4182,
+                  "points": 11952,
+                  "pointsPerMatch": 1.1952
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4182,
+                  "draws": 2751,
+                  "losses": 3067,
+                  "points": 15297,
+                  "pointsPerMatch": 1.5297
+                },
+                "pointsPerMatchDifference": -0.3345,
+                "absolutePointsPerMatchDifference": 0.3345
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 9136,
+                "draws": 8309,
+                "losses": 12555,
+                "points": 35717,
+                "pointsPerMatch": 1.1905666666666668
+              },
+              "second": {
+                "identity": "direct",
+                "wins": 12555,
+                "draws": 8309,
+                "losses": 9136,
+                "points": 45974,
+                "pointsPerMatch": 1.5324666666666666
+              },
+              "pointsPerMatchDifference": -0.34189999999999987,
+              "absolutePointsPerMatchDifference": 0.34189999999999987
+            }
+          },
+          {
+            "generatorSeed": 198811007,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3334,
+                  "draws": 2336,
+                  "losses": 4330,
+                  "points": 12338,
+                  "pointsPerMatch": 1.2338
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4330,
+                  "draws": 2336,
+                  "losses": 3334,
+                  "points": 15326,
+                  "pointsPerMatch": 1.5326
+                },
+                "pointsPerMatchDifference": -0.29879999999999995,
+                "absolutePointsPerMatchDifference": 0.29879999999999995
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3316,
+                  "draws": 2500,
+                  "losses": 4184,
+                  "points": 12448,
+                  "pointsPerMatch": 1.2448
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4184,
+                  "draws": 2500,
+                  "losses": 3316,
+                  "points": 15052,
+                  "pointsPerMatch": 1.5052
+                },
+                "pointsPerMatchDifference": -0.2604000000000002,
+                "absolutePointsPerMatchDifference": 0.2604000000000002
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3314,
+                  "draws": 2437,
+                  "losses": 4249,
+                  "points": 12379,
+                  "pointsPerMatch": 1.2379
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4249,
+                  "draws": 2437,
+                  "losses": 3314,
+                  "points": 15184,
+                  "pointsPerMatch": 1.5184
+                },
+                "pointsPerMatchDifference": -0.28049999999999997,
+                "absolutePointsPerMatchDifference": 0.28049999999999997
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 9964,
+                "draws": 7273,
+                "losses": 12763,
+                "points": 37165,
+                "pointsPerMatch": 1.2388333333333332
+              },
+              "second": {
+                "identity": "direct",
+                "wins": 12763,
+                "draws": 7273,
+                "losses": 9964,
+                "points": 45562,
+                "pointsPerMatch": 1.5187333333333333
+              },
+              "pointsPerMatchDifference": -0.27990000000000004,
+              "absolutePointsPerMatchDifference": 0.27990000000000004
+            }
+          },
+          {
+            "generatorSeed": 198811008,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 2992,
+                  "draws": 2787,
+                  "losses": 4221,
+                  "points": 11763,
+                  "pointsPerMatch": 1.1763
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4221,
+                  "draws": 2787,
+                  "losses": 2992,
+                  "points": 15450,
+                  "pointsPerMatch": 1.545
+                },
+                "pointsPerMatchDifference": -0.3687,
+                "absolutePointsPerMatchDifference": 0.3687
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3028,
+                  "draws": 2809,
+                  "losses": 4163,
+                  "points": 11893,
+                  "pointsPerMatch": 1.1893
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4163,
+                  "draws": 2809,
+                  "losses": 3028,
+                  "points": 15298,
+                  "pointsPerMatch": 1.5298
+                },
+                "pointsPerMatchDifference": -0.3405,
+                "absolutePointsPerMatchDifference": 0.3405
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 2984,
+                  "draws": 2823,
+                  "losses": 4193,
+                  "points": 11775,
+                  "pointsPerMatch": 1.1775
+                },
+                "second": {
+                  "identity": "direct",
+                  "wins": 4193,
+                  "draws": 2823,
+                  "losses": 2984,
+                  "points": 15402,
+                  "pointsPerMatch": 1.5402
+                },
+                "pointsPerMatchDifference": -0.3627,
+                "absolutePointsPerMatchDifference": 0.3627
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 9004,
+                "draws": 8419,
+                "losses": 12577,
+                "points": 35431,
+                "pointsPerMatch": 1.1810333333333334
+              },
+              "second": {
+                "identity": "direct",
+                "wins": 12577,
+                "draws": 8419,
+                "losses": 9004,
+                "points": 46150,
+                "pointsPerMatch": 1.5383333333333333
+              },
+              "pointsPerMatchDifference": -0.35729999999999995,
+              "absolutePointsPerMatchDifference": 0.35729999999999995
+            }
+          }
+        ],
+        "meanPointsPerMatchDifference": -0.3214375,
+        "absoluteMeanPointsPerMatchDifference": 0.3214375,
+        "meanAbsolutePointsPerMatchDifference": 0.3214375,
+        "sampleStandardDeviation": 0.035634852021180434,
+        "standardErrorOfMean": 0.012598822755377916,
+        "minimumPointsPerMatchDifference": -0.37949999999999995,
+        "maximumPointsPerMatchDifference": -0.27990000000000004
+      },
+      {
+        "firstIdentity": "passing",
+        "secondIdentity": "defensive",
+        "pairedSamples": [
+          {
+            "generatorSeed": 198811001,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4066,
+                  "draws": 2975,
+                  "losses": 2959,
+                  "points": 15173,
+                  "pointsPerMatch": 1.5173
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2959,
+                  "draws": 2975,
+                  "losses": 4066,
+                  "points": 11852,
+                  "pointsPerMatch": 1.1852
+                },
+                "pointsPerMatchDifference": 0.33210000000000006,
+                "absolutePointsPerMatchDifference": 0.33210000000000006
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4157,
+                  "draws": 2879,
+                  "losses": 2964,
+                  "points": 15350,
+                  "pointsPerMatch": 1.535
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2964,
+                  "draws": 2879,
+                  "losses": 4157,
+                  "points": 11771,
+                  "pointsPerMatch": 1.1771
+                },
+                "pointsPerMatchDifference": 0.3578999999999999,
+                "absolutePointsPerMatchDifference": 0.3578999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4101,
+                  "draws": 2952,
+                  "losses": 2947,
+                  "points": 15255,
+                  "pointsPerMatch": 1.5255
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2947,
+                  "draws": 2952,
+                  "losses": 4101,
+                  "points": 11793,
+                  "pointsPerMatch": 1.1793
+                },
+                "pointsPerMatchDifference": 0.34620000000000006,
+                "absolutePointsPerMatchDifference": 0.34620000000000006
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 12324,
+                "draws": 8806,
+                "losses": 8870,
+                "points": 45778,
+                "pointsPerMatch": 1.5259333333333334
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 8870,
+                "draws": 8806,
+                "losses": 12324,
+                "points": 35416,
+                "pointsPerMatch": 1.1805333333333334
+              },
+              "pointsPerMatchDifference": 0.34539999999999993,
+              "absolutePointsPerMatchDifference": 0.34539999999999993
+            }
+          },
+          {
+            "generatorSeed": 198811002,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4137,
+                  "draws": 2772,
+                  "losses": 3091,
+                  "points": 15183,
+                  "pointsPerMatch": 1.5183
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3091,
+                  "draws": 2772,
+                  "losses": 4137,
+                  "points": 12045,
+                  "pointsPerMatch": 1.2045
+                },
+                "pointsPerMatchDifference": 0.3138000000000001,
+                "absolutePointsPerMatchDifference": 0.3138000000000001
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4217,
+                  "draws": 2792,
+                  "losses": 2991,
+                  "points": 15443,
+                  "pointsPerMatch": 1.5443
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2991,
+                  "draws": 2792,
+                  "losses": 4217,
+                  "points": 11765,
+                  "pointsPerMatch": 1.1765
+                },
+                "pointsPerMatchDifference": 0.3677999999999999,
+                "absolutePointsPerMatchDifference": 0.3677999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4155,
+                  "draws": 2779,
+                  "losses": 3066,
+                  "points": 15244,
+                  "pointsPerMatch": 1.5244
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3066,
+                  "draws": 2779,
+                  "losses": 4155,
+                  "points": 11977,
+                  "pointsPerMatch": 1.1977
+                },
+                "pointsPerMatchDifference": 0.3267,
+                "absolutePointsPerMatchDifference": 0.3267
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 12509,
+                "draws": 8343,
+                "losses": 9148,
+                "points": 45870,
+                "pointsPerMatch": 1.529
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 9148,
+                "draws": 8343,
+                "losses": 12509,
+                "points": 35787,
+                "pointsPerMatch": 1.1929
+              },
+              "pointsPerMatchDifference": 0.33609999999999984,
+              "absolutePointsPerMatchDifference": 0.33609999999999984
+            }
+          },
+          {
+            "generatorSeed": 198811003,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4253,
+                  "draws": 2648,
+                  "losses": 3099,
+                  "points": 15407,
+                  "pointsPerMatch": 1.5407
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3099,
+                  "draws": 2648,
+                  "losses": 4253,
+                  "points": 11945,
+                  "pointsPerMatch": 1.1945
+                },
+                "pointsPerMatchDifference": 0.34620000000000006,
+                "absolutePointsPerMatchDifference": 0.34620000000000006
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4427,
+                  "draws": 2569,
+                  "losses": 3004,
+                  "points": 15850,
+                  "pointsPerMatch": 1.585
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3004,
+                  "draws": 2569,
+                  "losses": 4427,
+                  "points": 11581,
+                  "pointsPerMatch": 1.1581
+                },
+                "pointsPerMatchDifference": 0.42690000000000006,
+                "absolutePointsPerMatchDifference": 0.42690000000000006
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4275,
+                  "draws": 2620,
+                  "losses": 3105,
+                  "points": 15445,
+                  "pointsPerMatch": 1.5445
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3105,
+                  "draws": 2620,
+                  "losses": 4275,
+                  "points": 11935,
+                  "pointsPerMatch": 1.1935
+                },
+                "pointsPerMatchDifference": 0.351,
+                "absolutePointsPerMatchDifference": 0.351
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 12955,
+                "draws": 7837,
+                "losses": 9208,
+                "points": 46702,
+                "pointsPerMatch": 1.5567333333333333
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 9208,
+                "draws": 7837,
+                "losses": 12955,
+                "points": 35461,
+                "pointsPerMatch": 1.1820333333333333
+              },
+              "pointsPerMatchDifference": 0.37470000000000003,
+              "absolutePointsPerMatchDifference": 0.37470000000000003
+            }
+          },
+          {
+            "generatorSeed": 198811004,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4069,
+                  "draws": 2983,
+                  "losses": 2948,
+                  "points": 15190,
+                  "pointsPerMatch": 1.519
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2948,
+                  "draws": 2983,
+                  "losses": 4069,
+                  "points": 11827,
+                  "pointsPerMatch": 1.1827
+                },
+                "pointsPerMatchDifference": 0.3362999999999998,
+                "absolutePointsPerMatchDifference": 0.3362999999999998
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4106,
+                  "draws": 3000,
+                  "losses": 2894,
+                  "points": 15318,
+                  "pointsPerMatch": 1.5318
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2894,
+                  "draws": 3000,
+                  "losses": 4106,
+                  "points": 11682,
+                  "pointsPerMatch": 1.1682
+                },
+                "pointsPerMatchDifference": 0.36360000000000015,
+                "absolutePointsPerMatchDifference": 0.36360000000000015
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4068,
+                  "draws": 2946,
+                  "losses": 2986,
+                  "points": 15150,
+                  "pointsPerMatch": 1.515
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2986,
+                  "draws": 2946,
+                  "losses": 4068,
+                  "points": 11904,
+                  "pointsPerMatch": 1.1904
+                },
+                "pointsPerMatchDifference": 0.3246,
+                "absolutePointsPerMatchDifference": 0.3246
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 12243,
+                "draws": 8929,
+                "losses": 8828,
+                "points": 45658,
+                "pointsPerMatch": 1.5219333333333334
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 8828,
+                "draws": 8929,
+                "losses": 12243,
+                "points": 35413,
+                "pointsPerMatch": 1.1804333333333332
+              },
+              "pointsPerMatchDifference": 0.34150000000000014,
+              "absolutePointsPerMatchDifference": 0.34150000000000014
+            }
+          },
+          {
+            "generatorSeed": 198811005,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4316,
+                  "draws": 2583,
+                  "losses": 3101,
+                  "points": 15531,
+                  "pointsPerMatch": 1.5531
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3101,
+                  "draws": 2583,
+                  "losses": 4316,
+                  "points": 11886,
+                  "pointsPerMatch": 1.1886
+                },
+                "pointsPerMatchDifference": 0.3644999999999998,
+                "absolutePointsPerMatchDifference": 0.3644999999999998
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4372,
+                  "draws": 2601,
+                  "losses": 3027,
+                  "points": 15717,
+                  "pointsPerMatch": 1.5717
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3027,
+                  "draws": 2601,
+                  "losses": 4372,
+                  "points": 11682,
+                  "pointsPerMatch": 1.1682
+                },
+                "pointsPerMatchDifference": 0.4035000000000002,
+                "absolutePointsPerMatchDifference": 0.4035000000000002
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4273,
+                  "draws": 2556,
+                  "losses": 3171,
+                  "points": 15375,
+                  "pointsPerMatch": 1.5375
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3171,
+                  "draws": 2556,
+                  "losses": 4273,
+                  "points": 12069,
+                  "pointsPerMatch": 1.2069
+                },
+                "pointsPerMatchDifference": 0.3306,
+                "absolutePointsPerMatchDifference": 0.3306
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 12961,
+                "draws": 7740,
+                "losses": 9299,
+                "points": 46623,
+                "pointsPerMatch": 1.5541
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 9299,
+                "draws": 7740,
+                "losses": 12961,
+                "points": 35637,
+                "pointsPerMatch": 1.1879
+              },
+              "pointsPerMatchDifference": 0.3662000000000001,
+              "absolutePointsPerMatchDifference": 0.3662000000000001
+            }
+          },
+          {
+            "generatorSeed": 198811006,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4149,
+                  "draws": 2811,
+                  "losses": 3040,
+                  "points": 15258,
+                  "pointsPerMatch": 1.5258
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3040,
+                  "draws": 2811,
+                  "losses": 4149,
+                  "points": 11931,
+                  "pointsPerMatch": 1.1931
+                },
+                "pointsPerMatchDifference": 0.3327,
+                "absolutePointsPerMatchDifference": 0.3327
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4237,
+                  "draws": 2805,
+                  "losses": 2958,
+                  "points": 15516,
+                  "pointsPerMatch": 1.5516
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2958,
+                  "draws": 2805,
+                  "losses": 4237,
+                  "points": 11679,
+                  "pointsPerMatch": 1.1679
+                },
+                "pointsPerMatchDifference": 0.38370000000000015,
+                "absolutePointsPerMatchDifference": 0.38370000000000015
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4167,
+                  "draws": 2837,
+                  "losses": 2996,
+                  "points": 15338,
+                  "pointsPerMatch": 1.5338
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2996,
+                  "draws": 2837,
+                  "losses": 4167,
+                  "points": 11825,
+                  "pointsPerMatch": 1.1825
+                },
+                "pointsPerMatchDifference": 0.35129999999999995,
+                "absolutePointsPerMatchDifference": 0.35129999999999995
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 12553,
+                "draws": 8453,
+                "losses": 8994,
+                "points": 46112,
+                "pointsPerMatch": 1.5370666666666666
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 8994,
+                "draws": 8453,
+                "losses": 12553,
+                "points": 35435,
+                "pointsPerMatch": 1.1811666666666667
+              },
+              "pointsPerMatchDifference": 0.3558999999999999,
+              "absolutePointsPerMatchDifference": 0.3558999999999999
+            }
+          },
+          {
+            "generatorSeed": 198811007,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4392,
+                  "draws": 2465,
+                  "losses": 3143,
+                  "points": 15641,
+                  "pointsPerMatch": 1.5641
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3143,
+                  "draws": 2465,
+                  "losses": 4392,
+                  "points": 11894,
+                  "pointsPerMatch": 1.1894
+                },
+                "pointsPerMatchDifference": 0.37470000000000003,
+                "absolutePointsPerMatchDifference": 0.37470000000000003
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4361,
+                  "draws": 2567,
+                  "losses": 3072,
+                  "points": 15650,
+                  "pointsPerMatch": 1.565
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3072,
+                  "draws": 2567,
+                  "losses": 4361,
+                  "points": 11783,
+                  "pointsPerMatch": 1.1783
+                },
+                "pointsPerMatchDifference": 0.38670000000000004,
+                "absolutePointsPerMatchDifference": 0.38670000000000004
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4345,
+                  "draws": 2461,
+                  "losses": 3194,
+                  "points": 15496,
+                  "pointsPerMatch": 1.5496
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3194,
+                  "draws": 2461,
+                  "losses": 4345,
+                  "points": 12043,
+                  "pointsPerMatch": 1.2043
+                },
+                "pointsPerMatchDifference": 0.34530000000000016,
+                "absolutePointsPerMatchDifference": 0.34530000000000016
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 13098,
+                "draws": 7493,
+                "losses": 9409,
+                "points": 46787,
+                "pointsPerMatch": 1.5595666666666668
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 9409,
+                "draws": 7493,
+                "losses": 13098,
+                "points": 35720,
+                "pointsPerMatch": 1.1906666666666668
+              },
+              "pointsPerMatchDifference": 0.3689,
+              "absolutePointsPerMatchDifference": 0.3689
+            }
+          },
+          {
+            "generatorSeed": 198811008,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4133,
+                  "draws": 2874,
+                  "losses": 2993,
+                  "points": 15273,
+                  "pointsPerMatch": 1.5273
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2993,
+                  "draws": 2874,
+                  "losses": 4133,
+                  "points": 11853,
+                  "pointsPerMatch": 1.1853
+                },
+                "pointsPerMatchDifference": 0.3420000000000001,
+                "absolutePointsPerMatchDifference": 0.3420000000000001
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4214,
+                  "draws": 2807,
+                  "losses": 2979,
+                  "points": 15449,
+                  "pointsPerMatch": 1.5449
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2979,
+                  "draws": 2807,
+                  "losses": 4214,
+                  "points": 11744,
+                  "pointsPerMatch": 1.1744
+                },
+                "pointsPerMatchDifference": 0.37049999999999983,
+                "absolutePointsPerMatchDifference": 0.37049999999999983
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4164,
+                  "draws": 2835,
+                  "losses": 3001,
+                  "points": 15327,
+                  "pointsPerMatch": 1.5327
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 3001,
+                  "draws": 2835,
+                  "losses": 4164,
+                  "points": 11838,
+                  "pointsPerMatch": 1.1838
+                },
+                "pointsPerMatchDifference": 0.3489,
+                "absolutePointsPerMatchDifference": 0.3489
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 12511,
+                "draws": 8516,
+                "losses": 8973,
+                "points": 46049,
+                "pointsPerMatch": 1.5349666666666666
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 8973,
+                "draws": 8516,
+                "losses": 12511,
+                "points": 35435,
+                "pointsPerMatch": 1.1811666666666667
+              },
+              "pointsPerMatchDifference": 0.3537999999999999,
+              "absolutePointsPerMatchDifference": 0.3537999999999999
+            }
+          }
+        ],
+        "meanPointsPerMatchDifference": 0.3553124999999999,
+        "absoluteMeanPointsPerMatchDifference": 0.3553124999999999,
+        "meanAbsolutePointsPerMatchDifference": 0.3553124999999999,
+        "sampleStandardDeviation": 0.01383488731948541,
+        "standardErrorOfMean": 0.004891371320279955,
+        "minimumPointsPerMatchDifference": 0.33609999999999984,
+        "maximumPointsPerMatchDifference": 0.37470000000000003
+      },
+      {
+        "firstIdentity": "passing",
+        "secondIdentity": "balanced",
+        "pairedSamples": [
+          {
+            "generatorSeed": 198811001,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3800,
+                  "draws": 2808,
+                  "losses": 3392,
+                  "points": 14208,
+                  "pointsPerMatch": 1.4208
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3392,
+                  "draws": 2808,
+                  "losses": 3800,
+                  "points": 12984,
+                  "pointsPerMatch": 1.2984
+                },
+                "pointsPerMatchDifference": 0.12240000000000006,
+                "absolutePointsPerMatchDifference": 0.12240000000000006
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3842,
+                  "draws": 2790,
+                  "losses": 3368,
+                  "points": 14316,
+                  "pointsPerMatch": 1.4316
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3368,
+                  "draws": 2790,
+                  "losses": 3842,
+                  "points": 12894,
+                  "pointsPerMatch": 1.2894
+                },
+                "pointsPerMatchDifference": 0.14219999999999988,
+                "absolutePointsPerMatchDifference": 0.14219999999999988
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3787,
+                  "draws": 2850,
+                  "losses": 3363,
+                  "points": 14211,
+                  "pointsPerMatch": 1.4211
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3363,
+                  "draws": 2850,
+                  "losses": 3787,
+                  "points": 12939,
+                  "pointsPerMatch": 1.2939
+                },
+                "pointsPerMatchDifference": 0.12719999999999998,
+                "absolutePointsPerMatchDifference": 0.12719999999999998
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 11429,
+                "draws": 8448,
+                "losses": 10123,
+                "points": 42735,
+                "pointsPerMatch": 1.4245
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 10123,
+                "draws": 8448,
+                "losses": 11429,
+                "points": 38817,
+                "pointsPerMatch": 1.2939
+              },
+              "pointsPerMatchDifference": 0.13060000000000005,
+              "absolutePointsPerMatchDifference": 0.13060000000000005
+            }
+          },
+          {
+            "generatorSeed": 198811002,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3893,
+                  "draws": 2643,
+                  "losses": 3464,
+                  "points": 14322,
+                  "pointsPerMatch": 1.4322
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3464,
+                  "draws": 2643,
+                  "losses": 3893,
+                  "points": 13035,
+                  "pointsPerMatch": 1.3035
+                },
+                "pointsPerMatchDifference": 0.12869999999999981,
+                "absolutePointsPerMatchDifference": 0.12869999999999981
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3877,
+                  "draws": 2689,
+                  "losses": 3434,
+                  "points": 14320,
+                  "pointsPerMatch": 1.432
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3434,
+                  "draws": 2689,
+                  "losses": 3877,
+                  "points": 12991,
+                  "pointsPerMatch": 1.2991
+                },
+                "pointsPerMatchDifference": 0.13290000000000002,
+                "absolutePointsPerMatchDifference": 0.13290000000000002
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3887,
+                  "draws": 2657,
+                  "losses": 3456,
+                  "points": 14318,
+                  "pointsPerMatch": 1.4318
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3456,
+                  "draws": 2657,
+                  "losses": 3887,
+                  "points": 13025,
+                  "pointsPerMatch": 1.3025
+                },
+                "pointsPerMatchDifference": 0.12929999999999997,
+                "absolutePointsPerMatchDifference": 0.12929999999999997
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 11657,
+                "draws": 7989,
+                "losses": 10354,
+                "points": 42960,
+                "pointsPerMatch": 1.432
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 10354,
+                "draws": 7989,
+                "losses": 11657,
+                "points": 39051,
+                "pointsPerMatch": 1.3017
+              },
+              "pointsPerMatchDifference": 0.13029999999999986,
+              "absolutePointsPerMatchDifference": 0.13029999999999986
+            }
+          },
+          {
+            "generatorSeed": 198811003,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3961,
+                  "draws": 2532,
+                  "losses": 3507,
+                  "points": 14415,
+                  "pointsPerMatch": 1.4415
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3507,
+                  "draws": 2532,
+                  "losses": 3961,
+                  "points": 13053,
+                  "pointsPerMatch": 1.3053
+                },
+                "pointsPerMatchDifference": 0.1362000000000001,
+                "absolutePointsPerMatchDifference": 0.1362000000000001
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3997,
+                  "draws": 2549,
+                  "losses": 3454,
+                  "points": 14540,
+                  "pointsPerMatch": 1.454
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3454,
+                  "draws": 2549,
+                  "losses": 3997,
+                  "points": 12911,
+                  "pointsPerMatch": 1.2911
+                },
+                "pointsPerMatchDifference": 0.16290000000000004,
+                "absolutePointsPerMatchDifference": 0.16290000000000004
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3923,
+                  "draws": 2524,
+                  "losses": 3553,
+                  "points": 14293,
+                  "pointsPerMatch": 1.4293
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3553,
+                  "draws": 2524,
+                  "losses": 3923,
+                  "points": 13183,
+                  "pointsPerMatch": 1.3183
+                },
+                "pointsPerMatchDifference": 0.11099999999999999,
+                "absolutePointsPerMatchDifference": 0.11099999999999999
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 11881,
+                "draws": 7605,
+                "losses": 10514,
+                "points": 43248,
+                "pointsPerMatch": 1.4416
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 10514,
+                "draws": 7605,
+                "losses": 11881,
+                "points": 39147,
+                "pointsPerMatch": 1.3049
+              },
+              "pointsPerMatchDifference": 0.13670000000000004,
+              "absolutePointsPerMatchDifference": 0.13670000000000004
+            }
+          },
+          {
+            "generatorSeed": 198811004,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3769,
+                  "draws": 2821,
+                  "losses": 3410,
+                  "points": 14128,
+                  "pointsPerMatch": 1.4128
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3410,
+                  "draws": 2821,
+                  "losses": 3769,
+                  "points": 13051,
+                  "pointsPerMatch": 1.3051
+                },
+                "pointsPerMatchDifference": 0.10770000000000013,
+                "absolutePointsPerMatchDifference": 0.10770000000000013
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3773,
+                  "draws": 2903,
+                  "losses": 3324,
+                  "points": 14222,
+                  "pointsPerMatch": 1.4222
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3324,
+                  "draws": 2903,
+                  "losses": 3773,
+                  "points": 12875,
+                  "pointsPerMatch": 1.2875
+                },
+                "pointsPerMatchDifference": 0.13469999999999982,
+                "absolutePointsPerMatchDifference": 0.13469999999999982
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3726,
+                  "draws": 2849,
+                  "losses": 3425,
+                  "points": 14027,
+                  "pointsPerMatch": 1.4027
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3425,
+                  "draws": 2849,
+                  "losses": 3726,
+                  "points": 13124,
+                  "pointsPerMatch": 1.3124
+                },
+                "pointsPerMatchDifference": 0.09030000000000005,
+                "absolutePointsPerMatchDifference": 0.09030000000000005
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 11268,
+                "draws": 8573,
+                "losses": 10159,
+                "points": 42377,
+                "pointsPerMatch": 1.4125666666666667
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 10159,
+                "draws": 8573,
+                "losses": 11268,
+                "points": 39050,
+                "pointsPerMatch": 1.3016666666666667
+              },
+              "pointsPerMatchDifference": 0.1109,
+              "absolutePointsPerMatchDifference": 0.1109
+            }
+          },
+          {
+            "generatorSeed": 198811005,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3993,
+                  "draws": 2455,
+                  "losses": 3552,
+                  "points": 14434,
+                  "pointsPerMatch": 1.4434
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3552,
+                  "draws": 2455,
+                  "losses": 3993,
+                  "points": 13111,
+                  "pointsPerMatch": 1.3111
+                },
+                "pointsPerMatchDifference": 0.13230000000000008,
+                "absolutePointsPerMatchDifference": 0.13230000000000008
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4053,
+                  "draws": 2506,
+                  "losses": 3441,
+                  "points": 14665,
+                  "pointsPerMatch": 1.4665
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3441,
+                  "draws": 2506,
+                  "losses": 4053,
+                  "points": 12829,
+                  "pointsPerMatch": 1.2829
+                },
+                "pointsPerMatchDifference": 0.18359999999999999,
+                "absolutePointsPerMatchDifference": 0.18359999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3922,
+                  "draws": 2504,
+                  "losses": 3574,
+                  "points": 14270,
+                  "pointsPerMatch": 1.427
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3574,
+                  "draws": 2504,
+                  "losses": 3922,
+                  "points": 13226,
+                  "pointsPerMatch": 1.3226
+                },
+                "pointsPerMatchDifference": 0.10440000000000005,
+                "absolutePointsPerMatchDifference": 0.10440000000000005
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 11968,
+                "draws": 7465,
+                "losses": 10567,
+                "points": 43369,
+                "pointsPerMatch": 1.4456333333333333
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 10567,
+                "draws": 7465,
+                "losses": 11968,
+                "points": 39166,
+                "pointsPerMatch": 1.3055333333333334
+              },
+              "pointsPerMatchDifference": 0.1400999999999999,
+              "absolutePointsPerMatchDifference": 0.1400999999999999
+            }
+          },
+          {
+            "generatorSeed": 198811006,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3867,
+                  "draws": 2695,
+                  "losses": 3438,
+                  "points": 14296,
+                  "pointsPerMatch": 1.4296
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3438,
+                  "draws": 2695,
+                  "losses": 3867,
+                  "points": 13009,
+                  "pointsPerMatch": 1.3009
+                },
+                "pointsPerMatchDifference": 0.12870000000000004,
+                "absolutePointsPerMatchDifference": 0.12870000000000004
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3885,
+                  "draws": 2735,
+                  "losses": 3380,
+                  "points": 14390,
+                  "pointsPerMatch": 1.439
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3380,
+                  "draws": 2735,
+                  "losses": 3885,
+                  "points": 12875,
+                  "pointsPerMatch": 1.2875
+                },
+                "pointsPerMatchDifference": 0.15149999999999997,
+                "absolutePointsPerMatchDifference": 0.15149999999999997
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3853,
+                  "draws": 2679,
+                  "losses": 3468,
+                  "points": 14238,
+                  "pointsPerMatch": 1.4238
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3468,
+                  "draws": 2679,
+                  "losses": 3853,
+                  "points": 13083,
+                  "pointsPerMatch": 1.3083
+                },
+                "pointsPerMatchDifference": 0.11549999999999994,
+                "absolutePointsPerMatchDifference": 0.11549999999999994
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 11605,
+                "draws": 8109,
+                "losses": 10286,
+                "points": 42924,
+                "pointsPerMatch": 1.4308
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 10286,
+                "draws": 8109,
+                "losses": 11605,
+                "points": 38967,
+                "pointsPerMatch": 1.2989
+              },
+              "pointsPerMatchDifference": 0.13190000000000013,
+              "absolutePointsPerMatchDifference": 0.13190000000000013
+            }
+          },
+          {
+            "generatorSeed": 198811007,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4061,
+                  "draws": 2378,
+                  "losses": 3561,
+                  "points": 14561,
+                  "pointsPerMatch": 1.4561
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3561,
+                  "draws": 2378,
+                  "losses": 4061,
+                  "points": 13061,
+                  "pointsPerMatch": 1.3061
+                },
+                "pointsPerMatchDifference": 0.1499999999999999,
+                "absolutePointsPerMatchDifference": 0.1499999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4043,
+                  "draws": 2467,
+                  "losses": 3490,
+                  "points": 14596,
+                  "pointsPerMatch": 1.4596
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3490,
+                  "draws": 2467,
+                  "losses": 4043,
+                  "points": 12937,
+                  "pointsPerMatch": 1.2937
+                },
+                "pointsPerMatchDifference": 0.16589999999999994,
+                "absolutePointsPerMatchDifference": 0.16589999999999994
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 4049,
+                  "draws": 2402,
+                  "losses": 3549,
+                  "points": 14549,
+                  "pointsPerMatch": 1.4549
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3549,
+                  "draws": 2402,
+                  "losses": 4049,
+                  "points": 13049,
+                  "pointsPerMatch": 1.3049
+                },
+                "pointsPerMatchDifference": 0.15000000000000013,
+                "absolutePointsPerMatchDifference": 0.15000000000000013
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 12153,
+                "draws": 7247,
+                "losses": 10600,
+                "points": 43706,
+                "pointsPerMatch": 1.4568666666666668
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 10600,
+                "draws": 7247,
+                "losses": 12153,
+                "points": 39047,
+                "pointsPerMatch": 1.3015666666666668
+              },
+              "pointsPerMatchDifference": 0.1553,
+              "absolutePointsPerMatchDifference": 0.1553
+            }
+          },
+          {
+            "generatorSeed": 198811008,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3850,
+                  "draws": 2730,
+                  "losses": 3420,
+                  "points": 14280,
+                  "pointsPerMatch": 1.428
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3420,
+                  "draws": 2730,
+                  "losses": 3850,
+                  "points": 12990,
+                  "pointsPerMatch": 1.299
+                },
+                "pointsPerMatchDifference": 0.129,
+                "absolutePointsPerMatchDifference": 0.129
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3847,
+                  "draws": 2739,
+                  "losses": 3414,
+                  "points": 14280,
+                  "pointsPerMatch": 1.428
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3414,
+                  "draws": 2739,
+                  "losses": 3847,
+                  "points": 12981,
+                  "pointsPerMatch": 1.2981
+                },
+                "pointsPerMatchDifference": 0.1298999999999999,
+                "absolutePointsPerMatchDifference": 0.1298999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "passing",
+                  "wins": 3843,
+                  "draws": 2702,
+                  "losses": 3455,
+                  "points": 14231,
+                  "pointsPerMatch": 1.4231
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3455,
+                  "draws": 2702,
+                  "losses": 3843,
+                  "points": 13067,
+                  "pointsPerMatch": 1.3067
+                },
+                "pointsPerMatchDifference": 0.11640000000000006,
+                "absolutePointsPerMatchDifference": 0.11640000000000006
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "passing",
+                "wins": 11540,
+                "draws": 8171,
+                "losses": 10289,
+                "points": 42791,
+                "pointsPerMatch": 1.4263666666666666
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 10289,
+                "draws": 8171,
+                "losses": 11540,
+                "points": 39038,
+                "pointsPerMatch": 1.3012666666666666
+              },
+              "pointsPerMatchDifference": 0.1251,
+              "absolutePointsPerMatchDifference": 0.1251
+            }
+          }
+        ],
+        "meanPointsPerMatchDifference": 0.1326125,
+        "absoluteMeanPointsPerMatchDifference": 0.1326125,
+        "meanAbsolutePointsPerMatchDifference": 0.1326125,
+        "sampleStandardDeviation": 0.012678827965211468,
+        "standardErrorOfMean": 0.004482642615849333,
+        "minimumPointsPerMatchDifference": 0.1109,
+        "maximumPointsPerMatchDifference": 0.1553
+      },
+      {
+        "firstIdentity": "direct",
+        "secondIdentity": "defensive",
+        "pairedSamples": [
+          {
+            "generatorSeed": 198811001,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4591,
+                  "draws": 2985,
+                  "losses": 2424,
+                  "points": 16758,
+                  "pointsPerMatch": 1.6758
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2424,
+                  "draws": 2985,
+                  "losses": 4591,
+                  "points": 10257,
+                  "pointsPerMatch": 1.0257
+                },
+                "pointsPerMatchDifference": 0.6500999999999999,
+                "absolutePointsPerMatchDifference": 0.6500999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4582,
+                  "draws": 2953,
+                  "losses": 2465,
+                  "points": 16699,
+                  "pointsPerMatch": 1.6699
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2465,
+                  "draws": 2953,
+                  "losses": 4582,
+                  "points": 10348,
+                  "pointsPerMatch": 1.0348
+                },
+                "pointsPerMatchDifference": 0.6351,
+                "absolutePointsPerMatchDifference": 0.6351
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4612,
+                  "draws": 2933,
+                  "losses": 2455,
+                  "points": 16769,
+                  "pointsPerMatch": 1.6769
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2455,
+                  "draws": 2933,
+                  "losses": 4612,
+                  "points": 10298,
+                  "pointsPerMatch": 1.0298
+                },
+                "pointsPerMatchDifference": 0.6471,
+                "absolutePointsPerMatchDifference": 0.6471
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 13785,
+                "draws": 8871,
+                "losses": 7344,
+                "points": 50226,
+                "pointsPerMatch": 1.6742
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 7344,
+                "draws": 8871,
+                "losses": 13785,
+                "points": 30903,
+                "pointsPerMatch": 1.0301
+              },
+              "pointsPerMatchDifference": 0.6440999999999999,
+              "absolutePointsPerMatchDifference": 0.6440999999999999
+            }
+          },
+          {
+            "generatorSeed": 198811002,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4726,
+                  "draws": 2744,
+                  "losses": 2530,
+                  "points": 16922,
+                  "pointsPerMatch": 1.6922
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2530,
+                  "draws": 2744,
+                  "losses": 4726,
+                  "points": 10334,
+                  "pointsPerMatch": 1.0334
+                },
+                "pointsPerMatchDifference": 0.6587999999999998,
+                "absolutePointsPerMatchDifference": 0.6587999999999998
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4748,
+                  "draws": 2783,
+                  "losses": 2469,
+                  "points": 17027,
+                  "pointsPerMatch": 1.7027
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2469,
+                  "draws": 2783,
+                  "losses": 4748,
+                  "points": 10190,
+                  "pointsPerMatch": 1.019
+                },
+                "pointsPerMatchDifference": 0.6837000000000002,
+                "absolutePointsPerMatchDifference": 0.6837000000000002
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4763,
+                  "draws": 2716,
+                  "losses": 2521,
+                  "points": 17005,
+                  "pointsPerMatch": 1.7005
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2521,
+                  "draws": 2716,
+                  "losses": 4763,
+                  "points": 10279,
+                  "pointsPerMatch": 1.0279
+                },
+                "pointsPerMatchDifference": 0.6725999999999999,
+                "absolutePointsPerMatchDifference": 0.6725999999999999
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 14237,
+                "draws": 8243,
+                "losses": 7520,
+                "points": 50954,
+                "pointsPerMatch": 1.6984666666666666
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 7520,
+                "draws": 8243,
+                "losses": 14237,
+                "points": 30803,
+                "pointsPerMatch": 1.0267666666666666
+              },
+              "pointsPerMatchDifference": 0.6717,
+              "absolutePointsPerMatchDifference": 0.6717
+            }
+          },
+          {
+            "generatorSeed": 198811003,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4757,
+                  "draws": 2663,
+                  "losses": 2580,
+                  "points": 16934,
+                  "pointsPerMatch": 1.6934
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2580,
+                  "draws": 2663,
+                  "losses": 4757,
+                  "points": 10403,
+                  "pointsPerMatch": 1.0403
+                },
+                "pointsPerMatchDifference": 0.6531,
+                "absolutePointsPerMatchDifference": 0.6531
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4815,
+                  "draws": 2551,
+                  "losses": 2634,
+                  "points": 16996,
+                  "pointsPerMatch": 1.6996
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2634,
+                  "draws": 2551,
+                  "losses": 4815,
+                  "points": 10453,
+                  "pointsPerMatch": 1.0453
+                },
+                "pointsPerMatchDifference": 0.6543000000000001,
+                "absolutePointsPerMatchDifference": 0.6543000000000001
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4778,
+                  "draws": 2614,
+                  "losses": 2608,
+                  "points": 16948,
+                  "pointsPerMatch": 1.6948
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2608,
+                  "draws": 2614,
+                  "losses": 4778,
+                  "points": 10438,
+                  "pointsPerMatch": 1.0438
+                },
+                "pointsPerMatchDifference": 0.651,
+                "absolutePointsPerMatchDifference": 0.651
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 14350,
+                "draws": 7828,
+                "losses": 7822,
+                "points": 50878,
+                "pointsPerMatch": 1.6959333333333333
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 7822,
+                "draws": 7828,
+                "losses": 14350,
+                "points": 31294,
+                "pointsPerMatch": 1.0431333333333332
+              },
+              "pointsPerMatchDifference": 0.6528,
+              "absolutePointsPerMatchDifference": 0.6528
+            }
+          },
+          {
+            "generatorSeed": 198811004,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4652,
+                  "draws": 3016,
+                  "losses": 2332,
+                  "points": 16972,
+                  "pointsPerMatch": 1.6972
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2332,
+                  "draws": 3016,
+                  "losses": 4652,
+                  "points": 10012,
+                  "pointsPerMatch": 1.0012
+                },
+                "pointsPerMatchDifference": 0.696,
+                "absolutePointsPerMatchDifference": 0.696
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4702,
+                  "draws": 2970,
+                  "losses": 2328,
+                  "points": 17076,
+                  "pointsPerMatch": 1.7076
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2328,
+                  "draws": 2970,
+                  "losses": 4702,
+                  "points": 9954,
+                  "pointsPerMatch": 0.9954
+                },
+                "pointsPerMatchDifference": 0.7122,
+                "absolutePointsPerMatchDifference": 0.7122
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4688,
+                  "draws": 2933,
+                  "losses": 2379,
+                  "points": 16997,
+                  "pointsPerMatch": 1.6997
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2379,
+                  "draws": 2933,
+                  "losses": 4688,
+                  "points": 10070,
+                  "pointsPerMatch": 1.007
+                },
+                "pointsPerMatchDifference": 0.6927000000000001,
+                "absolutePointsPerMatchDifference": 0.6927000000000001
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 14042,
+                "draws": 8919,
+                "losses": 7039,
+                "points": 51045,
+                "pointsPerMatch": 1.7015
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 7039,
+                "draws": 8919,
+                "losses": 14042,
+                "points": 30036,
+                "pointsPerMatch": 1.0012
+              },
+              "pointsPerMatchDifference": 0.7002999999999999,
+              "absolutePointsPerMatchDifference": 0.7002999999999999
+            }
+          },
+          {
+            "generatorSeed": 198811005,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4802,
+                  "draws": 2630,
+                  "losses": 2568,
+                  "points": 17036,
+                  "pointsPerMatch": 1.7036
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2568,
+                  "draws": 2630,
+                  "losses": 4802,
+                  "points": 10334,
+                  "pointsPerMatch": 1.0334
+                },
+                "pointsPerMatchDifference": 0.6701999999999999,
+                "absolutePointsPerMatchDifference": 0.6701999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4838,
+                  "draws": 2520,
+                  "losses": 2642,
+                  "points": 17034,
+                  "pointsPerMatch": 1.7034
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2642,
+                  "draws": 2520,
+                  "losses": 4838,
+                  "points": 10446,
+                  "pointsPerMatch": 1.0446
+                },
+                "pointsPerMatchDifference": 0.6588,
+                "absolutePointsPerMatchDifference": 0.6588
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4777,
+                  "draws": 2615,
+                  "losses": 2608,
+                  "points": 16946,
+                  "pointsPerMatch": 1.6946
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2608,
+                  "draws": 2615,
+                  "losses": 4777,
+                  "points": 10439,
+                  "pointsPerMatch": 1.0439
+                },
+                "pointsPerMatchDifference": 0.6507000000000001,
+                "absolutePointsPerMatchDifference": 0.6507000000000001
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 14417,
+                "draws": 7765,
+                "losses": 7818,
+                "points": 51016,
+                "pointsPerMatch": 1.7005333333333332
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 7818,
+                "draws": 7765,
+                "losses": 14417,
+                "points": 31219,
+                "pointsPerMatch": 1.0406333333333333
+              },
+              "pointsPerMatchDifference": 0.6598999999999999,
+              "absolutePointsPerMatchDifference": 0.6598999999999999
+            }
+          },
+          {
+            "generatorSeed": 198811006,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4745,
+                  "draws": 2801,
+                  "losses": 2454,
+                  "points": 17036,
+                  "pointsPerMatch": 1.7036
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2454,
+                  "draws": 2801,
+                  "losses": 4745,
+                  "points": 10163,
+                  "pointsPerMatch": 1.0163
+                },
+                "pointsPerMatchDifference": 0.6873,
+                "absolutePointsPerMatchDifference": 0.6873
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4825,
+                  "draws": 2745,
+                  "losses": 2430,
+                  "points": 17220,
+                  "pointsPerMatch": 1.722
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2430,
+                  "draws": 2745,
+                  "losses": 4825,
+                  "points": 10035,
+                  "pointsPerMatch": 1.0035
+                },
+                "pointsPerMatchDifference": 0.7184999999999999,
+                "absolutePointsPerMatchDifference": 0.7184999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4774,
+                  "draws": 2762,
+                  "losses": 2464,
+                  "points": 17084,
+                  "pointsPerMatch": 1.7084
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2464,
+                  "draws": 2762,
+                  "losses": 4774,
+                  "points": 10154,
+                  "pointsPerMatch": 1.0154
+                },
+                "pointsPerMatchDifference": 0.6929999999999998,
+                "absolutePointsPerMatchDifference": 0.6929999999999998
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 14344,
+                "draws": 8308,
+                "losses": 7348,
+                "points": 51340,
+                "pointsPerMatch": 1.7113333333333334
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 7348,
+                "draws": 8308,
+                "losses": 14344,
+                "points": 30352,
+                "pointsPerMatch": 1.0117333333333334
+              },
+              "pointsPerMatchDifference": 0.6996,
+              "absolutePointsPerMatchDifference": 0.6996
+            }
+          },
+          {
+            "generatorSeed": 198811007,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4860,
+                  "draws": 2431,
+                  "losses": 2709,
+                  "points": 17011,
+                  "pointsPerMatch": 1.7011
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2709,
+                  "draws": 2431,
+                  "losses": 4860,
+                  "points": 10558,
+                  "pointsPerMatch": 1.0558
+                },
+                "pointsPerMatchDifference": 0.6453,
+                "absolutePointsPerMatchDifference": 0.6453
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4860,
+                  "draws": 2445,
+                  "losses": 2695,
+                  "points": 17025,
+                  "pointsPerMatch": 1.7025
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2695,
+                  "draws": 2445,
+                  "losses": 4860,
+                  "points": 10530,
+                  "pointsPerMatch": 1.053
+                },
+                "pointsPerMatchDifference": 0.6495,
+                "absolutePointsPerMatchDifference": 0.6495
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4850,
+                  "draws": 2418,
+                  "losses": 2732,
+                  "points": 16968,
+                  "pointsPerMatch": 1.6968
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2732,
+                  "draws": 2418,
+                  "losses": 4850,
+                  "points": 10614,
+                  "pointsPerMatch": 1.0614
+                },
+                "pointsPerMatchDifference": 0.6354000000000002,
+                "absolutePointsPerMatchDifference": 0.6354000000000002
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 14570,
+                "draws": 7294,
+                "losses": 8136,
+                "points": 51004,
+                "pointsPerMatch": 1.7001333333333333
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 8136,
+                "draws": 7294,
+                "losses": 14570,
+                "points": 31702,
+                "pointsPerMatch": 1.0567333333333333
+              },
+              "pointsPerMatchDifference": 0.6434,
+              "absolutePointsPerMatchDifference": 0.6434
+            }
+          },
+          {
+            "generatorSeed": 198811008,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4765,
+                  "draws": 2828,
+                  "losses": 2407,
+                  "points": 17123,
+                  "pointsPerMatch": 1.7123
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2407,
+                  "draws": 2828,
+                  "losses": 4765,
+                  "points": 10049,
+                  "pointsPerMatch": 1.0049
+                },
+                "pointsPerMatchDifference": 0.7074,
+                "absolutePointsPerMatchDifference": 0.7074
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4808,
+                  "draws": 2781,
+                  "losses": 2411,
+                  "points": 17205,
+                  "pointsPerMatch": 1.7205
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2411,
+                  "draws": 2781,
+                  "losses": 4808,
+                  "points": 10014,
+                  "pointsPerMatch": 1.0014
+                },
+                "pointsPerMatchDifference": 0.7190999999999999,
+                "absolutePointsPerMatchDifference": 0.7190999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4790,
+                  "draws": 2792,
+                  "losses": 2418,
+                  "points": 17162,
+                  "pointsPerMatch": 1.7162
+                },
+                "second": {
+                  "identity": "defensive",
+                  "wins": 2418,
+                  "draws": 2792,
+                  "losses": 4790,
+                  "points": 10046,
+                  "pointsPerMatch": 1.0046
+                },
+                "pointsPerMatchDifference": 0.7116,
+                "absolutePointsPerMatchDifference": 0.7116
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 14363,
+                "draws": 8401,
+                "losses": 7236,
+                "points": 51490,
+                "pointsPerMatch": 1.7163333333333333
+              },
+              "second": {
+                "identity": "defensive",
+                "wins": 7236,
+                "draws": 8401,
+                "losses": 14363,
+                "points": 30109,
+                "pointsPerMatch": 1.0036333333333334
+              },
+              "pointsPerMatchDifference": 0.7126999999999999,
+              "absolutePointsPerMatchDifference": 0.7126999999999999
+            }
+          }
+        ],
+        "meanPointsPerMatchDifference": 0.6730624999999999,
+        "absoluteMeanPointsPerMatchDifference": 0.6730624999999999,
+        "meanAbsolutePointsPerMatchDifference": 0.6730624999999999,
+        "sampleStandardDeviation": 0.02757229134475405,
+        "standardErrorOfMean": 0.00974827709136337,
+        "minimumPointsPerMatchDifference": 0.6434,
+        "maximumPointsPerMatchDifference": 0.7126999999999999
+      },
+      {
+        "firstIdentity": "direct",
+        "secondIdentity": "balanced",
+        "pairedSamples": [
+          {
+            "generatorSeed": 198811001,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4246,
+                  "draws": 2934,
+                  "losses": 2820,
+                  "points": 15672,
+                  "pointsPerMatch": 1.5672
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2820,
+                  "draws": 2934,
+                  "losses": 4246,
+                  "points": 11394,
+                  "pointsPerMatch": 1.1394
+                },
+                "pointsPerMatchDifference": 0.42779999999999996,
+                "absolutePointsPerMatchDifference": 0.42779999999999996
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4278,
+                  "draws": 2884,
+                  "losses": 2838,
+                  "points": 15718,
+                  "pointsPerMatch": 1.5718
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2838,
+                  "draws": 2884,
+                  "losses": 4278,
+                  "points": 11398,
+                  "pointsPerMatch": 1.1398
+                },
+                "pointsPerMatchDifference": 0.43200000000000016,
+                "absolutePointsPerMatchDifference": 0.43200000000000016
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4302,
+                  "draws": 2862,
+                  "losses": 2836,
+                  "points": 15768,
+                  "pointsPerMatch": 1.5768
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2836,
+                  "draws": 2862,
+                  "losses": 4302,
+                  "points": 11370,
+                  "pointsPerMatch": 1.137
+                },
+                "pointsPerMatchDifference": 0.43979999999999997,
+                "absolutePointsPerMatchDifference": 0.43979999999999997
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 12826,
+                "draws": 8680,
+                "losses": 8494,
+                "points": 47158,
+                "pointsPerMatch": 1.5719333333333334
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 8494,
+                "draws": 8680,
+                "losses": 12826,
+                "points": 34162,
+                "pointsPerMatch": 1.1387333333333334
+              },
+              "pointsPerMatchDifference": 0.43320000000000003,
+              "absolutePointsPerMatchDifference": 0.43320000000000003
+            }
+          },
+          {
+            "generatorSeed": 198811002,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4383,
+                  "draws": 2655,
+                  "losses": 2962,
+                  "points": 15804,
+                  "pointsPerMatch": 1.5804
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2962,
+                  "draws": 2655,
+                  "losses": 4383,
+                  "points": 11541,
+                  "pointsPerMatch": 1.1541
+                },
+                "pointsPerMatchDifference": 0.4263000000000001,
+                "absolutePointsPerMatchDifference": 0.4263000000000001
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4423,
+                  "draws": 2715,
+                  "losses": 2862,
+                  "points": 15984,
+                  "pointsPerMatch": 1.5984
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2862,
+                  "draws": 2715,
+                  "losses": 4423,
+                  "points": 11301,
+                  "pointsPerMatch": 1.1301
+                },
+                "pointsPerMatchDifference": 0.46829999999999994,
+                "absolutePointsPerMatchDifference": 0.46829999999999994
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4404,
+                  "draws": 2699,
+                  "losses": 2897,
+                  "points": 15911,
+                  "pointsPerMatch": 1.5911
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2897,
+                  "draws": 2699,
+                  "losses": 4404,
+                  "points": 11390,
+                  "pointsPerMatch": 1.139
+                },
+                "pointsPerMatchDifference": 0.45209999999999995,
+                "absolutePointsPerMatchDifference": 0.45209999999999995
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 13210,
+                "draws": 8069,
+                "losses": 8721,
+                "points": 47699,
+                "pointsPerMatch": 1.5899666666666668
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 8721,
+                "draws": 8069,
+                "losses": 13210,
+                "points": 34232,
+                "pointsPerMatch": 1.1410666666666667
+              },
+              "pointsPerMatchDifference": 0.4489000000000001,
+              "absolutePointsPerMatchDifference": 0.4489000000000001
+            }
+          },
+          {
+            "generatorSeed": 198811003,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4439,
+                  "draws": 2564,
+                  "losses": 2997,
+                  "points": 15881,
+                  "pointsPerMatch": 1.5881
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2997,
+                  "draws": 2564,
+                  "losses": 4439,
+                  "points": 11555,
+                  "pointsPerMatch": 1.1555
+                },
+                "pointsPerMatchDifference": 0.4326000000000001,
+                "absolutePointsPerMatchDifference": 0.4326000000000001
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4468,
+                  "draws": 2510,
+                  "losses": 3022,
+                  "points": 15914,
+                  "pointsPerMatch": 1.5914
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3022,
+                  "draws": 2510,
+                  "losses": 4468,
+                  "points": 11576,
+                  "pointsPerMatch": 1.1576
+                },
+                "pointsPerMatchDifference": 0.43379999999999996,
+                "absolutePointsPerMatchDifference": 0.43379999999999996
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4456,
+                  "draws": 2536,
+                  "losses": 3008,
+                  "points": 15904,
+                  "pointsPerMatch": 1.5904
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3008,
+                  "draws": 2536,
+                  "losses": 4456,
+                  "points": 11560,
+                  "pointsPerMatch": 1.156
+                },
+                "pointsPerMatchDifference": 0.4344000000000001,
+                "absolutePointsPerMatchDifference": 0.4344000000000001
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 13363,
+                "draws": 7610,
+                "losses": 9027,
+                "points": 47699,
+                "pointsPerMatch": 1.5899666666666668
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 9027,
+                "draws": 7610,
+                "losses": 13363,
+                "points": 34691,
+                "pointsPerMatch": 1.1563666666666668
+              },
+              "pointsPerMatchDifference": 0.4336,
+              "absolutePointsPerMatchDifference": 0.4336
+            }
+          },
+          {
+            "generatorSeed": 198811004,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4326,
+                  "draws": 2966,
+                  "losses": 2708,
+                  "points": 15944,
+                  "pointsPerMatch": 1.5944
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2708,
+                  "draws": 2966,
+                  "losses": 4326,
+                  "points": 11090,
+                  "pointsPerMatch": 1.109
+                },
+                "pointsPerMatchDifference": 0.48540000000000005,
+                "absolutePointsPerMatchDifference": 0.48540000000000005
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4388,
+                  "draws": 2880,
+                  "losses": 2732,
+                  "points": 16044,
+                  "pointsPerMatch": 1.6044
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2732,
+                  "draws": 2880,
+                  "losses": 4388,
+                  "points": 11076,
+                  "pointsPerMatch": 1.1076
+                },
+                "pointsPerMatchDifference": 0.49680000000000013,
+                "absolutePointsPerMatchDifference": 0.49680000000000013
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4372,
+                  "draws": 2899,
+                  "losses": 2729,
+                  "points": 16015,
+                  "pointsPerMatch": 1.6015
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2729,
+                  "draws": 2899,
+                  "losses": 4372,
+                  "points": 11086,
+                  "pointsPerMatch": 1.1086
+                },
+                "pointsPerMatchDifference": 0.4928999999999999,
+                "absolutePointsPerMatchDifference": 0.4928999999999999
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 13086,
+                "draws": 8745,
+                "losses": 8169,
+                "points": 48003,
+                "pointsPerMatch": 1.6001
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 8169,
+                "draws": 8745,
+                "losses": 13086,
+                "points": 33252,
+                "pointsPerMatch": 1.1084
+              },
+              "pointsPerMatchDifference": 0.4917,
+              "absolutePointsPerMatchDifference": 0.4917
+            }
+          },
+          {
+            "generatorSeed": 198811005,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4513,
+                  "draws": 2496,
+                  "losses": 2991,
+                  "points": 16035,
+                  "pointsPerMatch": 1.6035
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2991,
+                  "draws": 2496,
+                  "losses": 4513,
+                  "points": 11469,
+                  "pointsPerMatch": 1.1469
+                },
+                "pointsPerMatchDifference": 0.4565999999999999,
+                "absolutePointsPerMatchDifference": 0.4565999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4513,
+                  "draws": 2436,
+                  "losses": 3051,
+                  "points": 15975,
+                  "pointsPerMatch": 1.5975
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3051,
+                  "draws": 2436,
+                  "losses": 4513,
+                  "points": 11589,
+                  "pointsPerMatch": 1.1589
+                },
+                "pointsPerMatchDifference": 0.4385999999999999,
+                "absolutePointsPerMatchDifference": 0.4385999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4450,
+                  "draws": 2529,
+                  "losses": 3021,
+                  "points": 15879,
+                  "pointsPerMatch": 1.5879
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3021,
+                  "draws": 2529,
+                  "losses": 4450,
+                  "points": 11592,
+                  "pointsPerMatch": 1.1592
+                },
+                "pointsPerMatchDifference": 0.4287000000000001,
+                "absolutePointsPerMatchDifference": 0.4287000000000001
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 13476,
+                "draws": 7461,
+                "losses": 9063,
+                "points": 47889,
+                "pointsPerMatch": 1.5963
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 9063,
+                "draws": 7461,
+                "losses": 13476,
+                "points": 34650,
+                "pointsPerMatch": 1.155
+              },
+              "pointsPerMatchDifference": 0.4413,
+              "absolutePointsPerMatchDifference": 0.4413
+            }
+          },
+          {
+            "generatorSeed": 198811006,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4442,
+                  "draws": 2696,
+                  "losses": 2862,
+                  "points": 16022,
+                  "pointsPerMatch": 1.6022
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2862,
+                  "draws": 2696,
+                  "losses": 4442,
+                  "points": 11282,
+                  "pointsPerMatch": 1.1282
+                },
+                "pointsPerMatchDifference": 0.474,
+                "absolutePointsPerMatchDifference": 0.474
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4489,
+                  "draws": 2643,
+                  "losses": 2868,
+                  "points": 16110,
+                  "pointsPerMatch": 1.611
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2868,
+                  "draws": 2643,
+                  "losses": 4489,
+                  "points": 11247,
+                  "pointsPerMatch": 1.1247
+                },
+                "pointsPerMatchDifference": 0.48629999999999995,
+                "absolutePointsPerMatchDifference": 0.48629999999999995
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4429,
+                  "draws": 2710,
+                  "losses": 2861,
+                  "points": 15997,
+                  "pointsPerMatch": 1.5997
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2861,
+                  "draws": 2710,
+                  "losses": 4429,
+                  "points": 11293,
+                  "pointsPerMatch": 1.1293
+                },
+                "pointsPerMatchDifference": 0.47039999999999993,
+                "absolutePointsPerMatchDifference": 0.47039999999999993
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 13360,
+                "draws": 8049,
+                "losses": 8591,
+                "points": 48129,
+                "pointsPerMatch": 1.6043
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 8591,
+                "draws": 8049,
+                "losses": 13360,
+                "points": 33822,
+                "pointsPerMatch": 1.1274
+              },
+              "pointsPerMatchDifference": 0.4769000000000001,
+              "absolutePointsPerMatchDifference": 0.4769000000000001
+            }
+          },
+          {
+            "generatorSeed": 198811007,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4483,
+                  "draws": 2430,
+                  "losses": 3087,
+                  "points": 15879,
+                  "pointsPerMatch": 1.5879
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3087,
+                  "draws": 2430,
+                  "losses": 4483,
+                  "points": 11691,
+                  "pointsPerMatch": 1.1691
+                },
+                "pointsPerMatchDifference": 0.41880000000000006,
+                "absolutePointsPerMatchDifference": 0.41880000000000006
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4453,
+                  "draws": 2486,
+                  "losses": 3061,
+                  "points": 15845,
+                  "pointsPerMatch": 1.5845
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3061,
+                  "draws": 2486,
+                  "losses": 4453,
+                  "points": 11669,
+                  "pointsPerMatch": 1.1669
+                },
+                "pointsPerMatchDifference": 0.41759999999999997,
+                "absolutePointsPerMatchDifference": 0.41759999999999997
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4508,
+                  "draws": 2374,
+                  "losses": 3118,
+                  "points": 15898,
+                  "pointsPerMatch": 1.5898
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3118,
+                  "draws": 2374,
+                  "losses": 4508,
+                  "points": 11728,
+                  "pointsPerMatch": 1.1728
+                },
+                "pointsPerMatchDifference": 0.41700000000000004,
+                "absolutePointsPerMatchDifference": 0.41700000000000004
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 13444,
+                "draws": 7290,
+                "losses": 9266,
+                "points": 47622,
+                "pointsPerMatch": 1.5874
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 9266,
+                "draws": 7290,
+                "losses": 13444,
+                "points": 35088,
+                "pointsPerMatch": 1.1696
+              },
+              "pointsPerMatchDifference": 0.41779999999999995,
+              "absolutePointsPerMatchDifference": 0.41779999999999995
+            }
+          },
+          {
+            "generatorSeed": 198811008,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4398,
+                  "draws": 2792,
+                  "losses": 2810,
+                  "points": 15986,
+                  "pointsPerMatch": 1.5986
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2810,
+                  "draws": 2792,
+                  "losses": 4398,
+                  "points": 11222,
+                  "pointsPerMatch": 1.1222
+                },
+                "pointsPerMatchDifference": 0.47639999999999993,
+                "absolutePointsPerMatchDifference": 0.47639999999999993
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4480,
+                  "draws": 2704,
+                  "losses": 2816,
+                  "points": 16144,
+                  "pointsPerMatch": 1.6144
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2816,
+                  "draws": 2704,
+                  "losses": 4480,
+                  "points": 11152,
+                  "pointsPerMatch": 1.1152
+                },
+                "pointsPerMatchDifference": 0.4992000000000001,
+                "absolutePointsPerMatchDifference": 0.4992000000000001
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "direct",
+                  "wins": 4474,
+                  "draws": 2677,
+                  "losses": 2849,
+                  "points": 16099,
+                  "pointsPerMatch": 1.6099
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 2849,
+                  "draws": 2677,
+                  "losses": 4474,
+                  "points": 11224,
+                  "pointsPerMatch": 1.1224
+                },
+                "pointsPerMatchDifference": 0.48750000000000004,
+                "absolutePointsPerMatchDifference": 0.48750000000000004
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "direct",
+                "wins": 13352,
+                "draws": 8173,
+                "losses": 8475,
+                "points": 48229,
+                "pointsPerMatch": 1.6076333333333332
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 8475,
+                "draws": 8173,
+                "losses": 13352,
+                "points": 33598,
+                "pointsPerMatch": 1.1199333333333332
+              },
+              "pointsPerMatchDifference": 0.4877,
+              "absolutePointsPerMatchDifference": 0.4877
+            }
+          }
+        ],
+        "meanPointsPerMatchDifference": 0.4538875000000001,
+        "absoluteMeanPointsPerMatchDifference": 0.4538875000000001,
+        "meanAbsolutePointsPerMatchDifference": 0.4538875000000001,
+        "sampleStandardDeviation": 0.02784607884681178,
+        "standardErrorOfMean": 0.009845075591017943,
+        "minimumPointsPerMatchDifference": 0.41779999999999995,
+        "maximumPointsPerMatchDifference": 0.4917
+      },
+      {
+        "firstIdentity": "defensive",
+        "secondIdentity": "balanced",
+        "pairedSamples": [
+          {
+            "generatorSeed": 198811001,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3077,
+                  "draws": 3074,
+                  "losses": 3849,
+                  "points": 12305,
+                  "pointsPerMatch": 1.2305
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3849,
+                  "draws": 3074,
+                  "losses": 3077,
+                  "points": 14621,
+                  "pointsPerMatch": 1.4621
+                },
+                "pointsPerMatchDifference": -0.23160000000000003,
+                "absolutePointsPerMatchDifference": 0.23160000000000003
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3223,
+                  "draws": 2985,
+                  "losses": 3792,
+                  "points": 12654,
+                  "pointsPerMatch": 1.2654
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3792,
+                  "draws": 2985,
+                  "losses": 3223,
+                  "points": 14361,
+                  "pointsPerMatch": 1.4361
+                },
+                "pointsPerMatchDifference": -0.17069999999999985,
+                "absolutePointsPerMatchDifference": 0.17069999999999985
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3144,
+                  "draws": 2968,
+                  "losses": 3888,
+                  "points": 12400,
+                  "pointsPerMatch": 1.24
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3888,
+                  "draws": 2968,
+                  "losses": 3144,
+                  "points": 14632,
+                  "pointsPerMatch": 1.4632
+                },
+                "pointsPerMatchDifference": -0.22320000000000007,
+                "absolutePointsPerMatchDifference": 0.22320000000000007
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "defensive",
+                "wins": 9444,
+                "draws": 9027,
+                "losses": 11529,
+                "points": 37359,
+                "pointsPerMatch": 1.2453
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 11529,
+                "draws": 9027,
+                "losses": 9444,
+                "points": 43614,
+                "pointsPerMatch": 1.4538
+              },
+              "pointsPerMatchDifference": -0.2084999999999999,
+              "absolutePointsPerMatchDifference": 0.2084999999999999
+            }
+          },
+          {
+            "generatorSeed": 198811002,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3212,
+                  "draws": 2817,
+                  "losses": 3971,
+                  "points": 12453,
+                  "pointsPerMatch": 1.2453
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3971,
+                  "draws": 2817,
+                  "losses": 3212,
+                  "points": 14730,
+                  "pointsPerMatch": 1.473
+                },
+                "pointsPerMatchDifference": -0.2277,
+                "absolutePointsPerMatchDifference": 0.2277
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3250,
+                  "draws": 2819,
+                  "losses": 3931,
+                  "points": 12569,
+                  "pointsPerMatch": 1.2569
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3931,
+                  "draws": 2819,
+                  "losses": 3250,
+                  "points": 14612,
+                  "pointsPerMatch": 1.4612
+                },
+                "pointsPerMatchDifference": -0.20430000000000015,
+                "absolutePointsPerMatchDifference": 0.20430000000000015
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3224,
+                  "draws": 2832,
+                  "losses": 3944,
+                  "points": 12504,
+                  "pointsPerMatch": 1.2504
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3944,
+                  "draws": 2832,
+                  "losses": 3224,
+                  "points": 14664,
+                  "pointsPerMatch": 1.4664
+                },
+                "pointsPerMatchDifference": -0.21599999999999997,
+                "absolutePointsPerMatchDifference": 0.21599999999999997
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "defensive",
+                "wins": 9686,
+                "draws": 8468,
+                "losses": 11846,
+                "points": 37526,
+                "pointsPerMatch": 1.2508666666666666
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 11846,
+                "draws": 8468,
+                "losses": 9686,
+                "points": 44006,
+                "pointsPerMatch": 1.4668666666666668
+              },
+              "pointsPerMatchDifference": -0.2160000000000002,
+              "absolutePointsPerMatchDifference": 0.2160000000000002
+            }
+          },
+          {
+            "generatorSeed": 198811003,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3305,
+                  "draws": 2600,
+                  "losses": 4095,
+                  "points": 12515,
+                  "pointsPerMatch": 1.2515
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 4095,
+                  "draws": 2600,
+                  "losses": 3305,
+                  "points": 14885,
+                  "pointsPerMatch": 1.4885
+                },
+                "pointsPerMatchDifference": -0.23699999999999988,
+                "absolutePointsPerMatchDifference": 0.23699999999999988
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3370,
+                  "draws": 2657,
+                  "losses": 3973,
+                  "points": 12767,
+                  "pointsPerMatch": 1.2767
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3973,
+                  "draws": 2657,
+                  "losses": 3370,
+                  "points": 14576,
+                  "pointsPerMatch": 1.4576
+                },
+                "pointsPerMatchDifference": -0.18090000000000006,
+                "absolutePointsPerMatchDifference": 0.18090000000000006
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3279,
+                  "draws": 2652,
+                  "losses": 4069,
+                  "points": 12489,
+                  "pointsPerMatch": 1.2489
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 4069,
+                  "draws": 2652,
+                  "losses": 3279,
+                  "points": 14859,
+                  "pointsPerMatch": 1.4859
+                },
+                "pointsPerMatchDifference": -0.2370000000000001,
+                "absolutePointsPerMatchDifference": 0.2370000000000001
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "defensive",
+                "wins": 9954,
+                "draws": 7909,
+                "losses": 12137,
+                "points": 37771,
+                "pointsPerMatch": 1.2590333333333332
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 12137,
+                "draws": 7909,
+                "losses": 9954,
+                "points": 44320,
+                "pointsPerMatch": 1.4773333333333334
+              },
+              "pointsPerMatchDifference": -0.21830000000000016,
+              "absolutePointsPerMatchDifference": 0.21830000000000016
+            }
+          },
+          {
+            "generatorSeed": 198811004,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3058,
+                  "draws": 3025,
+                  "losses": 3917,
+                  "points": 12199,
+                  "pointsPerMatch": 1.2199
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3917,
+                  "draws": 3025,
+                  "losses": 3058,
+                  "points": 14776,
+                  "pointsPerMatch": 1.4776
+                },
+                "pointsPerMatchDifference": -0.25770000000000004,
+                "absolutePointsPerMatchDifference": 0.25770000000000004
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3219,
+                  "draws": 3003,
+                  "losses": 3778,
+                  "points": 12660,
+                  "pointsPerMatch": 1.266
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3778,
+                  "draws": 3003,
+                  "losses": 3219,
+                  "points": 14337,
+                  "pointsPerMatch": 1.4337
+                },
+                "pointsPerMatchDifference": -0.16769999999999996,
+                "absolutePointsPerMatchDifference": 0.16769999999999996
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3131,
+                  "draws": 2993,
+                  "losses": 3876,
+                  "points": 12386,
+                  "pointsPerMatch": 1.2386
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3876,
+                  "draws": 2993,
+                  "losses": 3131,
+                  "points": 14621,
+                  "pointsPerMatch": 1.4621
+                },
+                "pointsPerMatchDifference": -0.22350000000000003,
+                "absolutePointsPerMatchDifference": 0.22350000000000003
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "defensive",
+                "wins": 9408,
+                "draws": 9021,
+                "losses": 11571,
+                "points": 37245,
+                "pointsPerMatch": 1.2415
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 11571,
+                "draws": 9021,
+                "losses": 9408,
+                "points": 43734,
+                "pointsPerMatch": 1.4578
+              },
+              "pointsPerMatchDifference": -0.21629999999999994,
+              "absolutePointsPerMatchDifference": 0.21629999999999994
+            }
+          },
+          {
+            "generatorSeed": 198811005,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3293,
+                  "draws": 2562,
+                  "losses": 4145,
+                  "points": 12441,
+                  "pointsPerMatch": 1.2441
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 4145,
+                  "draws": 2562,
+                  "losses": 3293,
+                  "points": 14997,
+                  "pointsPerMatch": 1.4997
+                },
+                "pointsPerMatchDifference": -0.25560000000000005,
+                "absolutePointsPerMatchDifference": 0.25560000000000005
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3450,
+                  "draws": 2605,
+                  "losses": 3945,
+                  "points": 12955,
+                  "pointsPerMatch": 1.2955
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3945,
+                  "draws": 2605,
+                  "losses": 3450,
+                  "points": 14440,
+                  "pointsPerMatch": 1.444
+                },
+                "pointsPerMatchDifference": -0.14849999999999985,
+                "absolutePointsPerMatchDifference": 0.14849999999999985
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3266,
+                  "draws": 2640,
+                  "losses": 4094,
+                  "points": 12438,
+                  "pointsPerMatch": 1.2438
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 4094,
+                  "draws": 2640,
+                  "losses": 3266,
+                  "points": 14922,
+                  "pointsPerMatch": 1.4922
+                },
+                "pointsPerMatchDifference": -0.24839999999999995,
+                "absolutePointsPerMatchDifference": 0.24839999999999995
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "defensive",
+                "wins": 10009,
+                "draws": 7807,
+                "losses": 12184,
+                "points": 37834,
+                "pointsPerMatch": 1.2611333333333334
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 12184,
+                "draws": 7807,
+                "losses": 10009,
+                "points": 44359,
+                "pointsPerMatch": 1.4786333333333332
+              },
+              "pointsPerMatchDifference": -0.2174999999999998,
+              "absolutePointsPerMatchDifference": 0.2174999999999998
+            }
+          },
+          {
+            "generatorSeed": 198811006,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3185,
+                  "draws": 2847,
+                  "losses": 3968,
+                  "points": 12402,
+                  "pointsPerMatch": 1.2402
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3968,
+                  "draws": 2847,
+                  "losses": 3185,
+                  "points": 14751,
+                  "pointsPerMatch": 1.4751
+                },
+                "pointsPerMatchDifference": -0.2349000000000001,
+                "absolutePointsPerMatchDifference": 0.2349000000000001
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3282,
+                  "draws": 2790,
+                  "losses": 3928,
+                  "points": 12636,
+                  "pointsPerMatch": 1.2636
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3928,
+                  "draws": 2790,
+                  "losses": 3282,
+                  "points": 14574,
+                  "pointsPerMatch": 1.4574
+                },
+                "pointsPerMatchDifference": -0.19379999999999997,
+                "absolutePointsPerMatchDifference": 0.19379999999999997
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3215,
+                  "draws": 2833,
+                  "losses": 3952,
+                  "points": 12478,
+                  "pointsPerMatch": 1.2478
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3952,
+                  "draws": 2833,
+                  "losses": 3215,
+                  "points": 14689,
+                  "pointsPerMatch": 1.4689
+                },
+                "pointsPerMatchDifference": -0.22110000000000007,
+                "absolutePointsPerMatchDifference": 0.22110000000000007
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "defensive",
+                "wins": 9682,
+                "draws": 8470,
+                "losses": 11848,
+                "points": 37516,
+                "pointsPerMatch": 1.2505333333333333
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 11848,
+                "draws": 8470,
+                "losses": 9682,
+                "points": 44014,
+                "pointsPerMatch": 1.4671333333333334
+              },
+              "pointsPerMatchDifference": -0.21660000000000013,
+              "absolutePointsPerMatchDifference": 0.21660000000000013
+            }
+          },
+          {
+            "generatorSeed": 198811007,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3434,
+                  "draws": 2390,
+                  "losses": 4176,
+                  "points": 12692,
+                  "pointsPerMatch": 1.2692
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 4176,
+                  "draws": 2390,
+                  "losses": 3434,
+                  "points": 14918,
+                  "pointsPerMatch": 1.4918
+                },
+                "pointsPerMatchDifference": -0.2225999999999999,
+                "absolutePointsPerMatchDifference": 0.2225999999999999
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3445,
+                  "draws": 2527,
+                  "losses": 4028,
+                  "points": 12862,
+                  "pointsPerMatch": 1.2862
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 4028,
+                  "draws": 2527,
+                  "losses": 3445,
+                  "points": 14611,
+                  "pointsPerMatch": 1.4611
+                },
+                "pointsPerMatchDifference": -0.17490000000000006,
+                "absolutePointsPerMatchDifference": 0.17490000000000006
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3386,
+                  "draws": 2457,
+                  "losses": 4157,
+                  "points": 12615,
+                  "pointsPerMatch": 1.2615
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 4157,
+                  "draws": 2457,
+                  "losses": 3386,
+                  "points": 14928,
+                  "pointsPerMatch": 1.4928
+                },
+                "pointsPerMatchDifference": -0.23129999999999984,
+                "absolutePointsPerMatchDifference": 0.23129999999999984
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "defensive",
+                "wins": 10265,
+                "draws": 7374,
+                "losses": 12361,
+                "points": 38169,
+                "pointsPerMatch": 1.2723
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 12361,
+                "draws": 7374,
+                "losses": 10265,
+                "points": 44457,
+                "pointsPerMatch": 1.4819
+              },
+              "pointsPerMatchDifference": -0.2096,
+              "absolutePointsPerMatchDifference": 0.2096
+            }
+          },
+          {
+            "generatorSeed": 198811008,
+            "blocks": [
+              {
+                "matchSeedRange": {
+                  "start": 1,
+                  "end": 10000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3179,
+                  "draws": 2858,
+                  "losses": 3963,
+                  "points": 12395,
+                  "pointsPerMatch": 1.2395
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3963,
+                  "draws": 2858,
+                  "losses": 3179,
+                  "points": 14747,
+                  "pointsPerMatch": 1.4747
+                },
+                "pointsPerMatchDifference": -0.23519999999999985,
+                "absolutePointsPerMatchDifference": 0.23519999999999985
+              },
+              {
+                "matchSeedRange": {
+                  "start": 10001,
+                  "end": 20000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3280,
+                  "draws": 2849,
+                  "losses": 3871,
+                  "points": 12689,
+                  "pointsPerMatch": 1.2689
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3871,
+                  "draws": 2849,
+                  "losses": 3280,
+                  "points": 14462,
+                  "pointsPerMatch": 1.4462
+                },
+                "pointsPerMatchDifference": -0.1773,
+                "absolutePointsPerMatchDifference": 0.1773
+              },
+              {
+                "matchSeedRange": {
+                  "start": 20001,
+                  "end": 30000,
+                  "count": 10000
+                },
+                "matches": 10000,
+                "first": {
+                  "identity": "defensive",
+                  "wins": 3182,
+                  "draws": 2867,
+                  "losses": 3951,
+                  "points": 12413,
+                  "pointsPerMatch": 1.2413
+                },
+                "second": {
+                  "identity": "balanced",
+                  "wins": 3951,
+                  "draws": 2867,
+                  "losses": 3182,
+                  "points": 14720,
+                  "pointsPerMatch": 1.472
+                },
+                "pointsPerMatchDifference": -0.2306999999999999,
+                "absolutePointsPerMatchDifference": 0.2306999999999999
+              }
+            ],
+            "combined": {
+              "matchSeedRange": {
+                "start": 1,
+                "end": 30000,
+                "count": 30000
+              },
+              "matches": 30000,
+              "first": {
+                "identity": "defensive",
+                "wins": 9641,
+                "draws": 8574,
+                "losses": 11785,
+                "points": 37497,
+                "pointsPerMatch": 1.2499
+              },
+              "second": {
+                "identity": "balanced",
+                "wins": 11785,
+                "draws": 8574,
+                "losses": 9641,
+                "points": 43929,
+                "pointsPerMatch": 1.4643
+              },
+              "pointsPerMatchDifference": -0.21439999999999992,
+              "absolutePointsPerMatchDifference": 0.21439999999999992
+            }
+          }
+        ],
+        "meanPointsPerMatchDifference": -0.21465,
+        "absoluteMeanPointsPerMatchDifference": 0.21465,
+        "meanAbsolutePointsPerMatchDifference": 0.21465,
+        "sampleStandardDeviation": 0.0036484830507251703,
+        "standardErrorOfMean": 0.0012899335531059751,
+        "minimumPointsPerMatchDifference": -0.21830000000000016,
+        "maximumPointsPerMatchDifference": -0.2084999999999999
+      }
+    ]
+  },
+  "performance": {
+    "elapsedMs": 118570.15625599999,
+    "simulatedMatches": 1440000,
+    "note": "Each generator-seed sample aggregates the same three fixed 10,000-match-seed blocks."
+  },
+  "limitations": [
+    "This estimator uses tuning match seeds 1-30,000 only. The validation seed pool remains sealed.",
+    "The 12-question matrix was not run.",
+    "No tolerance is applied or recommended by the runner.",
+    "The committed interim compensation remains unchanged and is included in any pair involving the direct identity.",
+    "Effect-weighted identity-budget units are not used as a tuning or calibration target."
+  ]
+}
