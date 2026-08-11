@@ -6,7 +6,12 @@ import { stdin as input, stdout as output } from "node:process";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
-import { printRunProvenance, readGitProvenance, type GitProvenance } from "./provenance.js";
+import {
+  assertEvidenceWriteAllowed,
+  printRunProvenance,
+  readEvidenceProvenance,
+  type GitProvenance,
+} from "./provenance.js";
 import { SeededRandom } from "./random.js";
 import { TUNING_SEED_POOL } from "./seed-pools.js";
 import type { MatchOutput, Tactics } from "./types.js";
@@ -237,9 +242,7 @@ export function assessResponses(responses: PairResponse[]): Assessment {
 }
 
 export function assertCleanTree(provenance: GitProvenance): void {
-  if (provenance.dirtyTree) {
-    throw new Error("Tracked tree is dirty; H3 perceptibility playtest refused");
-  }
+  assertEvidenceWriteAllowed(provenance);
 }
 
 function statForArm(pair: KeptPair, arm: Arm): DisplayStats {
@@ -300,6 +303,7 @@ export function createEvidence(
     purpose: "Gate 1 H3 paired tactical perceptibility playtest",
     gitCommit: provenance.gitCommit,
     dirtyTree: provenance.dirtyTree,
+    dirtyFiles: provenance.dirtyFiles,
     engineConfigVersion: ENGINE_CONFIG.version,
     engineConfigHash: ENGINE_CONFIG_HASH,
     controls: {
@@ -373,7 +377,7 @@ function line(char = "=", width = 72): string {
 }
 
 export async function runPerceptibilityPlaytest(): Promise<void> {
-  const provenance = readGitProvenance();
+  const provenance = readEvidenceProvenance();
   printRunProvenance("H3 PERCEPTIBILITY PLAYTEST", provenance);
   assertCleanTree(provenance);
 

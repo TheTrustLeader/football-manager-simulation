@@ -2,11 +2,13 @@ export type Formation = "4-4-2" | "4-3-3" | "4-5-1" | "3-5-2" | "5-3-2";
 export type Style = "passing" | "direct" | "counter" | "balanced";
 export type Approach = "cautious" | "balanced" | "attacking";
 export type Tackling = "careful" | "normal" | "hard";
-export type Position = "GK" | "DF" | "MF" | "FW";
+export type GoalkeeperPosition = "GK";
+export type OutfieldPosition = "CB" | "FB" | "CM" | "WM" | "FW";
+export type Position = GoalkeeperPosition | OutfieldPosition;
 export type Morale = "very-low" | "low" | "steady" | "good" | "high";
 export type ScoreState = "level" | "leading" | "trailing";
 
-export interface Attributes {
+export interface OutfieldAttributes {
   defending: number;
   passing: number;
   creativity: number;
@@ -15,13 +17,27 @@ export interface Attributes {
   finishing: number;
   stamina: number;
   leadership: number;
-  goalkeeping: number;
+  crossing: number;
 }
+
+export interface GoalkeeperAttributes {
+  shotStopping: number;
+  handling: number;
+  kicking: number;
+  aerial: number;
+  leadership: number;
+}
+
+export type Attributes = OutfieldAttributes | GoalkeeperAttributes;
+export type OutfieldAttribute = keyof OutfieldAttributes;
+export type GoalkeeperAttribute = keyof GoalkeeperAttributes;
+export type AttributeName = OutfieldAttribute | GoalkeeperAttribute;
 
 export interface HiddenTraits {
   consistency: number;
   injurySusceptibility: number;
   temperament: number;
+  potential: number;
   adaptability: number;
 }
 
@@ -31,15 +47,25 @@ export interface PlayerState {
   recentForm: number;
 }
 
-export interface Player {
+interface PlayerBase {
   id: string;
   name: string;
   age: number;
-  primaryPosition: Position;
-  attributes: Attributes;
   hidden: HiddenTraits;
   state: PlayerState;
 }
+
+export interface GoalkeeperPlayer extends PlayerBase {
+  primaryPosition: GoalkeeperPosition;
+  attributes: GoalkeeperAttributes;
+}
+
+export interface OutfieldPlayer extends PlayerBase {
+  primaryPosition: OutfieldPosition;
+  attributes: OutfieldAttributes;
+}
+
+export type Player = GoalkeeperPlayer | OutfieldPlayer;
 
 export interface Tactics {
   formation: Formation;

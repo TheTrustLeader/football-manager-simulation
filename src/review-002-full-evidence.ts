@@ -3,9 +3,9 @@ import { dirname } from "node:path";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
-import { printRunProvenance, readGitProvenance } from "./provenance.js";
+import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
-import type { Formation, MatchOutput, Position, Style, TeamInput } from "./types.js";
+import type { Formation, MatchOutput, OutfieldPlayer, Position, Style, TeamInput } from "./types.js";
 
 interface Aggregate {
   matches: number;
@@ -43,7 +43,7 @@ interface MatrixCell {
 
 const formations: Formation[] = ["4-4-2", "4-3-3", "4-5-1", "3-5-2", "5-3-2"];
 const styles: Style[] = ["balanced", "passing", "direct", "counter"];
-const positions: Position[] = ["GK", "DF", "MF", "FW"];
+const positions: Position[] = ["GK", "CB", "FB", "CM", "WM", "FW"];
 
 function emptyAggregate(): Aggregate {
   return { matches: 0, homeWins: 0, draws: 0, awayWins: 0, homeGoals: 0, awayGoals: 0, homeChances: 0, awayChances: 0, homeShots: 0, awayShots: 0, homeShotsOnTarget: 0, awayShotsOnTarget: 0 };
@@ -159,7 +159,7 @@ function teamForMatrix(prefix: string, formation: Formation, style: Style = "bal
 const count = Number.parseInt(process.argv[2] ?? "500000", 10);
 const outputPath = process.argv[3] ?? "evidence/review-002-full-evidence.json";
 if (!Number.isInteger(count) || count < 500000 || count > 1000000) throw new Error("REVIEW-002 full evidence count must be between 500,000 and 1,000,000 tuning seeds");
-const provenance = readGitProvenance();
+const provenance = readEvidenceProvenance();
 printRunProvenance("REVIEW-002 EVIDENCE RUN", provenance);
 const seeds = seedRange("tuning", count);
 const started = performance.now();
@@ -317,7 +317,7 @@ for (const seed of focusedSeeds) {
 
 const defenceHome = makeTeam("defence-signal-home", 10);
 const defenceAway = makeTeam("defence-signal-away", 10);
-const defenders = defenceHome.starters.filter((player) => player.primaryPosition === "DF");
+const defenders = defenceHome.starters.filter((player): player is OutfieldPlayer => player.primaryPosition === "CB");
 defenders[0]!.attributes.defending = 20;
 defenders[1]!.attributes.defending = 2;
 let strongDefensiveActions = 0;
@@ -342,6 +342,7 @@ const evidence = {
   buildVersion: provenance.gitCommit,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
+  dirtyFiles: provenance.dirtyFiles,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
   command: `npm run review002:evidence -- ${count} ${outputPath}`,

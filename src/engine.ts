@@ -1,6 +1,6 @@
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { SeededRandom } from "./random.js";
-import type { MatchEvent, MatchInput, MatchOutput, Player, PlayerContribution, ScoreState, TeamInput, TeamStats } from "./types.js";
+import type { AttributeName, MatchEvent, MatchInput, MatchOutput, Player, PlayerContribution, ScoreState, TeamInput, TeamStats } from "./types.js";
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
@@ -39,7 +39,10 @@ interface ProfileCurves {
   aerial: AttributeCurve;
   finishing: AttributeCurve;
   defending: AttributeCurve;
-  goalkeeping: AttributeCurve;
+  shotStopping: AttributeCurve;
+  handling: AttributeCurve;
+  goalkeeperAerial: AttributeCurve;
+  goalkeeperLeadership: AttributeCurve;
 }
 
 interface TeamRuntime {
@@ -55,10 +58,17 @@ function conditionFor(player: Player, conditions: Map<string, number>): number {
   return value;
 }
 
+function attributeValue(player: Player, key: AttributeName): number {
+  const value = (player.attributes as Partial<Record<AttributeName, number>>)[key];
+  if (value === undefined) throw new Error(`${player.name} has no ${key} rating`);
+  return value;
+}
+
 function createPlayerRuntime(player: Player, initialCondition: number): PlayerRuntime {
   const c = ENGINE_CONFIG;
   const f = c.fatigue;
-  const staminaFactor = Math.max(0.65, 1 + (f.staminaBaseline - player.attributes.stamina) * f.staminaSensitivity);
+  const stamina = player.primaryPosition === "GK" ? f.staminaBaseline : player.attributes.stamina;
+  const staminaFactor = Math.max(0.65, 1 + (f.staminaBaseline - stamina) * f.staminaSensitivity);
   const lossPerWorkload = f.baseConditionLossPerMinute * staminaFactor;
   const floorBreakpoint = lossPerWorkload === 0 ? Number.POSITIVE_INFINITY : Math.max(0, (initialCondition - f.minimumCondition) / lossPerWorkload);
   return {
@@ -71,7 +81,7 @@ function createPlayerRuntime(player: Player, initialCondition: number): PlayerRu
   };
 }
 
-function createAttributeCurve(players: PlayerRuntime[], key: keyof Player["attributes"]): AttributeCurve {
+function createAttributeCurve(players: PlayerRuntime[], key: AttributeName): AttributeCurve {
   if (players.length === 0) throw new Error(`Cannot build empty ${String(key)} attribute curve`);
   const entries: AttributeCurveEntry[] = [];
   let sumWeight = 0;
@@ -80,7 +90,7 @@ function createAttributeCurve(players: PlayerRuntime[], key: keyof Player["attri
   let minimumFloorBreakpoint = Number.POSITIVE_INFINITY;
 
   for (const runtime of players) {
-    const weight = runtime.player.attributes[key] * runtime.formFactor * runtime.moraleFactor;
+    const weight = attributeValue(runtime.player, key) * runtime.formFactor * runtime.moraleFactor;
     entries.push({
       weight,
       initialCondition: runtime.initialCondition,
@@ -116,13 +126,16 @@ function buildProfileCurves(players: PlayerRuntime[]): ProfileCurves {
   const finishers = forwards.length > 0 ? forwards : outfield;
   if (finishers.length === 0) throw new Error("Active team has no eligible finisher");
   return {
-    passing: createAttributeCurve(players, "passing"),
-    creativity: createAttributeCurve(players, "creativity"),
-    pace: createAttributeCurve(players, "pace"),
-    aerial: createAttributeCurve(players, "aerial"),
+    passing: createAttributeCurve(outfield, "passing"),
+    creativity: createAttributeCurve(outfield, "creativity"),
+    pace: createAttributeCurve(outfield, "pace"),
+    aerial: createAttributeCurve(outfield, "aerial"),
     finishing: createAttributeCurve(finishers, "finishing"),
-    defending: createAttributeCurve(players, "defending"),
-    goalkeeping: createAttributeCurve(keepers, "goalkeeping"),
+    defending: createAttributeCurve(outfield, "defending"),
+    shotStopping: createAttributeCurve(keepers, "shotStopping"),
+    handling: createAttributeCurve(keepers, "handling"),
+    goalkeeperAerial: createAttributeCurve(keepers, "aerial"),
+    goalkeeperLeadership: createAttributeCurve(keepers, "leadership"),
   };
 }
 
@@ -165,12 +178,18 @@ function teamProfile(team: TeamInput, runtime: TeamRuntime) {
   const aerial = curveAverage(runtime.curves.aerial, runtime.workload);
   const finishing = curveAverage(runtime.curves.finishing, runtime.workload);
   const defending = curveAverage(runtime.curves.defending, runtime.workload);
-  const goalkeeping = curveAverage(runtime.curves.goalkeeping, runtime.workload);
+  const shotStopping = curveAverage(runtime.curves.shotStopping, runtime.workload);
+  const handling = curveAverage(runtime.curves.handling, runtime.workload);
+  const goalkeeperAerial = curveAverage(runtime.curves.goalkeeperAerial, runtime.workload);
+  const goalkeeperLeadership = curveAverage(runtime.curves.goalkeeperLeadership, runtime.workload);
 
   let retention = passing * c.profileWeights.retention.passing + creativity * c.profileWeights.retention.creativity;
   let progression = passing * c.profileWeights.progression.passing + creativity * c.profileWeights.progression.creativity + pace * c.profileWeights.progression.pace + aerial * c.profileWeights.progression.aerial;
   let attack = creativity * c.profileWeights.attack.creativity + pace * c.profileWeights.attack.pace + finishing * c.profileWeights.attack.finishing + aerial * c.profileWeights.attack.aerial;
-  let defence = defending * c.profileWeights.defence.defending + pace * c.profileWeights.defence.pace + aerial * c.profileWeights.defence.aerial;
+  const defenceWeights = c.profileWeights.defence;
+  const outfieldDefence = defending * defenceWeights.outfield.defending + pace * defenceWeights.outfield.pace + aerial * defenceWeights.outfield.aerial;
+  const goalkeeperDefence = handling * defenceWeights.goalkeeper.handling + goalkeeperAerial * defenceWeights.goalkeeper.aerial + goalkeeperLeadership * defenceWeights.goalkeeper.leadership;
+  let defence = outfieldDefence * defenceWeights.outfieldShare + goalkeeperDefence * defenceWeights.goalkeeperShare;
 
   const formation = c.formation[team.tactics.formation];
   retention *= formation.retention;
@@ -192,7 +211,7 @@ function teamProfile(team: TeamInput, runtime: TeamRuntime) {
     progression: progression * manpower,
     attack: attack * approach.attack * manpower,
     defence: defence * approach.defence * manpower,
-    goalkeeper: goalkeeping,
+    goalkeeper: shotStopping,
   };
 }
 
@@ -202,12 +221,12 @@ function playerCondition(runtime: TeamRuntime, playerRuntime: PlayerRuntime): nu
   return Math.max(ENGINE_CONFIG.fatigue.minimumCondition, playerRuntime.initialCondition - workload * playerRuntime.lossPerWorkload);
 }
 
-function effectiveAttribute(runtime: TeamRuntime, player: Player, key: keyof Player["attributes"]): number {
+function effectiveAttribute(runtime: TeamRuntime, player: Player, key: AttributeName): number {
   const prepared = runtime.players.get(player.id);
   if (!prepared) throw new Error(`Missing runtime state for ${player.id}`);
   const c = ENGINE_CONFIG.condition;
   const conditionFactor = c.base + c.range * clamp(playerCondition(runtime, prepared) / c.scale, 0, 1);
-  return player.attributes[key] * conditionFactor * prepared.formFactor * prepared.moraleFactor;
+  return attributeValue(player, key) * conditionFactor * prepared.formFactor * prepared.moraleFactor;
 }
 
 function emptyStats(): TeamStats {
@@ -261,7 +280,7 @@ function chooseCreator(random: SeededRandom, team: TeamInput, runtime: TeamRunti
   const active = runtime.activePlayers.map((entry) => entry.player);
   const designated = active.find((player) => player.id === team.tactics.creatorId);
   if (designated && random.chance(ENGINE_CONFIG.creator.designatedShare)) return designated;
-  const candidates = active.filter((player) => player.primaryPosition === "MF" || player.primaryPosition === "FW");
+  const candidates = active.filter((player) => player.primaryPosition === "CM" || player.primaryPosition === "WM" || player.primaryPosition === "FW");
   if (candidates.length > 0) return random.pick(candidates);
   return random.pick(activeOutfield(runtime, team.name));
 }
@@ -349,6 +368,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const attackStats = homeHasBall ? homeStats : awayStats;
     const defenceStats = homeHasBall ? awayStats : homeStats;
     const style = c.style[attackingTeam.tactics.style];
+    const attackingApproach = c.approach[attackingTeam.tactics.approach];
+    const defendingApproach = c.approach[defendingTeam.tactics.approach];
     const attackingScoreState = scoreState(attackStats.goals, defenceStats.goals);
     const gameStateProgressionAdd = attackingScoreState === "trailing"
       ? c.gameState.progressionProbabilityShift
@@ -358,7 +379,16 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     attackStats.possessionTicks += 1;
     gameStateDiagnostics.attackingState[attackingScoreState].possessions += 1;
 
-    const progressionProbability = clamp(c.progression.base + (homeHasBall ? homeProgressionProbabilityBoost : 0) + gameStateProgressionAdd + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor, c.progression.min, c.progression.max);
+    const progressionProbability = clamp(
+      c.progression.base
+        + (homeHasBall ? homeProgressionProbabilityBoost : 0)
+        + gameStateProgressionAdd
+        + attackingApproach.territorialProgressionAdd
+        + defendingApproach.spaceBehindProgressionAdd
+        + (attackProfile.progression - defenceProfile.defence) / c.progression.differenceDivisor,
+      c.progression.min,
+      c.progression.max,
+    );
     if (!random.chance(progressionProbability)) {
       creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
       advanceFatigue(homeRuntime, input.home, minute);

@@ -4,6 +4,7 @@ import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 export interface GitProvenance {
   gitCommit: string;
   dirtyTree: boolean;
+  dirtyFiles?: string[] | undefined;
 }
 
 function git(args: string[], cwd: string): string {
@@ -35,7 +36,33 @@ export function readGitProvenance(cwd = process.cwd()): GitProvenance {
     ":(exclude)dist/**",
     ":(exclude)coverage/**",
   ], root);
-  return { gitCommit, dirtyTree: status.length > 0 };
+  const dirtyFiles = status.length > 0
+    ? status.split("\n").filter((line) => line.length > 0)
+    : undefined;
+  return { gitCommit, dirtyTree: dirtyFiles !== undefined, dirtyFiles };
+}
+
+export function assertEvidenceWriteAllowed(
+  provenance: GitProvenance,
+  allowDirtyEvidence = process.env.ALLOW_DIRTY_EVIDENCE,
+): void {
+  if (!provenance.dirtyTree) return;
+  if (allowDirtyEvidence === "1") {
+    if (!provenance.dirtyFiles || provenance.dirtyFiles.length === 0) {
+      throw new Error("Dirty evidence escape requires a non-empty dirtyFiles provenance list");
+    }
+    return;
+  }
+  throw new Error(
+    "Evidence write refused because the source tree is dirty. Commit or restore the source changes, "
+      + "or set ALLOW_DIRTY_EVIDENCE=1 to stamp dirtyTree: true and dirtyFiles explicitly.",
+  );
+}
+
+export function readEvidenceProvenance(cwd = process.cwd()): GitProvenance {
+  const provenance = readGitProvenance(cwd);
+  assertEvidenceWriteAllowed(provenance);
+  return provenance;
 }
 
 export function formatRunProvenance(label: string, provenance: GitProvenance): string {
@@ -45,6 +72,7 @@ export function formatRunProvenance(label: string, provenance: GitProvenance): s
     "-".repeat(heading.length),
     `Git commit: ${provenance.gitCommit}`,
     `Dirty tree: ${provenance.dirtyTree}`,
+    ...(provenance.dirtyFiles ? [`Dirty files: ${provenance.dirtyFiles.join(", ")}`] : []),
     `Engine config: ${ENGINE_CONFIG.version}`,
     `Engine config hash: ${ENGINE_CONFIG_HASH}`,
   ].join("\n");
