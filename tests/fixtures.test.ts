@@ -127,7 +127,13 @@ describe("seeded squad generation", () => {
 
   it("keeps different level-10 identities within the stated points tolerance", () => {
     const control = ENGINE_CONFIG.squadGeneration.identityParity;
-    const result = runIdentityParityControl(seedRange("tuning", control.sampleMatches));
+    const fixedBlockCount = 3;
+    const result = runIdentityParityControl(seedRange("tuning", control.sampleMatches * fixedBlockCount));
+    expect(result.blocks).toHaveLength(fixedBlockCount);
+    expect(
+      result.blocks.map((block) => block.pass),
+      "D8 requires every fixed 10,000-seed block to pass",
+    ).toEqual(Array.from({ length: fixedBlockCount }, () => true));
     expect(result.combined.absolutePointsPerMatchDifference).toBeLessThanOrEqual(control.pointsPerMatchTolerance);
     expect(result.combined.pass).toBe(true);
   });
