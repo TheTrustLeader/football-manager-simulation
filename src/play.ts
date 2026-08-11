@@ -1,5 +1,6 @@
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import { conditionForDisplay } from "./condition-display.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readGitProvenance, type GitProvenance } from "./provenance.js";
@@ -80,7 +81,8 @@ function printSquad(team: TeamInput): void {
             : player.primaryPosition === "WM"
               ? `PAC ${player.attributes.pace}  CRO ${player.attributes.crossing}`
               : `FIN ${player.attributes.finishing}  AER ${player.attributes.aerial}`;
-    console.log(`${String(index + 1).padStart(2)}  ${player.primaryPosition.padEnd(3)}  ${player.name.padEnd(29)} ${String(player.state.condition).padStart(3)}   ${key}`);
+    const displayedCondition = conditionForDisplay(player.state.condition).toFixed(0);
+    console.log(`${String(index + 1).padStart(2)}  ${player.primaryPosition.padEnd(3)}  ${player.name.padEnd(29)} ${displayedCondition.padStart(3)}   ${key}`);
   });
 }
 
@@ -379,8 +381,9 @@ function printRatings(team: TeamInput, contributions: MatchOutput["contributions
   for (const player of team.starters) {
     const c = byId.get(player.id);
     if (!c) continue;
-    const condition = finalCondition[player.id] ?? player.state.condition;
-    console.log(`${player.name.padEnd(30)} ${c.rating.toFixed(1).padStart(3)}  ${condition.toFixed(0).padStart(4)}  ${String(c.goals).padStart(1)}  ${String(c.assists).padStart(1)}  ${String(c.yellowCards).padStart(2)} ${String(c.redCards).padStart(2)}`);
+    const internalCondition = finalCondition[player.id] ?? player.state.condition;
+    const displayedCondition = conditionForDisplay(internalCondition);
+    console.log(`${player.name.padEnd(30)} ${c.rating.toFixed(1).padStart(3)}  ${displayedCondition.toFixed(0).padStart(4)}  ${String(c.goals).padStart(1)}  ${String(c.assists).padStart(1)}  ${String(c.yellowCards).padStart(2)} ${String(c.redCards).padStart(2)}`);
   }
 }
 
