@@ -1,5 +1,71 @@
+const PROFILE_WEIGHTS = {
+  retention: { passing: 0.65, creativity: 0.35 },
+  progression: { passing: 0.35, creativity: 0.3, pace: 0.2, aerial: 0.15 },
+  attack: { creativity: 0.3, pace: 0.25, finishing: 0.3, aerial: 0.15 },
+  defence: {
+    outfieldShare: 0.9,
+    goalkeeperShare: 0.1,
+    outfield: { defending: 0.7, pace: 0.15, aerial: 0.15 },
+    goalkeeper: { handling: 0.4, aerial: 0.35, leadership: 0.25 },
+  },
+} as const;
+
+const ALL_OUTFIELD_POSITIONS = ["CB", "FB", "CM", "WM", "FW"] as const;
+const FORWARD_POSITIONS = ["FW"] as const;
+const NO_CONSUMER_POSITIONS = [] as const;
+
+const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
+  defending: {
+    consumed: true,
+    consumerPositions: ALL_OUTFIELD_POSITIONS,
+    weightedUnitsPerPoint: PROFILE_WEIGHTS.defence.outfieldShare * PROFILE_WEIGHTS.defence.outfield.defending,
+  },
+  passing: {
+    consumed: true,
+    consumerPositions: ALL_OUTFIELD_POSITIONS,
+    weightedUnitsPerPoint: PROFILE_WEIGHTS.retention.passing + PROFILE_WEIGHTS.progression.passing,
+  },
+  creativity: {
+    consumed: true,
+    consumerPositions: ALL_OUTFIELD_POSITIONS,
+    weightedUnitsPerPoint: PROFILE_WEIGHTS.retention.creativity + PROFILE_WEIGHTS.progression.creativity + PROFILE_WEIGHTS.attack.creativity,
+  },
+  pace: {
+    consumed: true,
+    consumerPositions: ALL_OUTFIELD_POSITIONS,
+    weightedUnitsPerPoint: PROFILE_WEIGHTS.progression.pace + PROFILE_WEIGHTS.attack.pace
+      + PROFILE_WEIGHTS.defence.outfieldShare * PROFILE_WEIGHTS.defence.outfield.pace,
+  },
+  aerial: {
+    consumed: true,
+    consumerPositions: ALL_OUTFIELD_POSITIONS,
+    weightedUnitsPerPoint: PROFILE_WEIGHTS.progression.aerial + PROFILE_WEIGHTS.attack.aerial
+      + PROFILE_WEIGHTS.defence.outfieldShare * PROFILE_WEIGHTS.defence.outfield.aerial,
+  },
+  finishing: {
+    consumed: true,
+    consumerPositions: FORWARD_POSITIONS,
+    weightedUnitsPerPoint: PROFILE_WEIGHTS.attack.finishing,
+  },
+  stamina: {
+    consumed: true,
+    consumerPositions: ALL_OUTFIELD_POSITIONS,
+    weightedUnitsPerPoint: null,
+  },
+  leadership: {
+    consumed: false,
+    consumerPositions: NO_CONSUMER_POSITIONS,
+    weightedUnitsPerPoint: 0,
+  },
+  crossing: {
+    consumed: false,
+    consumerPositions: NO_CONSUMER_POSITIONS,
+    weightedUnitsPerPoint: 0,
+  },
+} as const;
+
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.9.0",
+  version: "match-engine-config-0.9.1",
   matchMinutes: 90,
   possessionBase: 0.5,
   possessionMin: 0.38,
@@ -29,17 +95,7 @@ export const ENGINE_CONFIG = {
   condition: { base: 0.78, range: 0.22, scale: 100 },
   form: { maxMagnitude: 1, effect: 0.025 },
   morale: { "very-low": 0.94, low: 0.97, steady: 1, good: 1.02, high: 1.04 },
-  profileWeights: {
-    retention: { passing: 0.65, creativity: 0.35 },
-    progression: { passing: 0.35, creativity: 0.3, pace: 0.2, aerial: 0.15 },
-    attack: { creativity: 0.3, pace: 0.25, finishing: 0.3, aerial: 0.15 },
-    defence: {
-      outfieldShare: 0.9,
-      goalkeeperShare: 0.1,
-      outfield: { defending: 0.7, pace: 0.15, aerial: 0.15 },
-      goalkeeper: { handling: 0.4, aerial: 0.35, leadership: 0.25 },
-    },
-  },
+  profileWeights: PROFILE_WEIGHTS,
   style: {
     passing: { retention: 1.08, progression: 1.03, attack: 1, chanceRate: 1.05, shotRate: 0.93, shotQuality: 1.08 },
     direct: { retention: 0.94, progression: 1.04, attack: 1, chanceRate: 1.08, shotRate: 1.08, shotQuality: 0.96 },
@@ -141,6 +197,10 @@ export const ENGINE_CONFIG = {
       direct: { pace: 2, aerial: 2, crossing: 2, finishing: 1, passing: -3, creativity: -3, defending: -1 },
       defensive: { defending: 2, aerial: 2, creativity: -2, finishing: -2 },
       balanced: {},
+    },
+    identityBudget: {
+      zeroTolerance: 1e-12,
+      attributeWeights: IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS,
     },
     identityParity: {
       sampleMatches: 10000,
