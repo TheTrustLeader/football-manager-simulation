@@ -15,6 +15,7 @@
     "evidence": "tsx src/evidence.ts",
     "gate1a:evidence": "tsx src/gate-1a-squad-variation-evidence.ts",
     "gate1a:identity-parity": "tsx src/gate-1a-identity-parity-runner.ts",
+    "gate1a:paired-identity-estimator": "tsx src/gate-1a-paired-identity-estimator-runner.ts",
     "gate1a:four-style-baseline": "tsx src/gate-1a-four-style-baseline.ts",
     "review002:evidence": "tsx src/review-002-full-evidence.ts",
     "game-state:evidence": "tsx src/game-state-full-evidence.ts",
