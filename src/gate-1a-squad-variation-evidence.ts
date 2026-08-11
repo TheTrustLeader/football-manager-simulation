@@ -9,7 +9,7 @@ import {
   SQUAD_GENERATION_VERSION,
 } from "./fixtures.js";
 import { readParityCompensationState } from "./gate-1a-compensation-state.js";
-import { printRunProvenance, readGitProvenance } from "./provenance.js";
+import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
 import type { Approach, GoalkeeperAttribute, MatchOutput, OutfieldAttribute, Player, Position, Style, TeamInput } from "./types.js";
 
@@ -147,10 +147,6 @@ function pointsPerMatch(aggregate: Aggregate): number {
   return divide(aggregate.wins * 3 + aggregate.draws, aggregate.matches);
 }
 
-function opponentPointsPerMatch(aggregate: Aggregate): number {
-  return divide(aggregate.losses * 3 + aggregate.draws, aggregate.matches);
-}
-
 function range(values: number[]) {
   return { minimum: Math.min(...values), maximum: Math.max(...values) };
 }
@@ -213,15 +209,12 @@ const command = process.argv[1]?.endsWith(".js")
   ? `node dist/src/gate-1a-squad-variation-evidence.js ${count} ${outputPath} ${managedClub}`
   : `npm run gate1a:evidence -- ${count} ${outputPath} ${managedClub}`;
 const seeds = seedRange("tuning", count);
-const provenance = readGitProvenance();
+const provenance = readEvidenceProvenance();
 printRunProvenance(`GATE 1A ${managedClub.toUpperCase()} MANAGED`, provenance);
 
 const baseline = emptyAggregate();
-const identityParity = emptyAggregate();
 const baselineManaged = makeTeam(managedClub, 10);
 const baselineOpponent = makeTeam(opponentClub, 10);
-const parityNorthbridge = makeTeam("northbridge", 10, { style: "passing", approach: "balanced" });
-const parityRedmere = makeTeam("redmere", 10, { style: "direct", approach: "balanced" });
 const setupAggregates = Object.fromEntries(setups.map((setup) => [`${setup.style}/${setup.approach}`, emptyAggregate()])) as Record<string, Aggregate>;
 const setupTeams = Object.fromEntries(setups.map((setup) => [
   `${setup.style}/${setup.approach}`,
@@ -237,8 +230,6 @@ const started = performance.now();
 for (const seed of seeds) {
   const baselineMatch = playSeed(seed, baselineManaged, baselineOpponent);
   addMatch(baseline, baselineMatch.result, baselineMatch.managedHome);
-  const parityMatch = playSeed(seed, parityNorthbridge, parityRedmere);
-  addMatch(identityParity, parityMatch.result, parityMatch.managedHome);
   for (const setup of setups) {
     const key = `${setup.style}/${setup.approach}`;
     const setupMatch = playSeed(seed, setupTeams[key]!, baselineOpponent);
@@ -247,7 +238,7 @@ for (const seed of seeds) {
 }
 
 const elapsedMs = performance.now() - started;
-const simulatedMatches = count * (2 + setups.length);
+const simulatedMatches = count * (1 + setups.length);
 const sixSetupTable = setups.map((setup) => {
   const key = `${setup.style}/${setup.approach}`;
   return { setup: key, style: setup.style, approach: setup.approach, ...metrics(setupAggregates[key]!) };
@@ -280,18 +271,15 @@ const riskReward = (["direct", "passing"] as const).map((style) => {
       && goalsAgainstDelta >= ENGINE_CONFIG.approachAcceptance.minimumAttackingVsCautiousGoalsAgainstPerMatchDelta,
   };
 });
-const parityNorthbridgePoints = pointsPerMatch(identityParity);
-const parityRedmerePoints = opponentPointsPerMatch(identityParity);
-const parityDifference = Math.abs(parityNorthbridgePoints - parityRedmerePoints);
-const parityControl = ENGINE_CONFIG.squadGeneration.identityParity;
 const compensationState = readParityCompensationState();
 const evidence = {
-  schemaVersion: 4,
+  schemaVersion: 5,
   generatedAt: new Date().toISOString(),
-  purpose: `Gate 1A REVIEW-007 correction run with ${managedClub} managed`,
+  purpose: `Gate 1A squad-variation baseline with ${managedClub} managed after DECISION-001 D8 deferral`,
   command,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
+  dirtyFiles: provenance.dirtyFiles,
   compensationState,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
@@ -346,15 +334,6 @@ const evidence = {
     pass: riskReward.every((row) => row.pass),
     bestByStyle: approachBestByStyle,
   },
-  identityParity: {
-    control: parityControl.control,
-    matches: identityParity.matches,
-    northbridgePointsPerMatch: parityNorthbridgePoints,
-    redmerePointsPerMatch: parityRedmerePoints,
-    absoluteDifference: parityDifference,
-    tolerance: parityControl.pointsPerMatchTolerance,
-    pass: parityDifference <= parityControl.pointsPerMatchTolerance,
-  },
   ageCurveSeam: {
     applicationPoint: ENGINE_CONFIG.ageCurves.applicationPoint,
     attributesConstantDuringMatch: ENGINE_CONFIG.ageCurves.attributesConstantDuringMatch,
@@ -377,8 +356,8 @@ const evidence = {
   limitations: [
     "This run uses tuning seeds only. The validation seed pool remains sealed.",
     "The 12-question matrix was not run.",
-    "Approach risk/reward and generator identity parity changed under REVIEW-007; style-fit coefficients did not change.",
-    "Crossing remains unconsumed until Gate 1B, so the direct identity carries an explicit interim parity adjustment that must be rechecked when crossing is introduced.",
+    "The superseded single-club identity-parity control is not run or reported. The paired estimator is the sole D8 measurement instrument.",
+    "Identity compensation is removed. The remaining paired identity gaps are recorded and deferred by DECISION-001, with no parity tolerance configured.",
     "Age curves are configuration only and are not applied in a match or elsewhere by this build.",
     "H3 perceptibility was not rerun because it is outside this bounded Gate 1A item.",
   ],
@@ -397,6 +376,5 @@ console.log(JSON.stringify({
   sixSetupTable: evidence.sixSetupTable,
   directionalStyleFitPass: evidence.directionalStyleFitPass,
   approachRiskReward: evidence.approachRiskReward,
-  identityParity: evidence.identityParity,
   performance: evidence.performance,
 }, null, 2));

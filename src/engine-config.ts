@@ -39,6 +39,7 @@ const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
   aerial: {
     consumed: true,
     consumerPositions: ALL_OUTFIELD_POSITIONS,
+    goalkeeperConsumerOutsideIdentityScope: true,
     weightedUnitsPerPoint: PROFILE_WEIGHTS.progression.aerial + PROFILE_WEIGHTS.attack.aerial
       + PROFILE_WEIGHTS.defence.outfieldShare * PROFILE_WEIGHTS.defence.outfield.aerial,
   },
@@ -55,6 +56,7 @@ const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
   leadership: {
     consumed: false,
     consumerPositions: NO_CONSUMER_POSITIONS,
+    goalkeeperConsumerOutsideIdentityScope: true,
     weightedUnitsPerPoint: 0,
   },
   crossing: {
@@ -65,7 +67,7 @@ const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
 } as const;
 
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.9.1",
+  version: "match-engine-config-0.9.2",
   matchMinutes: 90,
   possessionBase: 0.5,
   possessionMin: 0.38,
@@ -159,7 +161,7 @@ export const ENGINE_CONFIG = {
     "5-3-2": { retention: 0.96, progression: 0.94, attack: 0.9, defence: 1.1 },
   },
   squadGeneration: {
-    version: "squad-generation-2.1.0",
+    version: "squad-generation-2.2.0",
     attributeMinimum: 1,
     attributeMaximum: 20,
     defaultCondition: 100,
@@ -199,19 +201,30 @@ export const ENGINE_CONFIG = {
       balanced: {},
     },
     identityBudget: {
-      zeroTolerance: 1e-12,
+      purpose: "Hygiene record only; weighted units are not a tuning, parity, or calibration target",
+      scope: "Outfield identityBias vectors only; fixtures.ts deliberately skips identity bias for goalkeepers",
+      limitations: {
+        finishing: {
+          pricingStatus: "partial-profile-weight-only",
+          unpricedConsumers: [
+            "individual forward on-target probability",
+            "individual forward goal probability",
+          ],
+          reason: "The individual shooter's finishing reaches both per-event outcomes undiluted and bypasses profileWeights; no valid linear price is recorded",
+          requiredBefore: "Any Gate 1B use of weighted units beyond hygiene recording",
+        },
+        stamina: {
+          pricingStatus: "not-priced",
+          reason: "Fatigue consumes stamina through a non-linear per-player condition curve rather than profileWeights",
+          effectOnVectors: "Any identity vector using stamina fails the audit until a method is recorded",
+        },
+      },
       attributeWeights: IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS,
     },
     identityParity: {
-      sampleMatches: 10000,
-      pointsPerMatchTolerance: 0.1,
-      control: "matching identity style, balanced approach, 4-4-2, normal tackling, alternating venue",
-      interimAdjustmentsUntilCrossingIsConsumed: {
+      compensationAdjustments: {
         passing: { outfield: {}, goalkeeper: {} },
-        direct: {
-          outfield: { finishing: 1 },
-          goalkeeper: { shotStopping: 6, handling: 1, kicking: 1, aerial: 1, leadership: 1 },
-        },
+        direct: { outfield: {}, goalkeeper: {} },
         defensive: { outfield: {}, goalkeeper: {} },
         balanced: { outfield: {}, goalkeeper: {} },
       },

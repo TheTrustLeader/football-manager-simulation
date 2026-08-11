@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam, resolveSquadGeneration, SQUAD_GENERATION_HASH, SQUAD_GENERATION_VERSION } from "./fixtures.js";
-import { printRunProvenance, readGitProvenance } from "./provenance.js";
+import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
 import type { Approach, MatchOutput, Style, TeamInput } from "./types.js";
 
@@ -114,7 +114,7 @@ const command = process.argv[1]?.endsWith(".js")
   ? `node dist/src/gate-1a-four-style-baseline.js ${count} ${outputPath}`
   : `npm run gate1a:four-style-baseline -- ${count} ${outputPath}`;
 const seeds = seedRange("tuning", count);
-const provenance = readGitProvenance();
+const provenance = readEvidenceProvenance();
 printRunProvenance("GATE 1A FOUR-STYLE BASELINE", provenance);
 const started = performance.now();
 
@@ -194,6 +194,7 @@ const evidence = {
   command,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
+  dirtyFiles: provenance.dirtyFiles,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
   squadGenerationVersion: SQUAD_GENERATION_VERSION,

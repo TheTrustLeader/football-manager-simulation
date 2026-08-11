@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import { ENGINE_CONFIG } from "../src/engine-config.js";
 import { simulateMatch } from "../src/engine.js";
 import { makeTeam, resolveSquadGeneration } from "../src/fixtures.js";
-import { runIdentityParityControl } from "../src/gate-1a-identity-parity.js";
+import {
+  PAIRED_ESTIMATOR_GENERATOR_SEEDS,
+  runPairedIdentityEstimator,
+} from "../src/gate-1a-paired-identity-estimator.js";
+import { readParityCompensationState } from "../src/gate-1a-compensation-state.js";
 import { seedRange } from "../src/seed-pools.js";
 import type { GoalkeeperPlayer, OutfieldAttribute, OutfieldPlayer, Player, Position, TeamInput } from "../src/types.js";
 
@@ -125,18 +129,43 @@ describe("seeded squad generation", () => {
     }
   });
 
-  it("keeps different level-10 identities within the stated points tolerance", () => {
-    const control = ENGINE_CONFIG.squadGeneration.identityParity;
-    const fixedBlockCount = 3;
-    const result = runIdentityParityControl(seedRange("tuning", control.sampleMatches * fixedBlockCount));
-    expect(result.blocks).toHaveLength(fixedBlockCount);
-    expect(
-      result.blocks.map((block) => block.pass),
-      "D8 requires every fixed 10,000-seed block to pass",
-    ).toEqual(Array.from({ length: fixedBlockCount }, () => true));
-    expect(result.combined.absolutePointsPerMatchDifference).toBeLessThanOrEqual(control.pointsPerMatchTolerance);
-    expect(result.combined.pass).toBe(true);
+  it("keeps parity compensation empty and records Redmere's unadjusted starting keeper", () => {
+    const state = readParityCompensationState();
+    const redmere = makeTeam("redmere", 10);
+    const keeper = redmere.starters.find((player): player is GoalkeeperPlayer => player.primaryPosition === "GK")!;
+
+    expect(state).toMatchObject({
+      state: "out",
+      includedInMeasuredResults: false,
+      activeIdentities: [],
+    });
+    expect(keeper.attributes.shotStopping).toBe(14);
   });
+
+  it("holds the compensation-out paired identity residuals within their regression windows", () => {
+    const recordedGaps = {
+      "passing/direct": 0.2358,
+      "passing/defensive": 0.3553,
+      "passing/balanced": 0.1326,
+      "direct/defensive": 0.1410,
+      "direct/balanced": -0.0887,
+      "defensive/balanced": -0.2147,
+    } as const;
+    const generatorSeeds = PAIRED_ESTIMATOR_GENERATOR_SEEDS.slice(0, 2);
+    const result = runPairedIdentityEstimator(generatorSeeds, seedRange("tuning", 30_000), 10_000);
+
+    expect(result.generatorSeeds).toEqual(generatorSeeds);
+    expect(result.matchSeedRange).toEqual({ start: 1, end: 30_000, count: 30_000 });
+    expect(result.estimates).toHaveLength(6);
+    for (const estimate of result.estimates) {
+      const pair = `${estimate.firstIdentity}/${estimate.secondIdentity}` as keyof typeof recordedGaps;
+      expect(estimate.pairedSamples.every((sample) => sample.blocks.length === 3)).toBe(true);
+      expect(
+        Math.abs(estimate.meanPointsPerMatchDifference - recordedGaps[pair]),
+        `${pair} changed from its recorded compensation-out gap`,
+      ).toBeLessThanOrEqual(0.02);
+    }
+  }, 60_000);
 });
 
 describe("age-curve seam", () => {

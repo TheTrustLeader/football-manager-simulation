@@ -8,7 +8,7 @@ import {
   PAIRED_ESTIMATOR_IDENTITIES,
   runPairedIdentityEstimator,
 } from "./gate-1a-paired-identity-estimator.js";
-import { printRunProvenance, readGitProvenance } from "./provenance.js";
+import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
 
 const MATCH_SEED_COUNT = 30_000;
@@ -18,8 +18,11 @@ const command = process.argv[1]?.endsWith(".js")
   ? `node dist/src/gate-1a-paired-identity-estimator-runner.js ${outputPath}`
   : `npm run gate1a:paired-identity-estimator -- ${outputPath}`;
 const matchSeeds = seedRange("tuning", MATCH_SEED_COUNT);
-const provenance = readGitProvenance();
+const provenance = readEvidenceProvenance();
 const compensationState = readParityCompensationState();
+if (compensationState.state !== "out" || compensationState.activeIdentities.length > 0) {
+  throw new Error("DECISION-001 baseline requires compensationState out with no active identities");
+}
 printRunProvenance("GATE 1A D8 PAIRED IDENTITY ESTIMATOR", provenance);
 const started = performance.now();
 const result = runPairedIdentityEstimator(
@@ -36,10 +39,11 @@ const simulatedMatches = result.estimates.length
 const evidence = {
   schemaVersion: 2,
   generatedAt: new Date().toISOString(),
-  purpose: "REVIEW-011 replacement estimator for D8, which is invalid as originally designed",
+  purpose: "DECISION-001 compensation-out baseline for the replacement D8 estimator; residual gaps are recorded and deferred",
   command,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
+  dirtyFiles: provenance.dirtyFiles,
   compensationState,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
@@ -78,9 +82,9 @@ const evidence = {
   limitations: [
     "This estimator uses tuning match seeds 1-30,000 only. The validation seed pool remains sealed.",
     "The 12-question matrix was not run.",
-    "No tolerance is applied or recommended by the runner.",
-    "The committed interim compensation remains unchanged and is included in any pair involving the direct identity.",
-    "Report this estimator only with its matching compensation-out run; neither compensation state may be reported alone.",
+    "No parity tolerance is configured or applied by the runner.",
+    "Compensation state is stamped from engine config and must be out with no active identities for this baseline.",
+    "The measured residuals are regression records, not tuning targets.",
     "Effect-weighted identity-budget units are not used as a tuning or calibration target.",
   ],
 };

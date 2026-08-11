@@ -4,7 +4,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
-import { printRunProvenance, readGitProvenance, type GitProvenance } from "./provenance.js";
+import { printRunProvenance, readEvidenceProvenance, type GitProvenance } from "./provenance.js";
 import type { Approach, Formation, Style, Tackling, TeamInput } from "./types.js";
 
 const rl = createInterface({ input, output });
@@ -130,6 +130,7 @@ function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput, tactics
     purpose: "Gate 1 human playtest — eight-match same-side engine sequence",
     gitCommit: provenance.gitCommit,
     dirtyTree: provenance.dirtyTree,
+    dirtyFiles: provenance.dirtyFiles,
     engineConfigVersion: ENGINE_CONFIG.version,
     engineConfigHash: ENGINE_CONFIG_HASH,
     validationSeedsUsed: false,
@@ -162,7 +163,7 @@ function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput, tactics
 }
 
 async function main(): Promise<void> {
-  const provenance = readGitProvenance();
+  const provenance = readEvidenceProvenance();
   try {
     console.clear();
     console.log(line("="));

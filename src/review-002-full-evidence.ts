@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
-import { printRunProvenance, readGitProvenance } from "./provenance.js";
+import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
 import type { Formation, MatchOutput, OutfieldPlayer, Position, Style, TeamInput } from "./types.js";
 
@@ -159,7 +159,7 @@ function teamForMatrix(prefix: string, formation: Formation, style: Style = "bal
 const count = Number.parseInt(process.argv[2] ?? "500000", 10);
 const outputPath = process.argv[3] ?? "evidence/review-002-full-evidence.json";
 if (!Number.isInteger(count) || count < 500000 || count > 1000000) throw new Error("REVIEW-002 full evidence count must be between 500,000 and 1,000,000 tuning seeds");
-const provenance = readGitProvenance();
+const provenance = readEvidenceProvenance();
 printRunProvenance("REVIEW-002 EVIDENCE RUN", provenance);
 const seeds = seedRange("tuning", count);
 const started = performance.now();
@@ -342,6 +342,7 @@ const evidence = {
   buildVersion: provenance.gitCommit,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
+  dirtyFiles: provenance.dirtyFiles,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
   command: `npm run review002:evidence -- ${count} ${outputPath}`,

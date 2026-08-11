@@ -38,7 +38,7 @@ const starterPositions = generationConfig.roster.starters as readonly Position[]
 const substitutePositions = generationConfig.roster.substitutes as readonly Position[];
 const clubProfiles = generationConfig.clubProfiles as Record<string, ResolvedSquadGeneration>;
 const identityBiases = generationConfig.identityBiases as Record<PlayingIdentity, AttributeModifiers>;
-const identityParityAdjustments = generationConfig.identityParity.interimAdjustmentsUntilCrossingIsConsumed as unknown as Record<PlayingIdentity, {
+const identityParityAdjustments = generationConfig.identityParity.compensationAdjustments as unknown as Record<PlayingIdentity, {
   outfield: AttributeModifiers;
   goalkeeper: AttributeModifiers;
 }>;

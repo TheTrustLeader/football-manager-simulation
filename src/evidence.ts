@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
-import { printRunProvenance, readGitProvenance } from "./provenance.js";
+import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange, type SeedPoolName } from "./seed-pools.js";
 import type { Formation, ScoreState, Style } from "./types.js";
 
@@ -84,7 +84,7 @@ const count = Number.parseInt(process.argv[2] ?? `${ENGINE_CONFIG.ciGuardrails.s
 const pool = (process.argv[3] ?? "tuning") as SeedPoolName;
 const outputPath = process.argv[4] ?? "evidence/match-lab-evidence.json";
 if (pool !== "tuning" && pool !== "validation") throw new Error(`Unknown seed pool: ${pool}`);
-const provenance = readGitProvenance();
+const provenance = readEvidenceProvenance();
 printRunProvenance("MATCH LAB EVIDENCE RUN", provenance);
 const seeds = seedRange(pool, count);
 
@@ -297,6 +297,7 @@ const evidence = {
   buildVersion: provenance.gitCommit,
   gitCommit: provenance.gitCommit,
   dirtyTree: provenance.dirtyTree,
+  dirtyFiles: provenance.dirtyFiles,
   engineConfigVersion: ENGINE_CONFIG.version,
   engineConfigHash: ENGINE_CONFIG_HASH,
   command: `npm run evidence -- ${count} ${pool} ${outputPath}`,
