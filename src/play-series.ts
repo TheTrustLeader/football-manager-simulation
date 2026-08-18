@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import { conditionForDisplay } from "./condition-display.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
@@ -45,7 +46,7 @@ interface SeriesMatchRecord {
     yellowCards: number;
     redCards: number;
   };
-  averageFinalCondition: number;
+  averageDisplayedCondition: number;
   scorelineBelievable: HumanJudgement;
   note: string;
 }
@@ -101,7 +102,10 @@ function average(values: number[]): number {
 }
 
 function managedCondition(team: TeamInput, finalCondition: Record<string, number>): number {
-  return average(team.starters.map((player) => finalCondition[player.id] ?? player.state.condition));
+  return average(team.starters.map((player) => {
+    const internalCondition = finalCondition[player.id] ?? player.state.condition;
+    return conditionForDisplay(internalCondition);
+  }));
 }
 
 function resultLetter(managedGoals: number, opponentGoals: number): "W" | "D" | "L" {
@@ -114,7 +118,7 @@ function printMatchRecord(record: SeriesMatchRecord): void {
   console.log(`\nMatch ${record.match}: ${record.managedClub} ${record.score.managed}-${record.score.opponent} ${record.opponent}  [${record.result}]`);
   console.log(`Seed: ${record.seed}`);
   console.log(`Chances ${record.managedStats.chances}-${record.opponentStats.chances} | Shots ${record.managedStats.shots}-${record.opponentStats.shots} | SOT ${record.managedStats.shotsOnTarget}-${record.opponentStats.shotsOnTarget} | Poss ${record.managedStats.possessionPercent}-${record.opponentStats.possessionPercent}%`);
-  console.log(`Average final condition: ${record.averageFinalCondition.toFixed(1)}`);
+  console.log(`Average final condition: ${record.averageDisplayedCondition.toFixed(1)}`);
 }
 
 function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput, tacticsPatternRecognisable: HumanJudgement, seriesNote: string, provenance: GitProvenance): string {
@@ -125,7 +129,7 @@ function writeEvidence(records: SeriesMatchRecord[], managed: TeamInput, tactics
   const draws = records.filter((record) => record.result === "D").length;
   const losses = records.filter((record) => record.result === "L").length;
   const evidence = {
-    schemaVersion: 3,
+    schemaVersion: 4,
     generatedAt: new Date().toISOString(),
     purpose: "Gate 1 human playtest — eight-match same-side engine sequence",
     gitCommit: provenance.gitCommit,
@@ -241,7 +245,7 @@ async function main(): Promise<void> {
           yellowCards: opponentStats.yellowCards,
           redCards: opponentStats.redCards,
         },
-        averageFinalCondition: managedCondition(managed, result.finalCondition),
+        averageDisplayedCondition: managedCondition(managed, result.finalCondition),
         scorelineBelievable: "unsure",
         note: "",
       };
