@@ -40,7 +40,9 @@ WORKTREE = Path("/tmp/verify-queue-worktree")
 
 # The exact commands the verifying session must run. Kept HERE, in the job, so the
 # session never invents its own idea of what "verified" means for this repo.
-VERIFY_CMD = "npm ci && npm run build && npm test"
+# npm ci is NOT usable here: this repo has no package-lock.json, and npm ci refuses
+# without one. The repo's own CI uses npm install; the loop must match it.
+VERIFY_CMD = "npm install --no-audit --no-fund && npm run build && npm test"
 
 
 def run(*args, cwd=None, check=True):
