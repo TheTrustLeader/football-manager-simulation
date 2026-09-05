@@ -61,10 +61,14 @@ def slug(name):
 
 
 def uk_now():
-    # The record is read in UK time. GitHub runs in UTC; +01:00 is BST.
-    return datetime.datetime.now(datetime.timezone.utc).astimezone(
-        datetime.timezone(datetime.timedelta(hours=1))
-    )
+    # Register rule 15: every timestamp is UK time and SAYS WHICH — BST or GMT.
+    # A fixed +01:00 offset prints "UTC+01:00", which is the same instant and the
+    # wrong record. ZoneInfo prints the name and switches at the boundary by itself.
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.datetime.now(ZoneInfo("Europe/London"))
+    except Exception:
+        return datetime.datetime.now(datetime.timezone.utc)
 
 
 def main():
