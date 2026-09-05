@@ -1,0 +1,64 @@
+# FILL THE VERIFY QUEUE — football manager
+#
+# Every two hours: look for new agent/*, codex/*, review-*/*, ci/* branches and,
+# for each one whose tree is not already queued, write one small job file onto
+# this repository's `verify-queue` branch. A scheduled Claude session picks it up,
+# clones this repo at that commit, runs the verify command and writes a result to
+# Google Drive.
+#
+# It does not merge, deploy, touch `main`, or decide whether anything passed.
+# It produces WORK, not a verdict.
+#
+# NO REPO SECRET EXISTS AND NONE SHOULD. This repository is public. The Hub's
+# version of this robot signs in to Google Drive with a token held as a repo
+# secret, and that token reaches the whole of the business Drive — it has no
+# business being in a public repo. Here the queue lives on a branch of this
+# repo instead, written with the built-in GITHUB_TOKEN.
+#
+# Script: .github/scripts/fill_verify_queue.py
+
+name: Fill the verify queue
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"          # every two hours (UTC). Actions minutes are free on a public repo.
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Force one branch regardless of age (proof runs)"
+        required: false
+        default: ""
+      dry_run:
+        description: "Report what would be written, write nothing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write                   # commit job files to the `verify-queue` branch. Nothing else.
+
+concurrency:
+  group: fill-verify-queue          # never two runs at once — a race could double-write a job
+  cancel-in-progress: false
+
+env:
+  # Branches whose head commit is older than this are ignored. Deliberately set
+  # BEFORE the existing branches so the first run backfills what is already here
+  # and the loop has something real to chew on from day one. Raise it later if
+  # the backlog ever needs cutting off.
+  SINCE: "2026-08-01T00:00:00+01:00"
+
+jobs:
+  fill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0            # the script needs history for merge-base
+
+      - name: Fill the queue
+        run: |
+          python3 .github/scripts/fill_verify_queue.py \
+            --since "$SINCE" \
+            --branch "${{ github.event.inputs.branch }}" \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
