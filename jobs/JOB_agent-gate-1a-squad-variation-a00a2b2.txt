@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=agent/gate-1a-squad-variation
+head=a00a2b2af3159f99f2a21cb5bdb31e13f7cfe0ae
+tree=ea604eec150a9e9eb442d0e99133ab3a766375af
+base=a00a2b2af3159f99f2a21cb5bdb31e13f7cfe0ae
+item=FM-agent-gate-1a-squad-variation
+verify=npm install --no-audit --no-fund && npm run build && npm test
+queued_at=2026-09-05 21:33 BST

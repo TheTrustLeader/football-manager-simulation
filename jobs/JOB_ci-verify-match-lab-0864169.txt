@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=ci/verify-match-lab
+head=0864169911da8680de41649df7771a489113428d
+tree=952990f54c4824e131cbf0c81cb7a9927b24858b
+base=0864169911da8680de41649df7771a489113428d
+item=FM-ci-verify-match-lab
+verify=npm install --no-audit --no-fund && npm run build && npm test
+queued_at=2026-09-05 21:33 BST

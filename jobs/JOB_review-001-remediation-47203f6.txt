@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=review-001/remediation
+head=47203f6bb52d87148f72656bf460e198565d2723
+tree=52b4b1929596667ae373431365e948b34d5e0b22
+base=4d65502f9d7122bd4e3daca38a4336bff7312cf8
+item=FM-review-001-remediation
+verify=npm install --no-audit --no-fund && npm run build && npm test
+queued_at=2026-09-05 21:33 BST

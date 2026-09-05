@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=agent/h1-condition-display
+head=bc5e4a694f28dda0ebd0c62cbe743f0ffa0be3c9
+tree=b277c529dd457f6960edcbd82c6652d9768b3e97
+base=bc5e4a694f28dda0ebd0c62cbe743f0ffa0be3c9
+item=FM-agent-h1-condition-display
+verify=npm install --no-audit --no-fund && npm run build && npm test
+queued_at=2026-09-05 21:33 BST
