@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=ci/engine-guardrails-and-golden
+head=c8f8d732c5c662d66c46f5dbd115c1c3a697c7f9
+tree=f1eb711c475cedf0b28ee1dfbe50be365d4bcb4c
+base=0f41c1d9e7d4e52015d5a2887e24bf313da71efe
+item=FM-ci-engine-guardrails-and-golden
+verify=npm install --no-audit --no-fund && npm run build && npm test
+queued_at=2026-09-07 23:50 BST
