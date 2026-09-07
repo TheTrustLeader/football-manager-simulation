@@ -29,7 +29,25 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Calibration safety gate (fails the build if the engine drifts out of band)
+        # This is the step that can actually go red. npm run evidence plays 20,000
+        # matches and compares goals per match, draw rate, home win rate, mirror
+        # fairness and the strong/weak ability checks against ciGuardrails in
+        # src/engine-config.ts, throwing if any of them breaks its band.
+        # ALLOW_DIRTY_EVIDENCE is needed only because npm install writes
+        # package-lock.json into an untracked tree; the checkout is the commit.
+        # shell: bash is REQUIRED, not decoration. The Actions default is "bash -e",
+        # which does NOT set pipefail, so piping into tee would report the exit code
+        # of tee and this gate would pass while the engine was out of band - the
+        # exact defect it exists to prevent. Verified 7 Sept 2026.
+        shell: bash
+        env:
+          ALLOW_DIRTY_EVIDENCE: "1"
+        run: npm run evidence 2>&1 | tee calibration-evidence.txt
+
       - name: Run 10,000 seeded matches
+        # Human-readable summary only. This step cannot fail on the numbers -
+        # the gate above is what judges them.
         run: npm run simulate -- 10000 | tee simulation-summary.txt
 
       - name: Upload simulation summary
@@ -37,6 +55,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: match-lab-simulation-summary
-          path: simulation-summary.txt
+          path: |
+            simulation-summary.txt
+            calibration-evidence.txt
+            evidence/match-lab-evidence.json
           if-no-files-found: warn
           retention-days: 14
