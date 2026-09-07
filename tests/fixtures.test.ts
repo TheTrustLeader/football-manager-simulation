@@ -165,7 +165,15 @@ describe("seeded squad generation", () => {
         `${pair} changed from its recorded compensation-out gap`,
       ).toBeLessThanOrEqual(0.02);
     }
-  }, 60_000);
+    // 180s, not 60s. This test plays 2 generator seeds across 30,000 match seeds
+    // and needs roughly 40 seconds of solid CPU. Measured 7 Sept 2026 on the same
+    // commit and the same Node: 33.9s run on its own, 39.6s inside the full suite,
+    // but 68.7s on a busier runner - which overran the old 60s limit and reported a
+    // RED that had nothing to do with the code. A gate that fails on how busy the
+    // machine is teaches people to ignore reds, which is the same defect as a gate
+    // that cannot fail at all. The limit is raised; every assertion above is
+    // unchanged, so a residual that genuinely leaves its window still fails.
+  }, 180_000);
 });
 
 describe("age-curve seam", () => {
