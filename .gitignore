@@ -1,0 +1,15 @@
+# Dependencies. package-lock.json is deliberately not committed, which is why
+# this repo uses `npm install` and not `npm ci`.
+node_modules/
+package-lock.json
+
+# Build output (tsconfig outDir).
+dist/
+
+# The evidence file a local `npm run evidence` writes. The dated GATE-1A and
+# REVIEW-002 files in evidence/ ARE committed records and stay tracked - only
+# this generated one is ignored.
+evidence/match-lab-evidence.json
+
+# Python bytecode from the verify-queue robot script.
+.github/scripts/__pycache__/
