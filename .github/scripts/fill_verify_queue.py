@@ -18,9 +18,10 @@ deliberate differences, both because THIS REPOSITORY IS PUBLIC:
      text file.
 
 WHAT IT DOES: every run, look at each branch whose name starts with one of
-PREFIXES. If that branch's TREE is not already queued for the same item — counting
-jobs/ and jobs/_done/ — write jobs/JOB_<stem>.txt onto the `verify-queue` branch.
-Identical content re-pushed is a REPLAY and writes nothing.
+PREFIXES. Skip any branch that is ALREADY FULLY MERGED into main — it has nothing
+left to verify. If a remaining branch's TREE is not already queued for the same
+item — counting jobs/ and jobs/_done/ — write jobs/JOB_<stem>.txt onto the
+`verify-queue` branch. Identical content re-pushed is a REPLAY and writes nothing.
 
 WHAT IT MUST NEVER DO: it does not merge, does not deploy, does not touch main,
 does not decide whether anything passed. It produces WORK, not a verdict.
@@ -124,6 +125,25 @@ def main():
     to_write = []
     for name, sha, head_when in candidates:
         item = "FM-" + slug(name)
+
+        # A branch with NOTHING AHEAD of main is already fully merged. Queuing it
+        # spends a whole verify run re-proving the past — which is exactly what
+        # happened on 7 Sep 2026: three of the five branches queued were already
+        # in main, so the loop verified yesterday for a day.
+        #
+        # `--left-right --count origin/main...<sha>` prints "<behind>\t<ahead>".
+        # The SECOND number is what matters; 0 means everything here is in main.
+        #
+        # --branch still forces it, so a deliberate proof run can name a merged
+        # branch and get a job for it.
+        counts = git("rev-list", "--left-right", "--count",
+                     "origin/main...%s" % sha).split()
+        ahead = int(counts[1]) if len(counts) == 2 else -1
+        if ahead == 0 and not args.branch:
+            print("SKIP    %s (%s) - already fully merged into main, 0 commits ahead"
+                  % (name, sha[:7]))
+            continue
+
         tree = git("rev-parse", "%s^{tree}" % sha)
         if (item, tree) in already:
             print("REPLAY  %s (%s) — tree already queued for %s" % (name, sha[:7], item))
