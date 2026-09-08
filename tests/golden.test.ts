@@ -1,25 +1,34 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ENGINE_CONFIG, ENGINE_CONFIG_HASH, stableHash } from "../src/engine-config.js";
+import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "../src/engine-config.js";
 import { simulateMatch } from "../src/engine.js";
 import { makeTeam } from "../src/fixtures.js";
+import { MATCH_RESULT_FIELDS, NOT_THE_FOOTBALL, matchResultHash } from "../src/match-result.js";
 
 interface GoldenOutput {
   seed: number;
   engineConfigVersion: string;
   engineConfigHash: string;
-  outputHash: string;
+  matchResultHash: string;
 }
 
 const golden = JSON.parse(
   readFileSync(new URL("./golden-output.json", import.meta.url), "utf8"),
 ) as GoldenOutput;
 
-const REBASELINE = "npm run golden:print, then copy seed, engineConfigVersion, "
-  + "engineConfigHash and outputHash into tests/golden-output.json.";
+const REBASELINE = "npm run --silent golden:print > tests/golden-output.json "
+  + "(the --silent matters: without it npm writes its own banner into the file). "
+  + "Run the command, never hand-type the values.";
 
 const versionMatches = ENGINE_CONFIG.version === golden.engineConfigVersion;
 const configMatches = ENGINE_CONFIG_HASH === golden.engineConfigHash;
+
+const output = simulateMatch({
+  seed: golden.seed,
+  neutralVenue: true,
+  home: makeTeam("golden-home", 10),
+  away: makeTeam("golden-away", 10),
+});
 
 describe("golden match output", () => {
   it("the recorded reference describes the config in this tree", () => {
@@ -44,13 +53,7 @@ describe("golden match output", () => {
   });
 
   it("one fixed match still plays out exactly as recorded", () => {
-    const output = simulateMatch({
-      seed: golden.seed,
-      neutralVenue: true,
-      home: makeTeam("golden-home", 10),
-      away: makeTeam("golden-away", 10),
-    });
-    const actual = stableHash(output);
+    const actual = matchResultHash(output);
 
     // If the config itself has moved, this match is SUPPOSED to differ. Raising an
     // alarm here would cry wolf on every deliberate tuning change, which is how a
@@ -58,21 +61,40 @@ describe("golden match output", () => {
     if (!versionMatches || !configMatches) {
       expect(
         actual,
-        "Match output differs, which is expected because the config above has changed. "
+        "The football differs, which is expected because the config above has changed. "
           + "This is not a separate problem. Fix the config check first.",
-      ).not.toBe(golden.outputHash);
+      ).not.toBe(golden.matchResultHash);
       return;
     }
 
-    // The real alarm. Config byte-identical, so nobody intended to change how a match
-    // plays — and yet it plays differently. This is the unintended impact worth
-    // blocking a merge for.
+    // The real alarm, and it now means ONE thing. This hash covers the football
+    // only — who played, the stats, every event in order, the contributions and the
+    // final condition — and deliberately excludes the config labels and the
+    // diagnostics block. So a red here cannot be caused by adding a telemetry
+    // field. It means a match genuinely plays differently.
     expect(
       actual,
       `UNINTENDED BEHAVIOUR CHANGE. The engine config is byte-identical to the `
         + `reference, so no tuning was intended, yet seed ${golden.seed} now produces a `
-        + `different match. Something outside the config has changed how matches play. `
+        + `different match — a different score, event log, contribution ledger or final `
+        + `condition. Adding a diagnostics or telemetry field CANNOT cause this. `
         + `Do not rebaseline to make this pass — find the cause first.`,
-    ).toBe(golden.outputHash);
+    ).toBe(golden.matchResultHash);
+  });
+
+  it("every field of a match output is consciously classified as football or not", () => {
+    // The hash above is an allow-list, which is what stops additive telemetry
+    // tripping it. The cost is that a genuinely footballing new field would be
+    // silently uncovered. This is the guard against that: add a field to
+    // MatchOutput and this fails until someone decides which side it belongs on.
+    const classified = [...MATCH_RESULT_FIELDS, ...NOT_THE_FOOTBALL].sort();
+    expect(
+      Object.keys(output).sort(),
+      `A match output field is not classified. Decide whether the new field is part `
+        + `of THE FOOTBALL (add it to MATCH_RESULT_FIELDS and to matchResult() in `
+        + `src/match-result.ts, then rebaseline) or is a label or measurement (add it `
+        + `to NOT_THE_FOOTBALL with a one-line reason). Do not skip this test: an `
+        + `unclassified field means the golden hash is no longer watching the whole game.`,
+    ).toEqual(classified);
   });
 });
