@@ -4,9 +4,9 @@ Standalone fictional football management game inspired by the pace and decision 
 
 ## Current gate
 
-Gate 1 — Match Lab.
+Gate 1 — Match Lab is complete. Gate 2 competition groundwork is now in place.
 
-The first build is a deterministic TypeScript match engine, kept separate from the browser interface and any persistence layer.
+The repository contains a deterministic TypeScript match engine, text-based Match Lab interfaces, and a competition layer. The competition layer provides seeded fixtures, a league table, and a deterministic season runner while keeping the match engine separate from interface and persistence concerns.
 
 ## First goals
 
@@ -16,7 +16,8 @@ The first build is a deterministic TypeScript match engine, kept separate from t
 - player contribution ledger and ratings
 - headless simulation runner
 - repeatable tests
-- later, a simple text Match Lab interface
+- text Match Lab interfaces for individual matches and match series
+- deterministic double round-robin fixtures, league tables, and season simulation
 
 ## Project boundary
 
@@ -29,6 +30,11 @@ npm install
 npm test
 npm run build
 npm run simulate -- 1000
+npm run season
+npm run play
+npm run play:series
+npm run evidence
+npm run golden:print
 ```
 
 The simulation count defaults to 1,000 when omitted.
