@@ -10,12 +10,12 @@ on:
     # public repo; a branch with no CI run has no CI evidence.
     # verify-queue is deliberately absent: it is an orphan queue branch with no
     # package.json, so this workflow cannot run there.
-    branches:
-      - main
-      - 'agent/**'
-      - 'codex/**'
-      - 'ci/**'
-      - 'review-*/**'
+    # An ALLOW-list re-creates the very blind spot this change exists to close:
+    # the first branch pushed after writing one was named fix/... and matched
+    # nothing, so it silently got no CI. Ignore-list instead - everything runs
+    # except the orphan queue branch, which has no package.json to build.
+    branches-ignore:
+      - verify-queue
   pull_request:
   workflow_dispatch:
 
