@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=ci/paired-identity-rpc-starvation
+head=4acee4592a9041e79a2b6a7f161967a3acd03781
+tree=32e619f665413a9e04d7e11dcf0ffbc5e620d4a8
+base=b9204f549b7ce22f68ec1bd1a9f2949085545715
+item=FM-ci-paired-identity-rpc-starvation
+verify=npm install --no-audit --no-fund && npm run build && npm test
+queued_at=2026-09-08 12:18 BST

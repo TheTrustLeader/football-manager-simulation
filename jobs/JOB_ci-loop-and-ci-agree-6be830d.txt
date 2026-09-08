@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=ci/loop-and-ci-agree
+head=6be830d78aad29dbfb6bca2c72968fc0b1e8769b
+tree=a86b7695e4b63b15b19513341e9252e4d162bea3
+base=b9204f549b7ce22f68ec1bd1a9f2949085545715
+item=FM-ci-loop-and-ci-agree
+verify=npm install --no-audit --no-fund && npm run build && npm test
+queued_at=2026-09-08 12:18 BST
