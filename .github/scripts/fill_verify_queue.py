@@ -43,7 +43,17 @@ WORKTREE = Path("/tmp/verify-queue-worktree")
 # session never invents its own idea of what "verified" means for this repo.
 # npm ci is NOT usable here: this repo has no package-lock.json, and npm ci refuses
 # without one. The repo's own CI uses npm install; the loop must match it.
-VERIFY_CMD = "npm install --no-audit --no-fund && npm run build && npm test"
+#
+# THIS MUST MIRROR .github/workflows/match-lab-ci.yml. It used to stop at
+# `npm test`, while CI also ran the calibration safety gate and the 10,000-match
+# simulate step. That gap is not academic: on 8 Sep 2026 a branch passed the loop,
+# was recorded green, and broke the build on the gate the moment it reached main.
+# A loop that says "verified" on a narrower basis than the build is a loop that
+# issues false greens. If a step is added to the workflow, add it here too.
+VERIFY_CMD = (
+    "npm install --no-audit --no-fund && npm run build && npm test "
+    "&& npm run evidence && npm run simulate -- 10000"
+)
 
 
 def run(*args, cwd=None, check=True):

@@ -2,7 +2,20 @@ name: Match Lab CI
 
 on:
   push:
-    branches: [main]
+    # main AND the working prefixes the verify loop watches. Before this, the
+    # workflow ran only on main and on pull_request, so an ordinary feature
+    # branch never got a CI run at all - which is how ci/engine-guardrails-and-
+    # golden was recorded "green, 46/46" on npm test alone and still turned main
+    # red the first time its own new gate executed. Actions minutes are free on a
+    # public repo; a branch with no CI run has no CI evidence.
+    # verify-queue is deliberately absent: it is an orphan queue branch with no
+    # package.json, so this workflow cannot run there.
+    branches:
+      - main
+      - 'agent/**'
+      - 'codex/**'
+      - 'ci/**'
+      - 'review-*/**'
   pull_request:
   workflow_dispatch:
 
