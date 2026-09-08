@@ -70,6 +70,12 @@ success, is the fault.**
 
 1. Post the complete patch as a single fenced diff block: `git diff <base-sha>..HEAD`
    (commit locally first, so there is a HEAD to diff).
+   ⛔ **If the diff contains backticks - and it will whenever you touch a
+   markdown file - open and close the block with FOUR backticks, ````diff.**
+   Three-backtick fences are closed early by the first ``` inside the patch, and
+   the reader gets a diff truncated mid-hunk that fails to apply with "corrupt
+   patch at line N". This happened for real on issue #9, whose diff of README.md
+   was cut at line 36 of 38.
 2. Raw unified diff only — no prose inside the block, not truncated.
 3. If it is too large for one message, split it in file order and say which part
    each is. **Do not summarise it to make it fit.**
