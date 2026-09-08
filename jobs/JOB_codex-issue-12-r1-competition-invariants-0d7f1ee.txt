@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-12-r1-competition-invariants
+head=0d7f1ee60043f399c15257f2175a174ddab3b72e
+tree=b8190240e3cd176603c0db4e227d11c9d64fe360
+base=9055ab94704aaf9a6f6efe1cd785af59ac51745f
+item=FM-codex-issue-12-r1-competition-invariants
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-08 17:37 BST

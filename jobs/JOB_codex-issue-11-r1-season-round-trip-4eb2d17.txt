@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-11-r1-season-round-trip
+head=4eb2d1704a266a031df0689178cef3ccadc59b95
+tree=d21d56b140e5ee19371425aee239ecb488a54d56
+base=9055ab94704aaf9a6f6efe1cd785af59ac51745f
+item=FM-codex-issue-11-r1-season-round-trip
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-08 17:37 BST
