@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-10-r1-season-player-stats
+head=0022609c33d7e70e35ac0265024e5fe6d4f6e9ec
+tree=7aa797a7e09862b93e72c69775f2f0ff2f24ce5c
+base=d3ddfc1ad75db9a8a198c9fa2bfa5606cf1abc76
+item=FM-codex-issue-10-r1-season-player-stats
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-08 22:09 BST

@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-13-r1-season-scale-evidence
+head=a76f35eb552e3bed4b950d83d31fdce6ac3809bb
+tree=0795df07e8ae80c126ada9afbadc6a9f4afac517
+base=d3ddfc1ad75db9a8a198c9fa2bfa5606cf1abc76
+item=FM-codex-issue-13-r1-season-scale-evidence
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-08 22:09 BST
