@@ -4,6 +4,7 @@ import { simulateMatch } from "../src/engine.js";
 import { makeTeam, resolveSquadGeneration } from "../src/fixtures.js";
 import {
   PAIRED_ESTIMATOR_GENERATOR_SEEDS,
+  PAIRED_ESTIMATOR_IDENTITIES,
   runPairedIdentityEstimator,
 } from "../src/gate-1a-paired-identity-estimator.js";
 import { readParityCompensationState } from "../src/gate-1a-compensation-state.js";
@@ -142,7 +143,7 @@ describe("seeded squad generation", () => {
     expect(keeper.attributes.shotStopping).toBe(14);
   });
 
-  it("holds the compensation-out paired identity residuals within their regression windows", () => {
+  it("holds the compensation-out paired identity residuals within their regression windows", async () => {
     const recordedGaps = {
       "passing/direct": 0.2358,
       "passing/defensive": 0.3553,
@@ -152,12 +153,48 @@ describe("seeded squad generation", () => {
       "defensive/balanced": -0.2147,
     } as const;
     const generatorSeeds = PAIRED_ESTIMATOR_GENERATOR_SEEDS.slice(0, 2);
-    const result = runPairedIdentityEstimator(generatorSeeds, seedRange("tuning", 30_000), 10_000);
+    const matchSeeds = seedRange("tuning", 30_000);
 
-    expect(result.generatorSeeds).toEqual(generatorSeeds);
-    expect(result.matchSeedRange).toEqual({ start: 1, end: 30_000, count: 30_000 });
-    expect(result.estimates).toHaveLength(6);
-    for (const estimate of result.estimates) {
+    // One identity pair per call, yielding the event loop between them.
+    //
+    // The arithmetic is IDENTICAL to a single six-pair call. identityPairs() in
+    // the estimator enumerates pairs and each pair's samples depend only on that
+    // pair, so passing exactly two identities computes exactly that pair. The
+    // loop below walks the same pairs in the same order.
+    //
+    // Why bother: this is NOT the 180s test timeout. Vitest's worker talks to the
+    // main process over birpc, whose DEFAULT_TIMEOUT is hard-coded to 60_000ms
+    // (node_modules/vitest/dist/chunks/index.B521nVV-.js line 3) with no config
+    // option or environment variable to raise it. A long SYNCHRONOUS block starves
+    // the worker's own event loop, so a pending onTaskUpdate reply cannot be
+    // processed, and once the block passes 60s the call throws
+    // "[vitest-worker]: Timeout calling onTaskUpdate" and fails the run.
+    //
+    // As one call this test measured 60.0s and 62.9s in September 2026, sitting
+    // right on that 60s ceiling, which is why it failed roughly one CI run in
+    // three while still printing "46 passed (46)". Raising the TEST timeout from
+    // 60s to 180s never bought headroom, because the binding limit was never the
+    // test timeout. Six chunks of about 10s each keep every block far below it.
+    const identities = PAIRED_ESTIMATOR_IDENTITIES;
+    const estimates = [];
+    for (let first = 0; first < identities.length; first += 1) {
+      for (let second = first + 1; second < identities.length; second += 1) {
+        const result = runPairedIdentityEstimator(
+          generatorSeeds,
+          matchSeeds,
+          10_000,
+          [identities[first]!, identities[second]!],
+        );
+        expect(result.generatorSeeds).toEqual(generatorSeeds);
+        expect(result.matchSeedRange).toEqual({ start: 1, end: 30_000, count: 30_000 });
+        expect(result.estimates).toHaveLength(1);
+        estimates.push(result.estimates[0]!);
+        await new Promise((resolve) => { setImmediate(resolve); });
+      }
+    }
+
+    expect(estimates).toHaveLength(6);
+    for (const estimate of estimates) {
       const pair = `${estimate.firstIdentity}/${estimate.secondIdentity}` as keyof typeof recordedGaps;
       expect(estimate.pairedSamples.every((sample) => sample.blocks.length === 3)).toBe(true);
       expect(
@@ -165,14 +202,6 @@ describe("seeded squad generation", () => {
         `${pair} changed from its recorded compensation-out gap`,
       ).toBeLessThanOrEqual(0.02);
     }
-    // 180s, not 60s. This test plays 2 generator seeds across 30,000 match seeds
-    // and needs roughly 40 seconds of solid CPU. Measured 7 Sept 2026 on the same
-    // commit and the same Node: 33.9s run on its own, 39.6s inside the full suite,
-    // but 68.7s on a busier runner - which overran the old 60s limit and reported a
-    // RED that had nothing to do with the code. A gate that fails on how busy the
-    // machine is teaches people to ignore reds, which is the same defect as a gate
-    // that cannot fail at all. The limit is raised; every assertion above is
-    // unchanged, so a residual that genuinely leaves its window still fails.
   }, 180_000);
 });
 
