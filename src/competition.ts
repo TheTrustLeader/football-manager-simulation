@@ -32,12 +32,20 @@ export interface LeagueTableRow {
   points: number;
 }
 
+export interface SeasonPlayerStats {
+  playerId: string;
+  appearances: number;
+  goals: number;
+  meanRating: number;
+}
+
 export interface SeasonResult {
   seed: number;
   teamIds: string[];
   fixtures: Fixture[];
   matches: MatchOutput[];
   table: LeagueTableRow[];
+  playerStats: SeasonPlayerStats[];
 }
 
 const POINTS_FOR_A_WIN = 3;
@@ -155,6 +163,36 @@ export function buildLeagueTable(matches: readonly MatchOutput[]): LeagueTableRo
     || a.teamId.localeCompare(b.teamId));
 }
 
+/** Roll the contribution ledger up for players who appeared in each match. */
+export function buildSeasonPlayerStats(matches: readonly MatchOutput[]): SeasonPlayerStats[] {
+  const totals = new Map<string, { appearances: number; goals: number; ratingTotal: number }>();
+
+  for (const match of matches) {
+    for (const contribution of match.contributions) {
+      if (contribution.minutesPlayed <= 0) continue;
+      const entry = totals.get(contribution.playerId) ?? {
+        appearances: 0,
+        goals: 0,
+        ratingTotal: 0,
+      };
+      entry.appearances += 1;
+      entry.goals += contribution.goals;
+      entry.ratingTotal += contribution.rating;
+      totals.set(contribution.playerId, entry);
+    }
+  }
+
+  return [...totals.entries()].map(([playerId, total]) => ({
+    playerId,
+    appearances: total.appearances,
+    goals: total.goals,
+    meanRating: total.ratingTotal / total.appearances,
+  })).sort((a, b) => b.goals - a.goals
+    || b.meanRating - a.meanRating
+    || b.appearances - a.appearances
+    || a.playerId.localeCompare(b.playerId));
+}
+
 /**
  * Play a whole fixture list through the existing engine.
  *
@@ -174,7 +212,14 @@ export function runSeason(teams: readonly TeamInput[], seed: number): SeasonResu
     away: byId.get(fixture.awayId)!,
   }));
 
-  return { seed, teamIds, fixtures, matches, table: buildLeagueTable(matches) };
+  return {
+    seed,
+    teamIds,
+    fixtures,
+    matches,
+    table: buildLeagueTable(matches),
+    playerStats: buildSeasonPlayerStats(matches),
+  };
 }
 
 /** A table a human can read, so the football can be eyeballed for sanity. */
@@ -194,4 +239,24 @@ export function formatLeagueTable(table: readonly LeagueTableRow[]): string {
     .map((cell, col) => (col === 1 ? cell.padEnd(widths[col]!) : cell.padStart(widths[col]!)))
     .join("  ");
   return [line(head), widths.map((w) => "-".repeat(w)).join("  "), ...body.map(line)].join("\n");
+}
+
+/** A compact scoring leaderboard, retaining rating precision from the ledger. */
+export function formatTopScorers(playerStats: readonly SeasonPlayerStats[], limit = 10): string {
+  const head = ["#", "Player", "Apps", "Goals", "Avg"];
+  const body = playerStats.slice(0, limit).map((player, index) => [
+    String(index + 1),
+    player.playerId,
+    String(player.appearances),
+    String(player.goals),
+    player.meanRating.toFixed(2),
+  ]);
+  const widths = head.map((_, col) => Math.max(
+    head[col]!.length,
+    ...body.map((row) => row[col]!.length),
+  ));
+  const line = (cells: string[]): string => cells
+    .map((cell, col) => (col === 1 ? cell.padEnd(widths[col]!) : cell.padStart(widths[col]!)))
+    .join("  ");
+  return [line(head), widths.map((width) => "-".repeat(width)).join("  "), ...body.map(line)].join("\n");
 }

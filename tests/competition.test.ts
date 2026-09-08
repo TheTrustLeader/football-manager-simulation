@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLeagueTable, generateFixtures, runSeason } from "../src/competition.js";
+import { buildLeagueTable, buildSeasonPlayerStats, generateFixtures, runSeason } from "../src/competition.js";
 import { makeTeam } from "../src/fixtures.js";
 import type { MatchOutput } from "../src/types.js";
 
@@ -18,6 +18,14 @@ function result(homeTeamId: string, homeGoals: number, awayTeamId: string, awayG
 const orderedPairs = (ids: readonly string[]): string[] => ids
   .flatMap((home) => ids.filter((away) => away !== home).map((away) => `${home} v ${away}`))
   .sort();
+
+function contributions(...players: Array<[string, number, number, number]>): MatchOutput {
+  return {
+    contributions: players.map(([playerId, minutesPlayed, goals, rating]) => ({
+      playerId, minutesPlayed, goals, rating,
+    })),
+  } as unknown as MatchOutput;
+}
 
 describe("fixture generation", () => {
   it("schedules every team home and away against every other, exactly once", () => {
@@ -154,6 +162,47 @@ describe("season", () => {
     const drawn = season.matches.length - decided;
     const points = season.table.reduce((total, r) => total + r.points, 0);
     expect(points).toBe(decided * 3 + drawn * 2);
+  });
+
+  it("reconciles player totals with the raw matches and league table", () => {
+    const season = runSeason(teams(), 11);
+    const playerGoals = season.playerStats.reduce((total, player) => total + player.goals, 0);
+    const contributionGoals = season.matches.flatMap((match) => match.contributions)
+      .reduce((total, player) => total + player.goals, 0);
+    const tableGoals = season.table.reduce((total, team) => total + team.goalsFor, 0);
+
+    expect(playerGoals).toBe(contributionGoals);
+    expect(playerGoals).toBe(tableGoals);
+    expect(season.playerStats.every((player) => player.appearances > 0)).toBe(true);
+  });
+
+  it("orders player stats by goals, rating, appearances, then player id", () => {
+    const stats = buildSeasonPlayerStats([
+      contributions(
+        ["goals-first", 90, 2, 5],
+        ["rating-next", 90, 1, 8],
+        ["apps-next", 90, 1, 7],
+        ["alpha-final", 90, 1, 7],
+        ["zulu-final", 90, 1, 7],
+        ["unused", 0, 0, 10],
+      ),
+      contributions(["apps-next", 45, 0, 7]),
+    ]);
+
+    expect(stats.map((player) => player.playerId)).toEqual([
+      "goals-first", "rating-next", "apps-next", "alpha-final", "zulu-final",
+    ]);
+    expect(stats.find((player) => player.playerId === "apps-next")).toMatchObject({
+      appearances: 2,
+      goals: 1,
+      meanRating: 7,
+    });
+  });
+
+  it("produces byte-identical player stats from the same season seed", () => {
+    const first = runSeason(teams(), 424242).playerStats;
+    const second = runSeason(teams(), 424242).playerStats;
+    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
   });
 
   it("refuses duplicate teams", () => {
