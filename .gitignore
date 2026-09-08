@@ -13,3 +13,12 @@ evidence/match-lab-evidence.json
 
 # Python bytecode from the verify-queue robot script.
 .github/scripts/__pycache__/
+
+# Console captures the CI steps write with `tee`. The shell creates these the
+# moment the step starts, so they make the tree dirty BEFORE the evidence
+# provenance guard reads it - which is the "a build step is writing an untracked
+# file" case that the guard's own comment in match-lab-ci.yml predicts. They are
+# transient logs, not records: the committed record is evidence/ and the run's
+# uploaded artifact.
+calibration-evidence.txt
+simulation-summary.txt
