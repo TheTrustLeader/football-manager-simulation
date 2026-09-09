@@ -1,4 +1,4 @@
-import { formatLeagueTable, runSeason } from "./competition.js";
+import { formatLeagueTable, formatTopScorers, runSeason } from "./competition.js";
 import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readGitProvenance } from "./provenance.js";
 
@@ -22,3 +22,4 @@ const season = runSeason(TEAMS, seed);
 console.log(`Season seed ${season.seed} — ${season.teamIds.length} teams, `
   + `${season.fixtures.length} fixtures, ${season.matches.length} matches played\n`);
 console.log(formatLeagueTable(season.table));
+console.log(`\nTop scorers\n${formatTopScorers(season.playerStats)}`);
