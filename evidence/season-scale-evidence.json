@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-08T15:33:42.901Z",
+  "purpose": "Measure season runtime and football outcomes as team count grows; this record does not choose a league size.",
+  "command": "npm run season:evidence",
+  "outputConvention": "Committed fixed-name record, following the committed evidence/ records rather than the gitignored local match-lab calibration output.",
+  "gitCommit": "35acabe4a6740830a4a9323918fad2aa92e1e89a",
+  "dirtyTree": false,
+  "engineConfigVersion": "match-engine-config-0.9.2",
+  "engineConfigHash": "fnv1a64:144619f235f54904",
+  "squadGenerationVersion": "squad-generation-2.2.0",
+  "squadGenerationHash": "fnv1a64:7f207b31041265de",
+  "controls": {
+    "teamCounts": [
+      4,
+      8,
+      12,
+      16,
+      20
+    ],
+    "seasonSeedBase": 424242,
+    "levelRange": {
+      "weakest": 7,
+      "strongest": 13
+    },
+    "schedule": "Double round-robin; each ordered pairing is played once."
+  },
+  "runtime": {
+    "nodeVersion": "v20.20.2",
+    "platform": "linux",
+    "architecture": "x64"
+  },
+  "rows": [
+    {
+      "teamCount": 4,
+      "fixturesGenerated": 12,
+      "matchesPlayed": 12,
+      "elapsedMs": 82.358,
+      "matchesPerSecond": 145.706,
+      "goalsPerMatch": 2.75,
+      "homeWinRate": 0.333,
+      "drawRate": 0.25,
+      "champion": {
+        "teamId": "scale-4-team-03",
+        "points": 14
+      },
+      "bottom": {
+        "teamId": "scale-4-team-01",
+        "points": 1
+      },
+      "pointsGap": 13,
+      "strongestTeamId": "scale-4-team-04",
+      "strongestFinishedTop": false
+    },
+    {
+      "teamCount": 8,
+      "fixturesGenerated": 56,
+      "matchesPlayed": 56,
+      "elapsedMs": 99.988,
+      "matchesPerSecond": 560.066,
+      "goalsPerMatch": 2.946,
+      "homeWinRate": 0.5,
+      "drawRate": 0.25,
+      "champion": {
+        "teamId": "scale-8-team-07",
+        "points": 23
+      },
+      "bottom": {
+        "teamId": "scale-8-team-01",
+        "points": 8
+      },
+      "pointsGap": 15,
+      "strongestTeamId": "scale-8-team-08",
+      "strongestFinishedTop": false
+    },
+    {
+      "teamCount": 12,
+      "fixturesGenerated": 132,
+      "matchesPlayed": 132,
+      "elapsedMs": 185.441,
+      "matchesPerSecond": 711.816,
+      "goalsPerMatch": 2.735,
+      "homeWinRate": 0.348,
+      "drawRate": 0.288,
+      "champion": {
+        "teamId": "scale-12-team-08",
+        "points": 46
+      },
+      "bottom": {
+        "teamId": "scale-12-team-02",
+        "points": 17
+      },
+      "pointsGap": 29,
+      "strongestTeamId": "scale-12-team-12",
+      "strongestFinishedTop": false
+    },
+    {
+      "teamCount": 16,
+      "fixturesGenerated": 240,
+      "matchesPlayed": 240,
+      "elapsedMs": 203.438,
+      "matchesPerSecond": 1179.723,
+      "goalsPerMatch": 2.996,
+      "homeWinRate": 0.421,
+      "drawRate": 0.287,
+      "champion": {
+        "teamId": "scale-16-team-15",
+        "points": 61
+      },
+      "bottom": {
+        "teamId": "scale-16-team-02",
+        "points": 27
+      },
+      "pointsGap": 34,
+      "strongestTeamId": "scale-16-team-16",
+      "strongestFinishedTop": false
+    },
+    {
+      "teamCount": 20,
+      "fixturesGenerated": 380,
+      "matchesPlayed": 380,
+      "elapsedMs": 323.089,
+      "matchesPerSecond": 1176.145,
+      "goalsPerMatch": 3.205,
+      "homeWinRate": 0.455,
+      "drawRate": 0.218,
+      "champion": {
+        "teamId": "scale-20-team-20",
+        "points": 89
+      },
+      "bottom": {
+        "teamId": "scale-20-team-08",
+        "points": 26
+      },
+      "pointsGap": 63,
+      "strongestTeamId": "scale-20-team-20",
+      "strongestFinishedTop": true
+    }
+  ]
+}
