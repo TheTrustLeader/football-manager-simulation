@@ -7,6 +7,7 @@ import {
   deriveSeasonSeed,
   distribution,
   extendedDistribution,
+  runSweepForSize,
   type Distribution,
   type ExtendedDistribution,
 } from "./season-sweep-evidence.js";
@@ -15,10 +16,7 @@ export const LEAGUE_SIZES = [8, 12, 16, 20] as const;
 export const SEASON_NUMBERS = Array.from({ length: 200 }, (_, index) => index + 1);
 export const OUTPUT_PATH = "evidence/strength-resolution-evidence.json";
 
-const SHARED_SEED_CONTROL = {
-  16: { strongestTeamFinishedTop: 17, goalsPerMatch: 2.929, homeWinRate: 0.428167, drawRate: 0.244583, pointsGapTopToBottom: 43.34 },
-  20: { strongestTeamFinishedTop: 24, goalsPerMatch: 2.988737, homeWinRate: 0.432737, drawRate: 0.245632, pointsGapTopToBottom: 48.2 },
-} as const;
+const SHARED_SEASON_NUMBERS = Array.from({ length: 50 }, (_, index) => index + 1);
 
 interface ControlActual {
   strongestTeamFinishedTop: number;
@@ -110,7 +108,7 @@ export function spearman(left: readonly number[], right: readonly number[]): num
   return rounded(numerator / Math.sqrt(leftSquares * rightSquares));
 }
 
-export function runStrengthForSize(teamCount: number): StrengthRow {
+export function runStrengthForSize(teamCount: number, seasonNumbers: readonly number[] = SEASON_NUMBERS): StrengthRow {
   const entries = makeEvidenceTeams(teamCount);
   const teams = entries.map(({ team }) => team);
   const strongestId = teams[teams.length - 1]!.id;
@@ -126,7 +124,7 @@ export function runStrengthForSize(teamCount: number): StrengthRow {
   let strongestTopCount = 0;
   let sharedStrongestTopCount = 0;
 
-  for (const seasonNumber of SEASON_NUMBERS) {
+  for (const seasonNumber of seasonNumbers) {
     const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber));
     const champion = season.table[0]!;
     const bottom = season.table[season.table.length - 1]!;
@@ -150,15 +148,15 @@ export function runStrengthForSize(teamCount: number): StrengthRow {
     }
   }
 
-  const proportion = strongestTopCount / SEASON_NUMBERS.length;
+  const proportion = strongestTopCount / seasonNumbers.length;
   const row: StrengthRow = {
     teamCount,
-    seasonsSimulated: SEASON_NUMBERS.length,
+    seasonsSimulated: seasonNumbers.length,
     totalMatchesSimulated,
     strongestTeamFinishedTop: {
       count: strongestTopCount,
       proportion: rounded(proportion),
-      standardError: rounded(Math.sqrt(proportion * (1 - proportion) / SEASON_NUMBERS.length)),
+      standardError: rounded(Math.sqrt(proportion * (1 - proportion) / seasonNumbers.length)),
     },
     strongestTeamFinishingPosition: { mean: distribution(positions).mean, median: rounded(median(positions)) },
     strongestTeamMeanSignedPointsMarginToTop: distribution(margins).mean,
@@ -168,7 +166,7 @@ export function runStrengthForSize(teamCount: number): StrengthRow {
     drawRate: distribution(drawRates),
     pointsGapTopToBottom: distribution(pointsGaps),
   };
-  if (teamCount === 16 || teamCount === 20) {
+  if ((teamCount === 16 || teamCount === 20) && SHARED_SEASON_NUMBERS.every((seasonNumber) => seasonNumbers.includes(seasonNumber))) {
     sharedSeedResults.set(row, {
       strongestTeamFinishedTop: sharedStrongestTopCount,
       goalsPerMatch: distribution(goalsPerMatch.slice(0, 50)).mean,
@@ -186,7 +184,14 @@ function verifyPositiveControl(rows: readonly StrengthRow[]) {
     if (!row) throw new Error(`Missing ${teamCount}-team experiment row`);
     const actual = sharedSeedResults.get(row);
     if (!actual) throw new Error(`Missing shared-seed results for ${teamCount}-team experiment row`);
-    const expected = SHARED_SEED_CONTROL[teamCount];
+    const sweep = runSweepForSize(teamCount, SHARED_SEASON_NUMBERS);
+    const expected: ControlActual = {
+      strongestTeamFinishedTop: sweep.strongestTeamFinishedTop,
+      goalsPerMatch: sweep.goalsPerMatch.mean,
+      homeWinRate: sweep.homeWinRate.mean,
+      drawRate: sweep.drawRate.mean,
+      pointsGapTopToBottom: sweep.pointsGapTopToBottom.mean,
+    };
     if (JSON.stringify(actual) !== JSON.stringify(expected)) {
       throw new Error(`POSITIVE CONTROL FAILED for ${teamCount} teams: expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}. STOP: season:sweep and strength:evidence disagree.`);
     }
@@ -246,7 +251,7 @@ export function formatStrengthOutput(evidence: StrengthEvidence): string {
 
 function main(): void {
   const started = performance.now();
-  const rows = LEAGUE_SIZES.map(runStrengthForSize);
+  const rows = LEAGUE_SIZES.map((teamCount) => runStrengthForSize(teamCount));
   const evidence = createStrengthEvidence(rows);
   mkdirSync("evidence", { recursive: true });
   writeFileSync(OUTPUT_PATH, serialiseStrengthEvidence(evidence), "utf8");

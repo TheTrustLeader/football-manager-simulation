@@ -104,7 +104,7 @@ function bandResult(value: number, band: { minimum: number; maximum: number }) {
   return value >= band.minimum && value <= band.maximum ? "WITHIN BAND" as const : "OUTSIDE BAND" as const;
 }
 
-export function runSweepForSize(teamCount: number): SweepRow {
+export function runSweepForSize(teamCount: number, seasonNumbers: readonly number[] = SEASON_NUMBERS): SweepRow {
   const teams = makeEvidenceTeams(teamCount);
   const goalsPerMatch: number[] = [];
   const homeWinRates: number[] = [];
@@ -113,7 +113,7 @@ export function runSweepForSize(teamCount: number): SweepRow {
   let totalMatchesSimulated = 0;
   let strongestTeamFinishedTop = 0;
 
-  for (const seasonNumber of SEASON_NUMBERS) {
+  for (const seasonNumber of seasonNumbers) {
     const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber));
     const totalGoals = season.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0);
     const homeWins = season.matches.filter((match) => match.home.goals > match.away.goals).length;
@@ -133,7 +133,7 @@ export function runSweepForSize(teamCount: number): SweepRow {
   const draws = distribution(drawRates);
   return {
     teamCount,
-    seasonsSimulated: SEASON_NUMBERS.length,
+    seasonsSimulated: seasonNumbers.length,
     totalMatchesSimulated,
     goalsPerMatch: goals,
     homeWinRate: homeWins,
