@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Measure 50-season outcome distributions at candidate league sizes; this evidence does not calibrate the engine.",
+  "command": "npm run season:sweep",
+  "timingPolicy": "Wall-clock timings are printed only to stdout and excluded from this deterministic JSON.",
+  "controls": {
+    "teamCounts": [
+      8,
+      12,
+      16,
+      20
+    ],
+    "seasonNumbers": {
+      "first": 1,
+      "last": 50,
+      "count": 50
+    },
+    "seedDerivation": "teamCount * 1000 + seasonNumber; each league size has a disjoint block of 50 seeds.",
+    "levelRange": {
+      "weakest": 7,
+      "strongest": 13
+    },
+    "acceptanceBands": {
+      "goalsPerMatch": {
+        "minimum": 2.6,
+        "maximum": 3.1
+      },
+      "homeWinRate": {
+        "minimum": 0.4,
+        "maximum": 0.5
+      },
+      "drawRate": {
+        "minimum": 0.2,
+        "maximum": 0.3
+      }
+    }
+  },
+  "rows": [
+    {
+      "teamCount": 8,
+      "seasonsSimulated": 50,
+      "totalMatchesSimulated": 2800,
+      "goalsPerMatch": {
+        "mean": 2.95,
+        "standardDeviation": 0.198077,
+        "minimum": 2.464286,
+        "maximum": 3.517857,
+        "percentile5": 2.678571,
+        "percentile95": 3.2875
+      },
+      "homeWinRate": {
+        "mean": 0.435714,
+        "standardDeviation": 0.065075
+      },
+      "drawRate": {
+        "mean": 0.236429,
+        "standardDeviation": 0.046642
+      },
+      "pointsGapTopToBottom": {
+        "mean": 22.76,
+        "standardDeviation": 3.855178
+      },
+      "strongestTeamFinishedTop": 24,
+      "bandResults": {
+        "goalsPerMatch": "WITHIN BAND",
+        "homeWinRate": "WITHIN BAND",
+        "drawRate": "WITHIN BAND"
+      }
+    },
+    {
+      "teamCount": 12,
+      "seasonsSimulated": 50,
+      "totalMatchesSimulated": 6600,
+      "goalsPerMatch": {
+        "mean": 3.041667,
+        "standardDeviation": 0.161797,
+        "minimum": 2.712121,
+        "maximum": 3.530303,
+        "percentile5": 2.815909,
+        "percentile95": 3.294318
+      },
+      "homeWinRate": {
+        "mean": 0.443636,
+        "standardDeviation": 0.046482
+      },
+      "drawRate": {
+        "mean": 0.229697,
+        "standardDeviation": 0.035933
+      },
+      "pointsGapTopToBottom": {
+        "mean": 33.84,
+        "standardDeviation": 5.356715
+      },
+      "strongestTeamFinishedTop": 5,
+      "bandResults": {
+        "goalsPerMatch": "WITHIN BAND",
+        "homeWinRate": "WITHIN BAND",
+        "drawRate": "WITHIN BAND"
+      }
+    },
+    {
+      "teamCount": 16,
+      "seasonsSimulated": 50,
+      "totalMatchesSimulated": 12000,
+      "goalsPerMatch": {
+        "mean": 2.929,
+        "standardDeviation": 0.106108,
+        "minimum": 2.654167,
+        "maximum": 3.2,
+        "percentile5": 2.78125,
+        "percentile95": 3.111042
+      },
+      "homeWinRate": {
+        "mean": 0.428167,
+        "standardDeviation": 0.030986
+      },
+      "drawRate": {
+        "mean": 0.244583,
+        "standardDeviation": 0.028385
+      },
+      "pointsGapTopToBottom": {
+        "mean": 43.34,
+        "standardDeviation": 6.958764
+      },
+      "strongestTeamFinishedTop": 17,
+      "bandResults": {
+        "goalsPerMatch": "WITHIN BAND",
+        "homeWinRate": "WITHIN BAND",
+        "drawRate": "WITHIN BAND"
+      }
+    },
+    {
+      "teamCount": 20,
+      "seasonsSimulated": 50,
+      "totalMatchesSimulated": 19000,
+      "goalsPerMatch": {
+        "mean": 2.988737,
+        "standardDeviation": 0.082161,
+        "minimum": 2.85,
+        "maximum": 3.176316,
+        "percentile5": 2.861711,
+        "percentile95": 3.132368
+      },
+      "homeWinRate": {
+        "mean": 0.432737,
+        "standardDeviation": 0.020869
+      },
+      "drawRate": {
+        "mean": 0.245632,
+        "standardDeviation": 0.021135
+      },
+      "pointsGapTopToBottom": {
+        "mean": 48.2,
+        "standardDeviation": 7.191662
+      },
+      "strongestTeamFinishedTop": 24,
+      "bandResults": {
+        "goalsPerMatch": "WITHIN BAND",
+        "homeWinRate": "WITHIN BAND",
+        "drawRate": "WITHIN BAND"
+      }
+    }
+  ]
+}
