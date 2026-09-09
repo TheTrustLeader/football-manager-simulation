@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-5-r2-seed-and-random-guards
+head=2bf37957da3ba8259da78a84ec757d9ca108d557
+tree=088cfc3e09c84e7b999817d15b308f685a0768dd
+base=d3ddfc1ad75db9a8a198c9fa2bfa5606cf1abc76
+item=FM-codex-issue-5-r2-seed-and-random-guards
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-09 05:45 BST
