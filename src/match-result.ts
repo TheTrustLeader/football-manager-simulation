@@ -20,6 +20,10 @@ import type { MatchOutput } from "./types.js";
  *      (gameState). Neither can move on its own. If the counting changes but the
  *      events do not, that is telemetry and should not raise an alarm. If the
  *      football changes, the events and stats below catch it first.
+ *      `minuteSnapshots` is likewise a measurement: its condition path ends in
+ *      hashed finalCondition, while its scores and ratings restate hashed stats
+ *      and contributions. `possessionByMinute`, by contrast, is football: two
+ *      identical event streams can arise from different possession sequences.
  *
  * This is an ALLOW-list, on purpose. A field added to MatchOutput does NOT
  * silently join the hash, which is what stops additive telemetry crying wolf.
@@ -33,6 +37,7 @@ export interface MatchResult {
   home: MatchOutput["home"];
   away: MatchOutput["away"];
   events: MatchOutput["events"];
+  possessionByMinute: MatchOutput["possessionByMinute"];
   contributions: MatchOutput["contributions"];
   finalCondition: MatchOutput["finalCondition"];
 }
@@ -45,6 +50,7 @@ export const MATCH_RESULT_FIELDS = [
   "home",
   "away",
   "events",
+  "possessionByMinute",
   "contributions",
   "finalCondition",
 ] as const;
@@ -54,6 +60,8 @@ export const NOT_THE_FOOTBALL = [
   "engineConfigVersion",
   "engineConfigHash",
   "diagnostics",
+  // A measurement of hashed condition, score, and contribution data over time.
+  "minuteSnapshots",
 ] as const;
 
 export function matchResult(output: MatchOutput): MatchResult {
@@ -64,6 +72,7 @@ export function matchResult(output: MatchOutput): MatchResult {
     home: output.home,
     away: output.away,
     events: output.events,
+    possessionByMinute: output.possessionByMinute,
     contributions: output.contributions,
     finalCondition: output.finalCondition,
   };

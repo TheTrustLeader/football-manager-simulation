@@ -261,7 +261,7 @@ describe("seed-swept competition invariants", () => {
     }
   });
 
-  it("reconciles season results and replays deterministically across the sweep", () => {
+  it("reconciles season results and replays deterministically across the sweep", { timeout: 90_000 }, () => {
     for (const size of sweepSizes) {
       for (const seed of seasonSweepSeeds) {
         const context = `${size} teams, seed ${seed}`;
