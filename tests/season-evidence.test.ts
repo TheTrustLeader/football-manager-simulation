@@ -20,6 +20,10 @@ describe("season scale evidence", () => {
         { teamId: "middle", played: 1, won: 0, drawn: 0, lost: 1, goalsFor: 0, goalsAgainst: 2, goalDifference: -2, points: 0 },
         { teamId: "bottom", played: 1, won: 0, drawn: 1, lost: 0, goalsFor: 1, goalsAgainst: 1, goalDifference: 0, points: 1 },
       ],
+      // Required since issue #10 added season player statistics to SeasonResult.
+      // This fixture exercises the table and match measures only, so an empty
+      // ledger is the honest value here rather than invented players.
+      playerStats: [],
     }, "strong", 4);
 
     expect(row).toEqual({
