@@ -1,11 +1,12 @@
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { SeededRandom } from "./random.js";
-import type { AttributeName, MatchEvent, MatchInput, MatchOutput, MinutePlayerSnapshot, MinuteSnapshot, Player, PlayerContribution, ScoreState, TeamInput, TeamStats } from "./types.js";
+import type { AttributeName, MatchDecision, MatchEvent, MatchInput, MatchOutput, MinutePlayerSnapshot, MinuteSnapshot, Player, PlayerContribution, ScoreState, TeamInput, TeamStats } from "./types.js";
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
 interface PlayerRuntime {
   player: Player;
+  entryMinute: number;
   initialCondition: number;
   lossPerWorkload: number;
   floorBreakpoint: number;
@@ -50,6 +51,8 @@ interface TeamRuntime {
   players: Map<string, PlayerRuntime>;
   activePlayers: PlayerRuntime[];
   curves: ProfileCurves;
+  dismissedPlayerIds: Set<string>;
+  substitutedOnPlayerIds: Set<string>;
 }
 
 function conditionFor(player: Player, conditions: Map<string, number>): number {
@@ -64,7 +67,7 @@ function attributeValue(player: Player, key: AttributeName): number {
   return value;
 }
 
-function createPlayerRuntime(player: Player, initialCondition: number): PlayerRuntime {
+function createPlayerRuntime(player: Player, initialCondition: number, entryMinute = 1): PlayerRuntime {
   const c = ENGINE_CONFIG;
   const f = c.fatigue;
   const stamina = player.primaryPosition === "GK" ? f.staminaBaseline : player.attributes.stamina;
@@ -73,6 +76,7 @@ function createPlayerRuntime(player: Player, initialCondition: number): PlayerRu
   const floorBreakpoint = lossPerWorkload === 0 ? Number.POSITIVE_INFINITY : Math.max(0, (initialCondition - f.minimumCondition) / lossPerWorkload);
   return {
     player,
+    entryMinute,
     initialCondition,
     lossPerWorkload,
     floorBreakpoint,
@@ -146,6 +150,8 @@ function createTeamRuntime(team: TeamInput, conditions: Map<string, number>): Te
     players: new Map(players.map((runtime) => [runtime.player.id, runtime])),
     activePlayers: [...players],
     curves: buildProfileCurves(players),
+    dismissedPlayerIds: new Set(),
+    substitutedOnPlayerIds: new Set(),
   };
 }
 
@@ -344,9 +350,62 @@ function sendOff(runtime: TeamRuntime, team: TeamInput, player: Player, minute: 
   const index = runtime.activePlayers.findIndex((entry) => entry.player.id === player.id);
   if (index < 0) throw new Error(`${player.name} cannot be sent off twice`);
   playerRuntime.exitWorkload = runtime.workload + fatigueIncrement(team, minute);
-  contribution.minutesPlayed = Math.min(contribution.minutesPlayed, minute);
+  contribution.minutesPlayed = minute - playerRuntime.entryMinute + 1;
   runtime.activePlayers.splice(index, 1);
+  runtime.dismissedPlayerIds.add(player.id);
   runtime.curves = buildProfileCurves(runtime.activePlayers);
+}
+
+function applySubstitution(
+  decision: MatchDecision,
+  team: TeamInput,
+  runtime: TeamRuntime,
+  contributions: Map<string, PlayerContribution>,
+  events: MatchEvent[],
+  conditions: Map<string, number>,
+): void {
+  if (runtime.dismissedPlayerIds.has(decision.playerOff)) {
+    throw new Error(`${decision.playerOff} cannot be substituted after being sent off`);
+  }
+  const offIndex = runtime.activePlayers.findIndex((entry) => entry.player.id === decision.playerOff);
+  if (offIndex < 0) throw new Error(`${decision.playerOff} is not on the pitch`);
+  if (runtime.substitutedOnPlayerIds.has(decision.playerOn)) {
+    throw new Error(`${decision.playerOn} cannot be brought on twice`);
+  }
+  const on = team.substitutes.find((player) => player.id === decision.playerOn);
+  if (!on) throw new Error(`${decision.playerOn} is not an available substitute`);
+
+  const offRuntime = runtime.activePlayers[offIndex]!;
+  const off = offRuntime.player;
+  if ((off.primaryPosition === "GK") !== (on.primaryPosition === "GK")) {
+    throw new Error("A goalkeeper may only be replaced by a goalkeeper");
+  }
+
+  offRuntime.exitWorkload = runtime.workload;
+  contributionFor(contributions, off).minutesPlayed = decision.minute - offRuntime.entryMinute;
+
+  // Shift the entrant's curve origin to the team's current workload. This keeps
+  // their supplied starting condition while allowing the existing fatigue path
+  // to accrue only the work performed after they enter.
+  const startingRuntime = createPlayerRuntime(on, conditionFor(on, conditions));
+  const onRuntime = createPlayerRuntime(
+    on,
+    startingRuntime.initialCondition + runtime.workload * startingRuntime.lossPerWorkload,
+    decision.minute,
+  );
+  runtime.players.set(on.id, onRuntime);
+  runtime.activePlayers.splice(offIndex, 1, onRuntime);
+  runtime.substitutedOnPlayerIds.add(on.id);
+  contributionFor(contributions, on).minutesPlayed = ENGINE_CONFIG.matchMinutes - decision.minute + 1;
+  runtime.curves = buildProfileCurves(runtime.activePlayers);
+  events.push({
+    minute: decision.minute,
+    type: "substitution",
+    teamId: team.id,
+    playerId: on.id,
+    secondaryPlayerId: off.id,
+    detail: `${on.name} replaces ${off.name}`,
+  });
 }
 
 function scoreState(attackingGoals: number, defendingGoals: number): ScoreState {
@@ -390,6 +449,18 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   }
 
   for (let minute = 1; minute <= c.matchMinutes; minute += 1) {
+    for (const decision of input.decisions?.filter((candidate) => candidate.minute === minute) ?? []) {
+      const homeDecision = decision.teamId === input.home.id;
+      applySubstitution(
+        decision,
+        homeDecision ? input.home : input.away,
+        homeDecision ? homeRuntime : awayRuntime,
+        contributions,
+        events,
+        conditions,
+      );
+    }
+
     if (homeStats.goals > awayStats.goals) gameStateDiagnostics.scoreStateMinutes.homeLeading += 1;
     else if (homeStats.goals < awayStats.goals) gameStateDiagnostics.scoreStateMinutes.awayLeading += 1;
     else gameStateDiagnostics.scoreStateMinutes.level += 1;
@@ -553,5 +624,20 @@ export function validateMatchInput(input: MatchInput): void {
     if (team.starters.filter((p) => p.primaryPosition === "FW").length === 0) throw new Error(`${team.name} must have at least one starting forward`);
     const ids = new Set([...team.starters, ...team.substitutes].map((p) => p.id));
     if (ids.size !== team.starters.length + team.substitutes.length) throw new Error(`${team.name} contains duplicate player ids`);
+  }
+  for (const decision of input.decisions ?? []) {
+    if (!Number.isInteger(decision.minute) || decision.minute < 1 || decision.minute > ENGINE_CONFIG.matchMinutes) {
+      throw new Error(`Substitution minute must be an integer from 1 to ${ENGINE_CONFIG.matchMinutes}`);
+    }
+    if (decision.type !== "substitution") throw new Error(`Unsupported decision type: ${String(decision.type)}`);
+    if (decision.teamId !== input.home.id && decision.teamId !== input.away.id) {
+      throw new Error(`Unknown decision team: ${decision.teamId}`);
+    }
+  }
+  for (const team of [input.home, input.away]) {
+    const decisions = (input.decisions ?? []).filter((decision) => decision.teamId === team.id);
+    if (decisions.length > ENGINE_CONFIG.substitutions.maximum) {
+      throw new Error(`${team.name} cannot make more than ${ENGINE_CONFIG.substitutions.maximum} substitutions`);
+    }
   }
 }
