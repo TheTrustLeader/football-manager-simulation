@@ -145,6 +145,19 @@ export interface TeamStats {
   redCards: number;
 }
 
+export interface MinutePlayerSnapshot {
+  playerId: string;
+  condition: number;
+  rating: number;
+}
+
+export interface MinuteSnapshot {
+  minute: number;
+  homeGoals: number;
+  awayGoals: number;
+  players: MinutePlayerSnapshot[];
+}
+
 export interface ScoreStateDiagnostic {
   possessions: number;
   progressions: number;
@@ -182,6 +195,8 @@ export interface MatchOutput {
   home: TeamStats;
   away: TeamStats;
   events: MatchEvent[];
+  possessionByMinute: string[];
+  minuteSnapshots: MinuteSnapshot[];
   contributions: PlayerContribution[];
   finalCondition: Record<string, number>;
   diagnostics: MatchDiagnostics;

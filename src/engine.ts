@@ -1,6 +1,6 @@
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { SeededRandom } from "./random.js";
-import type { AttributeName, MatchEvent, MatchInput, MatchOutput, Player, PlayerContribution, ScoreState, TeamInput, TeamStats } from "./types.js";
+import type { AttributeName, MatchEvent, MatchInput, MatchOutput, MinutePlayerSnapshot, MinuteSnapshot, Player, PlayerContribution, ScoreState, TeamInput, TeamStats } from "./types.js";
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
@@ -243,6 +243,12 @@ function contributionFor(map: Map<string, PlayerContribution>, player: Player): 
   return value;
 }
 
+function playerRating(contribution: PlayerContribution): number {
+  const r = ENGINE_CONFIG.ratings;
+  const raw = r.baseline + contribution.goals * r.goal + contribution.assists * r.assist + contribution.shots * r.shot + contribution.shotsOnTarget * r.shotOnTarget + contribution.chancesCreated * r.chanceCreated + contribution.progressionActions * r.progressionAction + contribution.defensiveActions * r.defensiveAction + contribution.saves * r.save + contribution.majorErrors * r.majorError + contribution.redCards * r.redCard + contribution.yellowCards * r.yellowCard;
+  return Math.round(clamp(raw, r.min, r.max) * r.precision) / r.precision;
+}
+
 function activeOutfield(runtime: TeamRuntime, teamName: string): Player[] {
   const players = runtime.activePlayers.filter((entry) => entry.player.primaryPosition !== "GK").map((entry) => entry.player);
   if (players.length === 0) throw new Error(`${teamName} has no active outfield players`);
@@ -301,6 +307,37 @@ function advanceFatigue(runtime: TeamRuntime, team: TeamInput, minute: number): 
   runtime.workload += fatigueIncrement(team, minute);
 }
 
+function finishMinute(
+  minute: number,
+  homeTeam: TeamInput,
+  awayTeam: TeamInput,
+  homeRuntime: TeamRuntime,
+  awayRuntime: TeamRuntime,
+  homeStats: TeamStats,
+  awayStats: TeamStats,
+  contributions: Map<string, PlayerContribution>,
+  snapshots: MinuteSnapshot[],
+): void {
+  advanceFatigue(homeRuntime, homeTeam, minute);
+  advanceFatigue(awayRuntime, awayTeam, minute);
+  const players: MinutePlayerSnapshot[] = [];
+  for (const runtime of [homeRuntime, awayRuntime]) {
+    for (const playerRuntime of runtime.activePlayers) {
+      players.push({
+        playerId: playerRuntime.player.id,
+        condition: playerCondition(runtime, playerRuntime),
+        rating: playerRating(contributionFor(contributions, playerRuntime.player)),
+      });
+    }
+  }
+  snapshots.push({
+    minute,
+    homeGoals: homeStats.goals,
+    awayGoals: awayStats.goals,
+    players,
+  });
+}
+
 function sendOff(runtime: TeamRuntime, team: TeamInput, player: Player, minute: number, contribution: PlayerContribution): void {
   const playerRuntime = runtime.players.get(player.id);
   if (!playerRuntime) throw new Error(`Missing runtime state for dismissed player ${player.id}`);
@@ -336,6 +373,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   const homeStats = emptyStats();
   const awayStats = emptyStats();
   const events: MatchEvent[] = [{ minute: 0, type: "kick-off", detail: "Kick-off" }];
+  const possessionByMinute: string[] = [];
+  const minuteSnapshots: MinuteSnapshot[] = [];
   const contributions = new Map<string, PlayerContribution>();
   const gameStateDiagnostics = {
     scoreStateMinutes: { level: 0, homeLeading: 0, awayLeading: 0 },
@@ -377,6 +416,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
         ? -c.gameState.progressionProbabilityShift
         : 0;
     attackStats.possessionTicks += 1;
+    possessionByMinute.push(attackingTeam.id);
     gameStateDiagnostics.attackingState[attackingScoreState].possessions += 1;
 
     const progressionProbability = clamp(
@@ -391,8 +431,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     );
     if (!random.chance(progressionProbability)) {
       creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
-      advanceFatigue(homeRuntime, input.home, minute);
-      advanceFatigue(awayRuntime, input.away, minute);
+      finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots);
       continue;
     }
     gameStateDiagnostics.attackingState[attackingScoreState].progressions += 1;
@@ -409,8 +448,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const chanceProbability = clamp((c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor) * style.chanceRate, c.chance.min, c.chance.max);
     if (!majorError && !random.chance(chanceProbability)) {
       creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
-      advanceFatigue(homeRuntime, input.home, minute);
-      advanceFatigue(awayRuntime, input.away, minute);
+      finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots);
       continue;
     }
 
@@ -469,8 +507,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       }
     }
 
-    advanceFatigue(homeRuntime, input.home, minute);
-    advanceFatigue(awayRuntime, input.away, minute);
+    finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots);
   }
 
   for (const runtime of [homeRuntime, awayRuntime]) {
@@ -480,9 +517,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   }
 
   for (const contribution of contributions.values()) {
-    const r = c.ratings;
-    const raw = r.baseline + contribution.goals * r.goal + contribution.assists * r.assist + contribution.shots * r.shot + contribution.shotsOnTarget * r.shotOnTarget + contribution.chancesCreated * r.chanceCreated + contribution.progressionActions * r.progressionAction + contribution.defensiveActions * r.defensiveAction + contribution.saves * r.save + contribution.majorErrors * r.majorError + contribution.redCards * r.redCard + contribution.yellowCards * r.yellowCard;
-    contribution.rating = Math.round(clamp(raw, r.min, r.max) * r.precision) / r.precision;
+    contribution.rating = playerRating(contribution);
   }
 
   events.push({ minute: c.matchMinutes, type: "full-time", detail: `Full-time: ${input.home.name} ${homeStats.goals}-${awayStats.goals} ${input.away.name}` });
@@ -495,6 +530,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     home: homeStats,
     away: awayStats,
     events,
+    possessionByMinute,
+    minuteSnapshots,
     contributions: [...contributions.values()],
     finalCondition: Object.fromEntries(conditions),
     diagnostics: {

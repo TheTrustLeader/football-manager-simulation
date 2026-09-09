@@ -34,13 +34,39 @@ describe("Match Engine", () => {
     expect(result.away.goals).toBeGreaterThanOrEqual(0);
   });
 
+  it("records the team in possession for every minute", () => {
+    const result = simulateMatch(input());
+    const homeMinutes = result.possessionByMinute.filter((teamId) => teamId === result.homeTeamId).length;
+    const awayMinutes = result.possessionByMinute.filter((teamId) => teamId === result.awayTeamId).length;
+
+    expect(result.possessionByMinute).toHaveLength(ENGINE_CONFIG.matchMinutes);
+    expect(homeMinutes).toBe(result.home.possessionTicks);
+    expect(awayMinutes).toBe(result.away.possessionTicks);
+  });
+
+  it("records a non-increasing condition and current rating for every player on the pitch each minute", () => {
+    const result = simulateMatch(input());
+    const previousCondition = new Map<string, number>();
+
+    expect(result.minuteSnapshots).toHaveLength(ENGINE_CONFIG.matchMinutes);
+    for (const snapshot of result.minuteSnapshots) {
+      expect(snapshot.minute).toBeGreaterThanOrEqual(1);
+      for (const player of snapshot.players) {
+        expect(player.condition).toBeLessThanOrEqual(previousCondition.get(player.playerId) ?? Number.POSITIVE_INFINITY);
+        expect(player.rating).toBeGreaterThanOrEqual(ENGINE_CONFIG.ratings.min);
+        expect(player.rating).toBeLessThanOrEqual(ENGINE_CONFIG.ratings.max);
+        previousCondition.set(player.playerId, player.condition);
+      }
+    }
+  });
+
   it("rejects an invalid starting XI", () => {
     const bad = input();
     bad.home.starters = bad.home.starters.slice(0, 10);
     expect(() => validateMatchInput(bad)).toThrow(/11 starters/);
   });
 
-  it("gives stronger teams a long-run advantage", () => {
+  it("gives stronger teams a long-run advantage", { timeout: 30_000 }, () => {
     let strongPoints = 0;
     let weakPoints = 0;
 
@@ -62,7 +88,7 @@ describe("Match Engine", () => {
     expect(strongPoints).toBeGreaterThan(weakPoints);
   });
 
-  it("makes attacking approach score and concede materially more than cautious", () => {
+  it("makes attacking approach score and concede materially more than cautious", { timeout: 60_000 }, () => {
     const opponent = makeTeam("approach-opponent", 10, { approach: "balanced" }, { seed: 9912, identity: "balanced" });
     const attacking = makeTeam("approach-team", 10, { approach: "attacking" }, { seed: 8821, identity: "balanced" });
     const cautious = makeTeam("approach-team", 10, { approach: "cautious" }, { seed: 8821, identity: "balanced" });

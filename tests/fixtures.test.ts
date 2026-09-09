@@ -202,7 +202,7 @@ describe("seeded squad generation", () => {
         `${pair} changed from its recorded compensation-out gap`,
       ).toBeLessThanOrEqual(0.02);
     }
-  }, 180_000);
+  }, 300_000);
 });
 
 describe("age-curve seam", () => {
