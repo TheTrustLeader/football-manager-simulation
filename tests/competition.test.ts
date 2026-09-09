@@ -19,6 +19,14 @@ const orderedPairs = (ids: readonly string[]): string[] => ids
   .flatMap((home) => ids.filter((away) => away !== home).map((away) => `${home} v ${away}`))
   .sort();
 
+const sweepSeeds = [0, 1, 2, 7, 42, 99, 424242, 0xffffffff];
+const seasonSweepSeeds = [0, 1, 7, 42, 424242];
+const sweepSizes = [2, 3, 4, 5, 6, 7, 8];
+
+function sweptTeams(size: number) {
+  return Array.from({ length: size }, (_, i) => makeTeam(`sweep-${size}-${i + 1}`, 8 + (i % 5)));
+}
+
 describe("fixture generation", () => {
   it("schedules every team home and away against every other, exactly once", () => {
     for (const size of [2, 3, 4, 5, 6]) {
@@ -159,5 +167,97 @@ describe("season", () => {
   it("refuses duplicate teams", () => {
     const duplicated = [makeTeam("same", 10), makeTeam("same", 10)];
     expect(() => runSeason(duplicated, 1)).toThrow(/unique/);
+  });
+});
+
+describe("seed-swept competition invariants", () => {
+  it("generates a valid double round-robin for team counts 2 through 8 across seeds", () => {
+    for (const size of sweepSizes) {
+      const ids = sweptTeams(size).map((team) => team.id);
+      const expectedPairs = orderedPairs(ids);
+
+      for (const seed of sweepSeeds) {
+        const context = `${size} teams, seed ${seed}`;
+        const fixtures = generateFixtures(ids, seed);
+        const playedPairs = fixtures
+          .map((fixture) => `${fixture.homeId} v ${fixture.awayId}`)
+          .sort();
+
+        expect(playedPairs, `${context}: every ordered pair appears exactly once`)
+          .toEqual(expectedPairs);
+        expect(new Set(playedPairs).size, `${context}: no duplicate ordered pair`)
+          .toBe(fixtures.length);
+        expect(fixtures.every((fixture) => fixture.homeId !== fixture.awayId), `${context}: no self-play`)
+          .toBe(true);
+
+        const rounds = new Map<number, string[]>();
+        for (const fixture of fixtures) {
+          const participants = rounds.get(fixture.round) ?? [];
+          participants.push(fixture.homeId, fixture.awayId);
+          rounds.set(fixture.round, participants);
+        }
+        for (const [round, participants] of rounds) {
+          expect(new Set(participants).size, `${context}, round ${round}: no team plays twice`)
+            .toBe(participants.length);
+        }
+
+        const appearances = new Map(ids.map((id) => [id, 0]));
+        for (const fixture of fixtures) {
+          appearances.set(fixture.homeId, appearances.get(fixture.homeId)! + 1);
+          appearances.set(fixture.awayId, appearances.get(fixture.awayId)! + 1);
+        }
+        expect([...appearances.values()], `${context}: equal matches per team`)
+          .toEqual(Array(size).fill(2 * (size - 1)));
+      }
+    }
+  });
+
+  it("reconciles season results and replays deterministically across the sweep", () => {
+    for (const size of sweepSizes) {
+      for (const seed of seasonSweepSeeds) {
+        const context = `${size} teams, seed ${seed}`;
+        const teams = sweptTeams(size);
+        const season = runSeason(teams, seed);
+        const replay = runSeason(sweptTeams(size), seed);
+        const other = runSeason(sweptTeams(size), (seed + 1) >>> 0);
+
+        expect(JSON.stringify(replay), `${context}: identical seed replays byte-identically`)
+          .toBe(JSON.stringify(season));
+        const withoutSeed = ({ seed: _seed, ...result }: typeof season) => result;
+        expect(JSON.stringify(withoutSeed(other)), `${context}: another seed changes the season`)
+          .not.toBe(JSON.stringify(withoutSeed(season)));
+        expect(season.matches, `${context}: every fixture is played`)
+          .toHaveLength(season.fixtures.length);
+
+        const goals = new Map(teams.map((team) => [team.id, { for: 0, against: 0 }]));
+        for (const match of season.matches) {
+          goals.get(match.homeTeamId)!.for += match.home.goals;
+          goals.get(match.homeTeamId)!.against += match.away.goals;
+          goals.get(match.awayTeamId)!.for += match.away.goals;
+          goals.get(match.awayTeamId)!.against += match.home.goals;
+        }
+        for (const row of season.table) {
+          expect(row.played, `${context}, ${row.teamId}: equal matches played`).toBe(2 * (size - 1));
+          expect(row.goalsFor, `${context}, ${row.teamId}: goals for reconcile`).toBe(goals.get(row.teamId)!.for);
+          expect(row.goalsAgainst, `${context}, ${row.teamId}: goals against reconcile`).toBe(goals.get(row.teamId)!.against);
+        }
+
+        const matchGoals = season.matches.reduce(
+          (total, match) => total + match.home.goals + match.away.goals,
+          0,
+        );
+        expect(season.table.reduce((total, row) => total + row.goalsFor, 0), `${context}: total goals for`)
+          .toBe(matchGoals);
+        expect(season.table.reduce((total, row) => total + row.goalsAgainst, 0), `${context}: total goals against`)
+          .toBe(matchGoals);
+
+        const expectedPoints = season.matches.reduce(
+          (total, match) => total + (match.home.goals === match.away.goals ? 2 : 3),
+          0,
+        );
+        expect(season.table.reduce((total, row) => total + row.points, 0), `${context}: points conserved`)
+          .toBe(expectedPoints);
+      }
+    }
   });
 });
