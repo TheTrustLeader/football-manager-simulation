@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-16-r1-decisions-and-substitutions
+head=eb10ef749a120869a74eb9e7fe3de75d8a14b7e9
+tree=36a4dcacc8238ec2a08fbbcd1d4c43aa59df7131
+base=9f67e1a38f58cb5197bef5f35ea3a45d2c445da7
+item=FM-codex-issue-16-r1-decisions-and-substitutions
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-09 16:16 BST

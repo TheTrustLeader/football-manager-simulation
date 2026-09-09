@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-17-r2-strength-resolution
+head=69fcd454be845f922a0be1965b1a4a41dcfa893d
+tree=7f608061f3d420a07ecdd4fdfb2c25665d312cca
+base=9f67e1a38f58cb5197bef5f35ea3a45d2c445da7
+item=FM-codex-issue-17-r2-strength-resolution
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-09 16:16 BST
