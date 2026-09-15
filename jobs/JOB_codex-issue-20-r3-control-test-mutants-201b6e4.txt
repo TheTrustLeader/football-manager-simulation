@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-20-r3-control-test-mutants
+head=201b6e4a30001f0424dc189aacba5579f26a3af6
+tree=afe8c69e5989078e3b5d33c5ec94889e0638b767
+base=9f67e1a38f58cb5197bef5f35ea3a45d2c445da7
+item=FM-codex-issue-20-r3-control-test-mutants
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-15 22:20 BST
