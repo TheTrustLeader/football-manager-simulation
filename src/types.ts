@@ -90,6 +90,15 @@ export interface MatchInput {
   home: TeamInput;
   away: TeamInput;
   neutralVenue?: boolean;
+  decisions?: MatchDecision[];
+}
+
+export interface MatchDecision {
+  minute: number;
+  teamId: string;
+  type: "substitution";
+  playerOff: string;
+  playerOn: string;
 }
 
 export type MatchEventType =

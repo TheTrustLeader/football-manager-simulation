@@ -168,8 +168,14 @@ export function buildSeasonPlayerStats(matches: readonly MatchOutput[]): SeasonP
   const totals = new Map<string, { appearances: number; goals: number; ratingTotal: number }>();
 
   for (const match of matches) {
+    const appearedWithoutAFullMinute = new Set((match.events ?? [])
+      .filter((event) => event.type === "substitution" && event.minute === 1)
+      .flatMap((event) => [event.playerId, event.secondaryPlayerId])
+      .filter((playerId): playerId is string => playerId !== undefined));
     for (const contribution of match.contributions) {
-      if (contribution.minutesPlayed <= 0) continue;
+      // A minute-one replacement has participated but the outgoing player's
+      // exact elapsed minutes are zero; still record the appearance.
+      if (contribution.minutesPlayed <= 0 && !appearedWithoutAFullMinute.has(contribution.playerId)) continue;
       const entry = totals.get(contribution.playerId) ?? {
         appearances: 0,
         goals: 0,

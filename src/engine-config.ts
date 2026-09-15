@@ -67,8 +67,10 @@ const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
 } as const;
 
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.9.2",
+  version: "match-engine-config-0.10.0",
   matchMinutes: 90,
+  // Substitution windows are deliberately not modelled.
+  substitutions: { maximum: 5 },
   possessionBase: 0.5,
   possessionMin: 0.38,
   possessionMax: 0.62,
