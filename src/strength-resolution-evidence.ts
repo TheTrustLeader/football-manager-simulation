@@ -25,7 +25,6 @@ interface ControlActual {
   drawRate: number;
   pointsGapTopToBottom: number;
 }
-const sharedSeedResults = new WeakMap<StrengthRow, ControlActual>();
 
 export interface StrengthRow {
   teamCount: number;
@@ -122,7 +121,6 @@ export function runStrengthForSize(teamCount: number, seasonNumbers: readonly nu
   const pointsGaps: number[] = [];
   let totalMatchesSimulated = 0;
   let strongestTopCount = 0;
-  let sharedStrongestTopCount = 0;
 
   for (const seasonNumber of seasonNumbers) {
     const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber));
@@ -134,7 +132,6 @@ export function runStrengthForSize(teamCount: number, seasonNumbers: readonly nu
     const homeWins = season.matches.filter((match) => match.home.goals > match.away.goals).length;
     const draws = season.matches.filter((match) => match.home.goals === match.away.goals).length;
     if (strongestPosition === 1) strongestTopCount += 1;
-    if (seasonNumber <= 50 && strongestPosition === 1) sharedStrongestTopCount += 1;
     positions.push(strongestPosition);
     margins.push(strongest.points - champion.points);
     totalMatchesSimulated += season.matches.length;
@@ -166,25 +163,29 @@ export function runStrengthForSize(teamCount: number, seasonNumbers: readonly nu
     drawRate: distribution(drawRates),
     pointsGapTopToBottom: distribution(pointsGaps),
   };
-  if ((teamCount === 16 || teamCount === 20) && SHARED_SEASON_NUMBERS.every((seasonNumber) => seasonNumbers.includes(seasonNumber))) {
-    sharedSeedResults.set(row, {
-      strongestTeamFinishedTop: sharedStrongestTopCount,
-      goalsPerMatch: distribution(goalsPerMatch.slice(0, 50)).mean,
-      homeWinRate: distribution(homeWinRates.slice(0, 50)).mean,
-      drawRate: distribution(drawRates.slice(0, 50)).mean,
-      pointsGapTopToBottom: distribution(pointsGaps.slice(0, 50)).mean,
-    });
-  }
   return row;
 }
 
-function verifyPositiveControl(rows: readonly StrengthRow[]) {
+type EvidenceRunner = (teamCount: number, seasonNumbers: readonly number[]) => StrengthRow;
+type SweepRunner = (teamCount: number, seasonNumbers: readonly number[]) => ReturnType<typeof runSweepForSize>;
+
+export function verifyPositiveControl(
+  rows: readonly StrengthRow[],
+  strengthRunner: EvidenceRunner = runStrengthForSize,
+  sweepRunner: SweepRunner = runSweepForSize,
+) {
   return ([16, 20] as const).map((teamCount) => {
     const row = rows.find((candidate) => candidate.teamCount === teamCount);
     if (!row) throw new Error(`Missing ${teamCount}-team experiment row`);
-    const actual = sharedSeedResults.get(row);
-    if (!actual) throw new Error(`Missing shared-seed results for ${teamCount}-team experiment row`);
-    const sweep = runSweepForSize(teamCount, SHARED_SEASON_NUMBERS);
+    const sharedStrength = strengthRunner(teamCount, SHARED_SEASON_NUMBERS);
+    const actual: ControlActual = {
+      strongestTeamFinishedTop: sharedStrength.strongestTeamFinishedTop.count,
+      goalsPerMatch: sharedStrength.goalsPerMatch.mean,
+      homeWinRate: sharedStrength.homeWinRate.mean,
+      drawRate: sharedStrength.drawRate.mean,
+      pointsGapTopToBottom: sharedStrength.pointsGapTopToBottom.mean,
+    };
+    const sweep = sweepRunner(teamCount, SHARED_SEASON_NUMBERS);
     const expected: ControlActual = {
       strongestTeamFinishedTop: sweep.strongestTeamFinishedTop,
       goalsPerMatch: sweep.goalsPerMatch.mean,
@@ -217,7 +218,10 @@ function comparisons(rows: readonly StrengthRow[]) {
   }));
 }
 
-export function createStrengthEvidence(rows: StrengthRow[]): StrengthEvidence {
+export function createStrengthEvidence(
+  rows: StrengthRow[],
+  positiveControlVerifier: (controlRows: readonly StrengthRow[]) => StrengthEvidence["positiveControl"] = verifyPositiveControl,
+): StrengthEvidence {
   return {
     schemaVersion: 1,
     purpose: "Determine whether the 12-team strongest-team dip persists over 200 seeds without changing the football engine.",
@@ -229,7 +233,7 @@ export function createStrengthEvidence(rows: StrengthRow[]): StrengthEvidence {
       seedDerivation: "deriveSeasonSeed(teamCount, seasonNumber), shared with season:sweep; seasons 1-50 overlap.",
       levelRange: { weakest: 7, strongest: 13 },
     },
-    positiveControl: verifyPositiveControl(rows),
+    positiveControl: positiveControlVerifier(rows),
     rows,
     strongestTopComparisons: comparisons(rows),
   };
@@ -243,7 +247,7 @@ export function formatStrengthOutput(evidence: StrengthEvidence): string {
   const lines = evidence.rows.map((row) => {
     const comparison = evidence.strongestTopComparisons.find((entry) => entry.teamCount === row.teamCount)!;
     const conclusions = comparison.comparisons.map((item) => `${item.otherTeamCount}:${item.conclusion}`).join(", ");
-    return `${row.teamCount} teams: top ${row.strongestTeamFinishedTop.count}/200 = ${row.strongestTeamFinishedTop.proportion.toFixed(3)} (SE ${row.strongestTeamFinishedTop.standardError.toFixed(3)}); position mean/median ${row.strongestTeamFinishingPosition.mean.toFixed(3)}/${row.strongestTeamFinishingPosition.median.toFixed(1)}; margin ${row.strongestTeamMeanSignedPointsMarginToTop.toFixed(3)}; Spearman ${row.squadRatingToFinalPositionSpearman.toFixed(3)}; comparisons [${conclusions}]`;
+    return `${row.teamCount} teams: top ${row.strongestTeamFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestTeamFinishedTop.proportion.toFixed(3)} (SE ${row.strongestTeamFinishedTop.standardError.toFixed(3)}); position mean/median ${row.strongestTeamFinishingPosition.mean.toFixed(3)}/${row.strongestTeamFinishingPosition.median.toFixed(1)}; margin ${row.strongestTeamMeanSignedPointsMarginToTop.toFixed(3)}; Spearman ${row.squadRatingToFinalPositionSpearman.toFixed(3)}; comparisons [${conclusions}]`;
   });
   const controls = evidence.positiveControl.map((control) => `POSITIVE CONTROL ${control.teamCount} teams, seeds ${control.sharedSeasonNumbers}: ${control.status}`);
   return [...controls, ...lines].join("\n");
