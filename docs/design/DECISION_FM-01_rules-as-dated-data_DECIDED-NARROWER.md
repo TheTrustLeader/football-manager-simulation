@@ -1,7 +1,6 @@
 # DECISION CARD — FM-01 — Football rules are dated data, not constants
 
-**Status: AWAITING SCOTT.** Raised by Claude, 2026-09-15 22:10 BST. **Owner:** Scott.
-**Filed here, not in `_COORDINATION/Decision-Inbox/`, deliberately** — FM moves to its own project in the morning and this must travel with it, not be orphaned in the Trust Leader governance layer.
+**Status: DECIDED — NARROWER.** Raised by Claude, 2026-09-15 22:10 BST. Decided by Scott, 2026-09-16 BST. **Owner:** Scott.
 **Relates to:** `VISION_what-the-finished-game-is_v1-DRAFT.md` (Stage C) · `CALIBRATION_era-bands-1981-82_FINDINGS.md` (the same mechanism closes both)
 
 ## The decision asked for
@@ -39,3 +38,17 @@ Every rule added during Stage B — promotion places, European qualification slo
 
 ## What Scott is being asked
 **Yes / narrower / no.** If yes, the next Codex brief carries it and the calibration bands get their date range in the same change.
+
+## Scott's decision — 16 Sep 2026 (BST)
+
+**Narrower.** In Scott's words: *the changes should happen in the years they happen in the real world, and keep the rules the ones that impact on the game, such as the back-pass rule and changes to the role of the goalkeeper.*
+
+What this means in practice:
+- A rule gets a date range **only if changing it changes what happens in the game** (examples Scott gave: the back-pass rule; changes to what the goalkeeper may do).
+- Each change takes effect in the **season it happened in real football**. Dates are sourced, and the source is recorded next to the date (sourced fact kept apart from design choice).
+- Rules that never changed, or whose change makes no difference to play or results, stay as plain constants.
+- The acceptance test and the counter-check above still apply.
+
+**Open — for Scott (not yet answered):**
+1. Does "impacts the game" include season rules that change results but not the match itself — points for a win, number of substitutes, promotion places? Claude recommends yes.
+2. The game's country is fictional. Real-world dates come from **English** football unless Scott says otherwise.
