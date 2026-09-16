@@ -10,12 +10,13 @@ describe("season saves", () => {
       makeTeam("redmere", 10),
       makeTeam("kingsford", 10),
       makeTeam("ashvale", 8),
-    ], 424242);
+    ], 424242, 1981);
 
     const loaded = loadSeason(saveSeason(season));
 
     expect(loaded).toEqual(season);
     expect(JSON.stringify(loaded)).toBe(JSON.stringify(season));
+    expect(loaded.season).toBe(1981);
   });
 
   it("rejects a corrupted string with a clear error", () => {

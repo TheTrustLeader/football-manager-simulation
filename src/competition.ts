@@ -1,5 +1,7 @@
 import { simulateMatch } from "./engine.js";
 import { SeededRandom } from "./random.js";
+import { rulesForSeason } from "./rules.js";
+import type { SeasonId, SeasonRules } from "./rules.js";
 import type { MatchOutput, TeamInput } from "./types.js";
 
 /**
@@ -41,6 +43,7 @@ export interface SeasonPlayerStats {
 
 export interface SeasonResult {
   seed: number;
+  season: SeasonId;
   teamIds: string[];
   fixtures: Fixture[];
   matches: MatchOutput[];
@@ -48,7 +51,6 @@ export interface SeasonResult {
   playerStats: SeasonPlayerStats[];
 }
 
-const POINTS_FOR_A_WIN = 3;
 const POINTS_FOR_A_DRAW = 1;
 const BYE = " bye";
 
@@ -104,14 +106,14 @@ export function generateFixtures(teamIds: readonly string[], seed: number): Fixt
 }
 
 /**
- * Build the table. 3 for a win, 1 for a draw.
+ * Build the table using the season's win-points rule. A draw is always 1 point.
  *
  * Ordering: points, then goal difference, then goals scored, then team id. That
  * last one is not a footballing rule. It is there so the order is never
  * ambiguous, because two teams level on everything must still come out in the
  * same order every run or "byte-identical season" means nothing.
  */
-export function buildLeagueTable(matches: readonly MatchOutput[]): LeagueTableRow[] {
+export function buildLeagueTable(matches: readonly MatchOutput[], rules: SeasonRules): LeagueTableRow[] {
   const rows = new Map<string, LeagueTableRow>();
   const row = (teamId: string): LeagueTableRow => {
     const existing = rows.get(teamId);
@@ -140,11 +142,11 @@ export function buildLeagueTable(matches: readonly MatchOutput[]): LeagueTableRo
     if (homeGoals > awayGoals) {
       home.won += 1;
       away.lost += 1;
-      home.points += POINTS_FOR_A_WIN;
+      home.points += rules.pointsForAWin;
     } else if (homeGoals < awayGoals) {
       away.won += 1;
       home.lost += 1;
-      away.points += POINTS_FOR_A_WIN;
+      away.points += rules.pointsForAWin;
     } else {
       home.drawn += 1;
       away.drawn += 1;
@@ -206,7 +208,8 @@ export function buildSeasonPlayerStats(matches: readonly MatchOutput[]): SeasonP
  * the same season seed with the same teams reproduces the season exactly, and a
  * different seed does not.
  */
-export function runSeason(teams: readonly TeamInput[], seed: number): SeasonResult {
+export function runSeason(teams: readonly TeamInput[], seed: number, season: SeasonId): SeasonResult {
+  const rules = rulesForSeason(season);
   const byId = new Map(teams.map((team) => [team.id, team]));
   if (byId.size !== teams.length) throw new Error("Team ids must be unique");
 
@@ -220,10 +223,11 @@ export function runSeason(teams: readonly TeamInput[], seed: number): SeasonResu
 
   return {
     seed,
+    season,
     teamIds,
     fixtures,
     matches,
-    table: buildLeagueTable(matches),
+    table: buildLeagueTable(matches, rules),
     playerStats: buildSeasonPlayerStats(matches),
   };
 }

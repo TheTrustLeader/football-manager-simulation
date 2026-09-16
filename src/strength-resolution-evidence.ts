@@ -123,7 +123,7 @@ export function runStrengthForSize(teamCount: number, seasonNumbers: readonly nu
   let strongestTopCount = 0;
 
   for (const seasonNumber of seasonNumbers) {
-    const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber));
+    const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), 1981);
     const champion = season.table[0]!;
     const bottom = season.table[season.table.length - 1]!;
     const strongestPosition = season.table.findIndex((row) => row.teamId === strongestId) + 1;

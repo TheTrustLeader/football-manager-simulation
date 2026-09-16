@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildLeagueTable, buildSeasonPlayerStats, generateFixtures, runSeason } from "../src/competition.js";
 import { makeTeam } from "../src/fixtures.js";
+import { rulesForSeason } from "../src/rules.js";
 import type { MatchOutput } from "../src/types.js";
 
 // buildLeagueTable reads only the four fields below, so a table test does not
@@ -14,6 +15,8 @@ function result(homeTeamId: string, homeGoals: number, awayTeamId: string, awayG
     away: { goals: awayGoals },
   } as unknown as MatchOutput;
 }
+
+const RULES_1981 = rulesForSeason(1981);
 
 const orderedPairs = (ids: readonly string[]): string[] => ids
   .flatMap((home) => ids.filter((away) => away !== home).map((away) => `${home} v ${away}`))
@@ -80,7 +83,7 @@ describe("league table", () => {
     const table = buildLeagueTable([
       result("alpha", 2, "bravo", 1),
       result("bravo", 3, "alpha", 3),
-    ]);
+    ], RULES_1981);
     const alpha = table.find((r) => r.teamId === "alpha")!;
     const bravo = table.find((r) => r.teamId === "bravo")!;
 
@@ -110,7 +113,7 @@ describe("league table", () => {
       result("opponent-c", 0, "goals-fewer", 0),
       result("zzz-last", 1, "opponent-d", 1),
       result("opponent-d", 0, "zzz-last", 0),
-    ]);
+    ], RULES_1981);
     const contenders = table
       .filter((r) => !r.teamId.startsWith("opponent"))
       .map((r) => r.teamId);
@@ -120,8 +123,8 @@ describe("league table", () => {
 
   it("orders a level table the same way every time it is built", () => {
     const matches = [result("b", 1, "a", 1), result("a", 1, "b", 1)];
-    expect(buildLeagueTable(matches).map((r) => r.teamId))
-      .toEqual(buildLeagueTable([...matches].reverse()).map((r) => r.teamId));
+    expect(buildLeagueTable(matches, RULES_1981).map((r) => r.teamId))
+      .toEqual(buildLeagueTable([...matches].reverse(), RULES_1981).map((r) => r.teamId));
   });
 });
 
@@ -134,9 +137,9 @@ describe("season", () => {
   ];
 
   it("replays byte-identically from the same seed, and differently from another", () => {
-    const first = runSeason(teams(), 424242);
-    const second = runSeason(teams(), 424242);
-    const other = runSeason(teams(), 424243);
+    const first = runSeason(teams(), 424242, 1981);
+    const second = runSeason(teams(), 424242, 1981);
+    const other = runSeason(teams(), 424243, 1981);
 
     // The whole season, not just the table: fixtures, every match output and the
     // standings. A table can match by coincidence; the full object cannot.
@@ -145,7 +148,7 @@ describe("season", () => {
   });
 
   it("plays every fixture and gives every team the same number of games", () => {
-    const season = runSeason(teams(), 7);
+    const season = runSeason(teams(), 7, 1981);
     expect(season.matches).toHaveLength(season.fixtures.length);
     expect(season.fixtures).toHaveLength(4 * 3); // every ordered pair of 4 teams
 
@@ -155,7 +158,7 @@ describe("season", () => {
   });
 
   it("produces a table whose points and goals agree with the matches played", () => {
-    const season = runSeason(teams(), 11);
+    const season = runSeason(teams(), 11, 1981);
     const goalsFor = season.table.reduce((total, r) => total + r.goalsFor, 0);
     const goalsAgainst = season.table.reduce((total, r) => total + r.goalsAgainst, 0);
     const matchGoals = season.matches.reduce((t, m) => t + m.home.goals + m.away.goals, 0);
@@ -173,7 +176,7 @@ describe("season", () => {
   });
 
   it("reconciles player totals with the raw matches and league table", () => {
-    const season = runSeason(teams(), 11);
+    const season = runSeason(teams(), 11, 1981);
     const playerGoals = season.playerStats.reduce((total, player) => total + player.goals, 0);
     const contributionGoals = season.matches.flatMap((match) => match.contributions)
       .reduce((total, player) => total + player.goals, 0);
@@ -208,14 +211,14 @@ describe("season", () => {
   });
 
   it("produces byte-identical player stats from the same season seed", () => {
-    const first = runSeason(teams(), 424242).playerStats;
-    const second = runSeason(teams(), 424242).playerStats;
+    const first = runSeason(teams(), 424242, 1981).playerStats;
+    const second = runSeason(teams(), 424242, 1981).playerStats;
     expect(JSON.stringify(second)).toBe(JSON.stringify(first));
   });
 
   it("refuses duplicate teams", () => {
     const duplicated = [makeTeam("same", 10), makeTeam("same", 10)];
-    expect(() => runSeason(duplicated, 1)).toThrow(/unique/);
+    expect(() => runSeason(duplicated, 1, 1981)).toThrow(/unique/);
   });
 });
 
@@ -266,9 +269,9 @@ describe("seed-swept competition invariants", () => {
       for (const seed of seasonSweepSeeds) {
         const context = `${size} teams, seed ${seed}`;
         const teams = sweptTeams(size);
-        const season = runSeason(teams, seed);
-        const replay = runSeason(sweptTeams(size), seed);
-        const other = runSeason(sweptTeams(size), (seed + 1) >>> 0);
+        const season = runSeason(teams, seed, 1981);
+        const replay = runSeason(sweptTeams(size), seed, 1981);
+        const other = runSeason(sweptTeams(size), (seed + 1) >>> 0, 1981);
 
         expect(JSON.stringify(replay), `${context}: identical seed replays byte-identically`)
           .toBe(JSON.stringify(season));
