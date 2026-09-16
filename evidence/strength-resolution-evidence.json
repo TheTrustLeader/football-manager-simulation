@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Determine whether the 12-team strongest-team dip persists over 200 seeds without changing the football engine.",
+  "command": "npm run strength:evidence",
+  "timingPolicy": "Wall-clock timings are printed only to stdout and excluded from this deterministic JSON.",
+  "controls": {
+    "teamCounts": [
+      8,
+      12,
+      16,
+      20
+    ],
+    "seasonNumbers": {
+      "first": 1,
+      "last": 200,
+      "count": 200
+    },
+    "seedDerivation": "deriveSeasonSeed(teamCount, seasonNumber), shared with season:sweep; seasons 1-50 overlap.",
+    "levelRange": {
+      "weakest": 7,
+      "strongest": 13
+    }
+  },
+  "positiveControl": [
+    {
+      "teamCount": 16,
+      "sharedSeasonNumbers": "1-50",
+      "status": "REPRODUCED"
+    },
+    {
+      "teamCount": 20,
+      "sharedSeasonNumbers": "1-50",
+      "status": "REPRODUCED"
+    }
+  ],
+  "rows": [
+    {
+      "teamCount": 8,
+      "seasonsSimulated": 200,
+      "totalMatchesSimulated": 11200,
+      "strongestTeamFinishedTop": {
+        "count": 82,
+        "proportion": 0.41,
+        "standardError": 0.034778
+      },
+      "strongestTeamFinishingPosition": {
+        "mean": 2.05,
+        "median": 2
+      },
+      "strongestTeamMeanSignedPointsMarginToTop": -3.22,
+      "squadRatingToFinalPositionSpearman": -0.770119,
+      "goalsPerMatch": {
+        "mean": 2.932857,
+        "standardDeviation": 0.204542,
+        "minimum": 2.428571,
+        "maximum": 3.517857,
+        "percentile5": 2.624107,
+        "percentile95": 3.269643
+      },
+      "homeWinRate": {
+        "mean": 0.43375,
+        "standardDeviation": 0.058374
+      },
+      "drawRate": {
+        "mean": 0.235179,
+        "standardDeviation": 0.053664
+      },
+      "pointsGapTopToBottom": {
+        "mean": 22.745,
+        "standardDeviation": 4.070623
+      }
+    },
+    {
+      "teamCount": 12,
+      "seasonsSimulated": 200,
+      "totalMatchesSimulated": 26400,
+      "strongestTeamFinishedTop": {
+        "count": 21,
+        "proportion": 0.105,
+        "standardError": 0.021677
+      },
+      "strongestTeamFinishingPosition": {
+        "mean": 3.795,
+        "median": 4
+      },
+      "strongestTeamMeanSignedPointsMarginToTop": -9.375,
+      "squadRatingToFinalPositionSpearman": -0.777832,
+      "goalsPerMatch": {
+        "mean": 3.036742,
+        "standardDeviation": 0.156539,
+        "minimum": 2.613636,
+        "maximum": 3.530303,
+        "percentile5": 2.75,
+        "percentile95": 3.295833
+      },
+      "homeWinRate": {
+        "mean": 0.437841,
+        "standardDeviation": 0.043442
+      },
+      "drawRate": {
+        "mean": 0.235076,
+        "standardDeviation": 0.039005
+      },
+      "pointsGapTopToBottom": {
+        "mean": 33.165,
+        "standardDeviation": 5.4688
+      }
+    },
+    {
+      "teamCount": 16,
+      "seasonsSimulated": 200,
+      "totalMatchesSimulated": 48000,
+      "strongestTeamFinishedTop": {
+        "count": 57,
+        "proportion": 0.285,
+        "standardError": 0.03192
+      },
+      "strongestTeamFinishingPosition": {
+        "mean": 2.79,
+        "median": 3
+      },
+      "strongestTeamMeanSignedPointsMarginToTop": -6.11,
+      "squadRatingToFinalPositionSpearman": -0.786721,
+      "goalsPerMatch": {
+        "mean": 2.905729,
+        "standardDeviation": 0.117579,
+        "minimum": 2.533333,
+        "maximum": 3.354167,
+        "percentile5": 2.720208,
+        "percentile95": 3.092292
+      },
+      "homeWinRate": {
+        "mean": 0.429417,
+        "standardDeviation": 0.030344
+      },
+      "drawRate": {
+        "mean": 0.247375,
+        "standardDeviation": 0.027561
+      },
+      "pointsGapTopToBottom": {
+        "mean": 42.855,
+        "standardDeviation": 6.461732
+      }
+    },
+    {
+      "teamCount": 20,
+      "seasonsSimulated": 200,
+      "totalMatchesSimulated": 76000,
+      "strongestTeamFinishedTop": {
+        "count": 85,
+        "proportion": 0.425,
+        "standardError": 0.034955
+      },
+      "strongestTeamFinishingPosition": {
+        "mean": 2.56,
+        "median": 2
+      },
+      "strongestTeamMeanSignedPointsMarginToTop": -4.95,
+      "squadRatingToFinalPositionSpearman": -0.778105,
+      "goalsPerMatch": {
+        "mean": 2.995053,
+        "standardDeviation": 0.083455,
+        "minimum": 2.781579,
+        "maximum": 3.221053,
+        "percentile5": 2.863158,
+        "percentile95": 3.124474
+      },
+      "homeWinRate": {
+        "mean": 0.431211,
+        "standardDeviation": 0.024225
+      },
+      "drawRate": {
+        "mean": 0.251553,
+        "standardDeviation": 0.023337
+      },
+      "pointsGapTopToBottom": {
+        "mean": 48.625,
+        "standardDeviation": 6.929962
+      }
+    }
+  ],
+  "strongestTopComparisons": [
+    {
+      "teamCount": 8,
+      "comparisons": [
+        {
+          "otherTeamCount": 12,
+          "difference": 0.305,
+          "combinedStandardError": 0.040981,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 16,
+          "difference": 0.125,
+          "combinedStandardError": 0.047206,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 20,
+          "difference": 0.015,
+          "combinedStandardError": 0.049309,
+          "moreThanTwoStandardErrors": false,
+          "conclusion": "NOT A FINDING"
+        }
+      ]
+    },
+    {
+      "teamCount": 12,
+      "comparisons": [
+        {
+          "otherTeamCount": 8,
+          "difference": 0.305,
+          "combinedStandardError": 0.040981,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 16,
+          "difference": 0.18,
+          "combinedStandardError": 0.038585,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 20,
+          "difference": 0.32,
+          "combinedStandardError": 0.041131,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        }
+      ]
+    },
+    {
+      "teamCount": 16,
+      "comparisons": [
+        {
+          "otherTeamCount": 8,
+          "difference": 0.125,
+          "combinedStandardError": 0.047206,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 12,
+          "difference": 0.18,
+          "combinedStandardError": 0.038585,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 20,
+          "difference": 0.14,
+          "combinedStandardError": 0.047336,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        }
+      ]
+    },
+    {
+      "teamCount": 20,
+      "comparisons": [
+        {
+          "otherTeamCount": 8,
+          "difference": 0.015,
+          "combinedStandardError": 0.049309,
+          "moreThanTwoStandardErrors": false,
+          "conclusion": "NOT A FINDING"
+        },
+        {
+          "otherTeamCount": 12,
+          "difference": 0.32,
+          "combinedStandardError": 0.041131,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 16,
+          "difference": 0.14,
+          "combinedStandardError": 0.047336,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        }
+      ]
+    }
+  ]
+}

@@ -13,12 +13,12 @@ export const LEAGUE_SIZES = [8, 12, 16, 20] as const;
 export const SEASON_NUMBERS = Array.from({ length: 50 }, (_, index) => index + 1);
 export const OUTPUT_PATH = "evidence/season-sweep-evidence.json";
 
-interface Distribution {
+export interface Distribution {
   mean: number;
   standardDeviation: number;
 }
 
-interface ExtendedDistribution extends Distribution {
+export interface ExtendedDistribution extends Distribution {
   minimum: number;
   maximum: number;
   percentile5: number;
@@ -74,7 +74,7 @@ function makeEvidenceTeams(teamCount: number) {
   });
 }
 
-function distribution(values: readonly number[]): Distribution {
+export function distribution(values: readonly number[]): Distribution {
   const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
   const variance = values.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / values.length;
   return { mean: rounded(mean), standardDeviation: rounded(Math.sqrt(variance)) };
@@ -89,7 +89,7 @@ function percentile(sortedValues: readonly number[], percentileValue: number): n
   return lowerValue + fraction * (upperValue - lowerValue);
 }
 
-function extendedDistribution(values: readonly number[]): ExtendedDistribution {
+export function extendedDistribution(values: readonly number[]): ExtendedDistribution {
   const sorted = [...values].sort((left, right) => left - right);
   return {
     ...distribution(values),
@@ -104,7 +104,7 @@ function bandResult(value: number, band: { minimum: number; maximum: number }) {
   return value >= band.minimum && value <= band.maximum ? "WITHIN BAND" as const : "OUTSIDE BAND" as const;
 }
 
-export function runSweepForSize(teamCount: number): SweepRow {
+export function runSweepForSize(teamCount: number, seasonNumbers: readonly number[] = SEASON_NUMBERS): SweepRow {
   const teams = makeEvidenceTeams(teamCount);
   const goalsPerMatch: number[] = [];
   const homeWinRates: number[] = [];
@@ -113,7 +113,7 @@ export function runSweepForSize(teamCount: number): SweepRow {
   let totalMatchesSimulated = 0;
   let strongestTeamFinishedTop = 0;
 
-  for (const seasonNumber of SEASON_NUMBERS) {
+  for (const seasonNumber of seasonNumbers) {
     const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber));
     const totalGoals = season.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0);
     const homeWins = season.matches.filter((match) => match.home.goals > match.away.goals).length;
@@ -133,7 +133,7 @@ export function runSweepForSize(teamCount: number): SweepRow {
   const draws = distribution(drawRates);
   return {
     teamCount,
-    seasonsSimulated: SEASON_NUMBERS.length,
+    seasonsSimulated: seasonNumbers.length,
     totalMatchesSimulated,
     goalsPerMatch: goals,
     homeWinRate: homeWins,
