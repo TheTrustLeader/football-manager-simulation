@@ -26,6 +26,7 @@ Nothing in 1981/82. A season now knows which year it is, and the league table us
 
 ## Must NOT change
 - The match engine, `engine-config.ts`, the golden output. **The golden test must pass untouched** — that is the proof 1981/82 behaves exactly as before.
+- ⚠ The decision card says the calibration bands get their date range "in the same change". **Deliberately deferred to a separate brief:** dating the bands touches `engine-config.ts` and the config hash, and mixing that into this change would hide whether the golden output moved for a rules reason or a calibration reason.
 - Any evidence JSON under `evidence/` — if a regenerated file differs, stop and report.
 
 ## Tests — each must go red if its rule breaks
