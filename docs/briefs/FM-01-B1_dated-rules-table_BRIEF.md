@@ -8,20 +8,19 @@ Nothing in 1981/82. A season now knows which year it is, and the league table us
 
 ## Build
 1. **New file `src/rules.ts`.** A single data table of dated rules, and one function:
-   `rulesForSeason(season: SeasonId): SeasonRules`.
-   - `SeasonId` names a season by its starting year (1981 = 1981/82). Choose a clear type; reject non-integers.
-   - Each table row: rule name, value, first season in force (inclusive), optional last season (inclusive), source note.
-   - Two rules only:
-     - `pointsForAWin`: 2 up to and including 1980/81; 3 from 1981/82.
-     - `tableTieBreak`: `"goalAverage"` up to and including 1975/76; `"goalDifference"` from 1976/77.
-   - A season with no matching row, or two overlapping rows for the same rule, **throws** with the rule name and season. Test both.
+   `rulesForSeason(season: SeasonId, table = SEASON_RULES): SeasonRules`.
+   - `SeasonId` names a season by its starting year (1981 = 1981/82). Reject non-integers.
+   - Each row: rule name, value, first season in force (inclusive), optional last season (inclusive), source note.
+   - **The game starts in 1981/82, so the table starts there.** Nothing earlier is stored. Asking for a season before 1981 **throws** ("before the game starts").
+   - Rules in this brief:
+     - `pointsForAWin`: 3 from 1981/82 (source: Football League introduced 3 points for a win in 1981/82).
+     - `tableTieBreak`: `"goalDifference"` from 1981/82 (in force in England since 1976/77). Only this one value exists for now — the type allows a later value to be added, but do not build other tie-break methods.
+   - A season with no matching row, or two overlapping rows for the same rule, **throws** with the rule name and season.
    - Points for a draw stays a constant (it never changed).
-2. **`buildLeagueTable(matches, rules)`** — `rules` is **required**. Remove `POINTS_FOR_A_WIN`. Points come from `rules.pointsForAWin`.
-   - `goalDifference` tie-break: unchanged chain (points → goal difference → goals scored → team id).
-   - `goalAverage` tie-break: points → goal average → goals scored → team id. Compare by cross-multiplying (`a.for * b.against` vs `b.for * a.against`) — no division. A team that has conceded 0 ranks above any team that has conceded more, if it has scored at least one; two teams both on 0 conceded compare by goals scored. Say in a comment that this handling of 0 is a design choice, not a sourced rule.
-   - Keep `goalDifference` in the row in both eras (it is displayed).
-3. **`runSeason(teams, seed, season)`** — `season` is **required**. Stored on `SeasonResult`. Update every caller (`season.ts`, `season-evidence.ts`, `season-sweep-evidence.ts`, `strength-resolution-evidence.ts`, tests) to pass 1981.
-   - ⛔ No default value for `season` or `rules`. A default is how the house defect gets in: a caller that forgets the season still passes.
+   - The optional `table` argument exists only so tests can supply a table that changes mid-way. Production code never passes it.
+2. **`buildLeagueTable(matches, rules)`** — `rules` is **required**. Remove `POINTS_FOR_A_WIN`; points come from `rules.pointsForAWin`. Tie-break chain unchanged (points → goal difference → goals scored → team id).
+3. **`runSeason(teams, seed, season)`** — `season` is **required**, stored on `SeasonResult`, and passed through `rulesForSeason`. Update every caller (`season.ts`, `season-evidence.ts`, `season-sweep-evidence.ts`, `strength-resolution-evidence.ts`, tests) to pass 1981.
+   - ⛔ No default for `season` or `rules`. A default is how the house defect gets in: a caller that forgets the season still passes.
 4. Save/reload (`season-save.ts`): the season must survive a save and reload byte-identically. If the save format changes, say so explicitly.
 
 ## Must NOT change
@@ -31,20 +30,20 @@ Nothing in 1981/82. A season now knows which year it is, and the league table us
 
 ## Tests — each must go red if its rule breaks
 Ask of every test: *what value would have to change for this to go red?*
-- **The acceptance test:** the same matches give **2** points per win with season 1980 and **3** with season 1981. The fixture must contain at least one win, and the expected totals must differ between the two seasons.
-- **Boundary:** 1980 → 2, 1981 → 3; 1975 → goal average, 1976 → goal difference.
-- **Tie-break divergence:** build one set of matches where goal average and goal difference put two teams in **opposite** order (e.g. A: 4 for, 1 against → GD +3, GA 4.0; B: 8 for, 4 against → GD +4, GA 2.0, same points). Assert the order flips between 1975 and 1976. If the fixture does not flip, it is decoration.
-- **Zero conceded:** the case in Build 2.
-- **Table integrity:** points conserved = wins × pointsForAWin + draws × 2, for both eras.
-- **Errors:** missing season row and overlapping rows both throw.
+- **The acceptance test:** with a test table where `pointsForAWin` is 3 up to 1989 and 2 from 1990, the same matches give different point totals for 1989 and 1990. The fixture must contain at least one win. (The real table has no change after 1981/82 yet, so a test table is the only honest way to prove the lookup is used.)
+- **Boundary:** with that test table, 1989 → 3 and 1990 → 2.
+- **Game start:** `rulesForSeason(1980)` throws, and `runSeason(teams, seed, 1980)` throws.
+- **Real table:** 1981 → 3 points, goal difference.
+- **Table integrity:** points conserved = wins × pointsForAWin + draws × 2, under both test-table values.
+- **Errors:** a gap in the table and overlapping rows both throw.
 
 ## Mutants (written from this brief, not from the tests) — all must be killed
 1. `pointsForAWin` hard-coded to 3 in `buildLeagueTable`.
-2. `rulesForSeason` ignores its argument and returns the latest rules.
+2. `rulesForSeason` ignores its season and returns the latest rules.
 3. Boundary off by one (`>` instead of `>=` on first season).
-4. Tie-break ignores `rules.tableTieBreak` and always uses goal difference.
-5. Goal average computed as goal difference (`for - against`).
-6. `runSeason` ignores `season` and always uses 1981.
+4. `rulesForSeason` ignores its `table` argument and always uses the real table.
+5. `runSeason` ignores `season` and always uses 1981.
+6. The "before the game starts" check removed.
 7. Overlap check removed.
 Report each mutant, the test that killed it, and paste the red line.
 
