@@ -44,11 +44,13 @@ Every rule added during Stage B — promotion places, European qualification slo
 **Narrower.** In Scott's words: *the changes should happen in the years they happen in the real world, and keep the rules the ones that impact on the game, such as the back-pass rule and changes to the role of the goalkeeper.*
 
 What this means in practice:
-- A rule gets a date range **only if changing it changes what happens in the game** (examples Scott gave: the back-pass rule; changes to what the goalkeeper may do).
+- A rule gets a date range **only if changing it changes the game** — on the pitch (back-pass rule, goalkeeper role) or off it (points for a win, substitutes, Bosman).
 - Each change takes effect in the **season it happened in real football**. Dates are sourced, and the source is recorded next to the date (sourced fact kept apart from design choice).
 - Rules that never changed, or whose change makes no difference to play or results, stay as plain constants.
 - The acceptance test and the counter-check above still apply.
 
-**Open — for Scott (not yet answered):**
-1. Does "impacts the game" include season rules that change results but not the match itself — points for a win, number of substitutes, promotion places? Claude recommends yes.
-2. The game's country is fictional. Real-world dates come from **English** football unless Scott says otherwise.
+**Answered by Scott, 16 Sep 2026 (BST):**
+1. "Impacts the game" is wider than the pitch — it includes season and career rules such as points for a win, substitutes and the Bosman ruling.
+2. Dates follow the **English league**.
+
+The list of rules lives in `REGISTER_football-rules-by-season.md`. First build: `docs/briefs/FM-01-B1_dated-rules-table_BRIEF.md`.
