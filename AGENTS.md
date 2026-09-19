@@ -148,6 +148,13 @@ diff costs more review time than the fix saves.
 Do not "tidy" pre-existing failures you did not introduce. If a check already
 fails at the base commit, prove that it does, name it, and leave it alone.
 
+## 7a. Finished means finished
+
+Return work that is complete for the brief. Do not hand back a gap inside the brief's scope
+marked "for now", "follow-up" or "later" — close it. If you find one you cannot close without
+going outside the brief, list it under a heading **BLOCKING** at the top of your reply, not as
+a note. A reply with a BLOCKING item is not done.
+
 ## 8. This repository's own gotchas
 
 - **`package-lock.json` is deliberately NOT COMMITTED** — it is gitignored, so a
