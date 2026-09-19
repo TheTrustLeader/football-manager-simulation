@@ -17,7 +17,7 @@ const seed = Number.isFinite(requested) ? requested : 424242;
 
 printRunProvenance("MATCH LAB SEASON", readGitProvenance());
 
-const season = runSeason(TEAMS, seed);
+const season = runSeason(TEAMS, seed, 1981);
 
 console.log(`Season seed ${season.seed} — ${season.teamIds.length} teams, `
   + `${season.fixtures.length} fixtures, ${season.matches.length} matches played\n`);

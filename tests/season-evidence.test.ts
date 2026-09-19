@@ -12,6 +12,7 @@ describe("season scale evidence", () => {
     const matches = [match("strong", 2, "middle", 0), match("bottom", 1, "strong", 1)];
     const row = summariseSeason({
       seed: 1,
+      season: 1981,
       teamIds: ["strong", "middle", "bottom"],
       fixtures: [{ round: 1, homeId: "strong", awayId: "middle" }, { round: 2, homeId: "bottom", awayId: "strong" }],
       matches,
