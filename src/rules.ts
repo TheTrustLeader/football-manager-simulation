@@ -1,5 +1,5 @@
 export type SeasonId = number;
-export type TableTieBreak = "goalDifference";
+export type TableTieBreak = "goalDifference" | "goalAverage";
 
 export interface SeasonRules {
   pointsForAWin: number;

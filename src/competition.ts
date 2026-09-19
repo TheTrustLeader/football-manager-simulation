@@ -159,10 +159,28 @@ export function buildLeagueTable(matches: readonly MatchOutput[], rules: SeasonR
     entry.goalDifference = entry.goalsFor - entry.goalsAgainst;
   }
 
-  return [...rows.values()].sort((a, b) => b.points - a.points
-    || b.goalDifference - a.goalDifference
-    || b.goalsFor - a.goalsFor
-    || a.teamId.localeCompare(b.teamId));
+  const tieBreak = rules.tableTieBreak as string;
+  if (tieBreak !== "goalDifference" && tieBreak !== "goalAverage") {
+    throw new Error(`Unknown table tie-break: ${tieBreak}`);
+  }
+
+  return [...rows.values()].sort((a, b) => {
+    const primary = b.points - a.points;
+    if (primary !== 0) return primary;
+
+    if (tieBreak === "goalDifference") {
+      const goalDifference = b.goalDifference - a.goalDifference;
+      if (goalDifference !== 0) return goalDifference;
+    } else if (a.goalsAgainst === 0 || b.goalsAgainst === 0) {
+      if (a.goalsAgainst === 0 && b.goalsAgainst !== 0) return -1;
+      if (b.goalsAgainst === 0 && a.goalsAgainst !== 0) return 1;
+    } else {
+      const crossProduct = b.goalsFor * a.goalsAgainst - a.goalsFor * b.goalsAgainst;
+      if (crossProduct !== 0) return crossProduct;
+    }
+
+    return b.goalsFor - a.goalsFor || a.teamId.localeCompare(b.teamId);
+  });
 }
 
 /** Roll the contribution ledger up for players who appeared in each match. */

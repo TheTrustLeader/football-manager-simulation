@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildLeagueTable, runSeason } from "../src/competition.js";
 import { makeTeam } from "../src/fixtures.js";
 import { rulesForSeason } from "../src/rules.js";
-import type { SeasonRule } from "../src/rules.js";
+import type { SeasonRule, SeasonRules } from "../src/rules.js";
 import type { MatchOutput } from "../src/types.js";
 
 const CHANGING_RULES: readonly SeasonRule[] = [
@@ -28,6 +28,10 @@ const MATCHES = [
   result("alpha", 1, "bravo", 0),
   result("alpha", 1, "charlie", 1),
 ];
+
+function rules(tableTieBreak: SeasonRules["tableTieBreak"]): SeasonRules {
+  return { pointsForAWin: 3, tableTieBreak };
+}
 
 describe("season rules", () => {
   it("changes the same match results when the win-points rule changes", () => {
@@ -82,5 +86,38 @@ describe("season rules", () => {
     ];
     expect(() => rulesForSeason(1989, overlap))
       .toThrow("pointsForAWin for season 1989: overlapping rows");
+  });
+
+  it("makes goal difference and goal average produce different orders", () => {
+    const fixtures = [result("high-difference", 10, "opponent-a", 5), result("high-average", 3, "opponent-b", 1)];
+    const contenders = (tieBreak: SeasonRules["tableTieBreak"]) => buildLeagueTable(fixtures, rules(tieBreak))
+      .filter((row) => row.teamId.startsWith("high-"))
+      .map((row) => row.teamId);
+
+    expect(contenders("goalDifference")).toEqual(["high-difference", "high-average"]);
+    expect(contenders("goalAverage")).toEqual(["high-average", "high-difference"]);
+  });
+
+  it("puts zero-conceded sides first under goal average and falls through to goals scored", () => {
+    const table = buildLeagueTable([
+      result("zero-two", 2, "opponent-a", 0),
+      result("zero-three", 3, "opponent-b", 0),
+      result("conceded", 5, "opponent-c", 1),
+      result("nil-nil", 0, "opponent-d", 0),
+      result("five-five", 5, "opponent-e", 5),
+    ], rules("goalAverage"));
+    const contenders = table.filter((row) => ["zero-two", "zero-three", "conceded"].includes(row.teamId));
+
+    expect(contenders.map((row) => row.teamId)).toEqual(["zero-three", "zero-two", "conceded"]);
+    expect(table.filter((row) => ["nil-nil", "five-five"].includes(row.teamId)).map((row) => row.teamId))
+      .toEqual(["nil-nil", "five-five"]);
+    expect(JSON.stringify(table)).not.toMatch(/Infinity|NaN/);
+  });
+
+  it("rejects an unknown tie-break and names its value", () => {
+    expect(() => buildLeagueTable(MATCHES, {
+      pointsForAWin: 3,
+      tableTieBreak: "headToHead" as SeasonRules["tableTieBreak"],
+    })).toThrow("Unknown table tie-break: headToHead");
   });
 });
