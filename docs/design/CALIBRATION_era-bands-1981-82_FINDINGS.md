@@ -96,7 +96,13 @@ Measured across the 800 seasons already committed in `evidence/strength-resoluti
 | Draw rate | 0.261 | **0.235 / 0.235 / 0.247 / 0.252** |
 | Home win rate | 0.498 | 0.434 / 0.438 / 0.429 / 0.431 |
 
-Too many goals, too few draws, and too little home advantage — against **real football**, not merely against an undated band.
+⭐ **Scored against real season-to-season variation**, not just the aggregate. Across the eight seasons in the span the season-level spread (mean ± 2 SD) is: goals **2.459–2.881**, home wins **0.434–0.563**, draws **0.206–0.316**. Judged against that:
+
+- **Goals — FAILS.** All four league sizes (2.91–3.04) sit above the top of the real spread. This is the clear defect.
+- **Home advantage — marginal to failing.** 0.429–0.438 against a real floor of 0.434. Low at every size, below the floor at 16 and 20 teams.
+- **Draws — passes.** 0.235–0.252 sits comfortably inside 0.206–0.316. The game draws less often than the era average (0.261), but real seasons varied at least that much.
+
+⚠ So the honest headline is narrower than "two of three are wrong": **the game scores too many goals, and home advantage is a little weak. Draw rate is fine.**
 
 ⛔ **Nothing currently measures this.** `calibrationTargets` and `ciGuardrails` are read only by `evidence.ts`, `game-state-full-evidence.ts`, `review-002-full-evidence.ts` and the match-lab workflow. No file under `src/season*.ts` ever compares season play to a band. The harness tests a population the game does not play — the house defect again, this time in what is being sampled.
 
