@@ -114,7 +114,7 @@ export function runSweepForSize(teamCount: number, seasonNumbers: readonly numbe
   let strongestTeamFinishedTop = 0;
 
   for (const seasonNumber of seasonNumbers) {
-    const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber));
+    const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), 1981);
     const totalGoals = season.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0);
     const homeWins = season.matches.filter((match) => match.home.goals > match.away.goals).length;
     const draws = season.matches.filter((match) => match.home.goals === match.away.goals).length;

@@ -81,7 +81,8 @@ function isMatch(value: unknown): boolean {
 }
 
 function isSeasonResult(value: unknown): value is SeasonResult {
-  return hasNumberFields(value, ["seed"])
+  return hasNumberFields(value, ["seed", "season"])
+    && Number.isInteger(value.season)
     && hasFields(value, ["teamIds", "fixtures", "matches", "table"])
     && Array.isArray(value.teamIds)
     && value.teamIds.every((id) => typeof id === "string")
@@ -100,8 +101,8 @@ export function saveSeason(result: SeasonResult): string {
 
 /**
  * Parse a complete SeasonResult. Invalid JSON and values missing required
- * season, fixture, match, contribution, or table fields are malformed: those
- * values cannot safely be consumed as an engine-produced season.
+ * season id, fixture, match, contribution, or table fields are malformed:
+ * those values cannot safely be consumed as an engine-produced season.
  */
 export function loadSeason(json: string): SeasonResult {
   let value: unknown;

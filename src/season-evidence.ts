@@ -92,7 +92,7 @@ function main(): void {
   const rows = TEAM_COUNTS.map((teamCount) => {
     const teams = makeEvidenceTeams(teamCount);
     const started = performance.now();
-    const season = runSeason(teams, SEASON_SEED + teamCount);
+    const season = runSeason(teams, SEASON_SEED + teamCount, 1981);
     return summariseSeason(season, teams[teams.length - 1]!.id, performance.now() - started);
   });
   const evidence = {
