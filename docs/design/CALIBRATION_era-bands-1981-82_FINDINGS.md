@@ -56,7 +56,57 @@ An exact 1981/82 figure needs a **match-level dataset** — the final table alon
 4. ⭐ Give the band a **date range**, not just values — which is the same mechanism the era work needs (see the rules-as-dated-data decision). Do it once, for both jobs.
 
 ## Status
-**OPEN.** The bands are now known to be modern; the 1981/82 replacements are not yet sourced. ⛔ Until this closes, "the engine is calibrated" means "calibrated to the 1990s".
+**SOURCED, 20 Sep 2026 (BST).** The replacement figures are below and the data is committed at `data/english-first-division-seasons.csv`. ⛔ Still open: the bands in `engine-config.ts` have not yet been changed, and season play has never been measured against them. Brief FM-02-B1 covers both.
+
+## ⭐⭐ SOURCED — 20 Sep 2026 (BST)
+
+**Source:** engsoccerdata (James Curley) — every English tier-1 match, 1888 onward. 208,028 matches in the dataset, 50,570 in tier 1. Per-season aggregates committed to `data/english-first-division-seasons.csv` with the derivation recorded in `data/README.md`.
+
+**Positive control passed.** The benchmark this document already cited from an unrelated source — 2.65 goals/game over 11,266 Premier League matches, 1992–2021 — recomputes from the new data as **11,266 matches, 2.6555 goals/match**. Same count, same figure, independent route. The point above about one consulted source returning arithmetic that did not survive checking still stands; this is a different source and it does check out.
+
+### The band figures — English First Division, 1978/79–1985/86, all 3,696 matches
+
+| | Band as it stands | Real, 1978–85 | 95% interval | Verdict |
+|---|---|---|---|---|
+| Goals per match | 2.40 – 2.70 | **2.670** | — | inside, but the band centre (2.55) is 0.12 low |
+| Draw rate | 0.27 – 0.31 | **0.2606** | 0.246 – 0.275 | ⛔ **real sits below the whole band** |
+| Home win rate | 0.41 – 0.47 | **0.4981** | 0.482 – 0.514 | ⛔ **real sits above the whole band** |
+
+### ⭐ A correction to this document
+
+This document assumed goals per match are era-dependent. **On this evidence they are not.** 1978–85 gives 2.670; the modern Premier League (1992/93–2020/21) gives 2.656. Practically identical across forty years.
+
+The era difference is almost entirely **home advantage**: 49.8% home wins in 1978–85 against 45.9% in the modern game. That is what this document predicted, and it is confirmed.
+
+The draw band is a separate matter. Real draws are ~26% in **both** eras, below the 0.27–0.31 band either way. That is not an era problem — it is simply a wrong band.
+
+### ⭐ One season cannot set a band — demonstrated, not asserted
+
+**1981/82 on its own:** 462 matches, home wins **46.3%**, draws **26.2%**, goals **2.539**.
+
+That single season sits *inside* the current home-win band, and it is a notably low home-win year against its neighbours (1980/81 was 52.6%, 1982/83 was 55.2%). Sourcing 1981/82 alone would have produced the conclusion that the existing bands were fine. The eight-season span is what makes the finding hold: ±1.6 points of margin instead of ±4.6.
+
+### ⛔ And the football the game actually plays is outside real football too
+
+Measured across the 800 seasons already committed in `evidence/strength-resolution-evidence.json` (~100,000 matches):
+
+| | Real, 1978–85 | Season play, 8 / 12 / 16 / 20 teams |
+|---|---|---|
+| Goals per match | 2.670 | **2.93 / 3.04 / 2.91 / 3.00** |
+| Draw rate | 0.261 | **0.235 / 0.235 / 0.247 / 0.252** |
+| Home win rate | 0.498 | 0.434 / 0.438 / 0.429 / 0.431 |
+
+⭐ **Scored against real season-to-season variation**, not just the aggregate. Across the eight seasons in the span the season-level spread (mean ± 2 SD) is: goals **2.459–2.881**, home wins **0.434–0.563**, draws **0.206–0.316**. Judged against that:
+
+- **Goals — FAILS.** All four league sizes (2.91–3.04) sit above the top of the real spread. This is the clear defect.
+- **Home advantage — marginal to failing.** 0.429–0.438 against a real floor of 0.434. Low at every size, below the floor at 16 and 20 teams.
+- **Draws — passes.** 0.235–0.252 sits comfortably inside 0.206–0.316. The game draws less often than the era average (0.261), but real seasons varied at least that much.
+
+⚠ So the honest headline is narrower than "two of three are wrong": **the game scores too many goals, and home advantage is a little weak. Draw rate is fine.**
+
+⛔ **Nothing currently measures this.** `calibrationTargets` and `ciGuardrails` are read only by `evidence.ts`, `game-state-full-evidence.ts`, `review-002-full-evidence.ts` and the match-lab workflow. No file under `src/season*.ts` ever compares season play to a band. The harness tests a population the game does not play — the house defect again, this time in what is being sampled.
+
+⚠ Some gap is expected by construction: season play draws teams from a 7–13 level spread, a different population from the 20,000-match lab run. The defensible complaint is not the size of the gap. It is that nobody is measuring it.
 
 ## Sources
 - Football League goal statistics — https://www.footballhistory.org/league/football-league-statistics.html
