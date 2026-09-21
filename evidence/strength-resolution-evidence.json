@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "purpose": "Determine whether the 12-team strongest-team dip persists over 200 seeds without changing the football engine.",
+  "schemaVersion": 2,
+  "purpose": "Compare nominal team level and generated starting-eleven strength as predictors of final position.",
   "command": "npm run strength:evidence",
   "timingPolicy": "Wall-clock timings are printed only to stdout and excluded from this deterministic JSON.",
   "controls": {
@@ -43,12 +43,27 @@
         "proportion": 0.41,
         "standardError": 0.034778
       },
+      "strongestByActualRatingFinishedTop": {
+        "count": 82,
+        "proportion": 0.41,
+        "standardError": 0.034778
+      },
+      "strongestByLevelAndActualRatingAgreement": {
+        "count": 200,
+        "proportion": 1
+      },
       "strongestTeamFinishingPosition": {
         "mean": 2.05,
         "median": 2
       },
       "strongestTeamMeanSignedPointsMarginToTop": -3.22,
-      "squadRatingToFinalPositionSpearman": -0.770119,
+      "levelToFinalPositionSpearman": -0.770119,
+      "actualRatingToFinalPositionSpearman": -0.754405,
+      "actualSquadRatingSpread": {
+        "minimum": 7.073684,
+        "maximum": 13.221053,
+        "range": 6.147368
+      },
       "goalsPerMatch": {
         "mean": 2.932857,
         "standardDeviation": 0.204542,
@@ -79,12 +94,27 @@
         "proportion": 0.105,
         "standardError": 0.021677
       },
+      "strongestByActualRatingFinishedTop": {
+        "count": 21,
+        "proportion": 0.105,
+        "standardError": 0.021677
+      },
+      "strongestByLevelAndActualRatingAgreement": {
+        "count": 200,
+        "proportion": 1
+      },
       "strongestTeamFinishingPosition": {
         "mean": 3.795,
         "median": 4
       },
       "strongestTeamMeanSignedPointsMarginToTop": -9.375,
-      "squadRatingToFinalPositionSpearman": -0.777832,
+      "levelToFinalPositionSpearman": -0.777832,
+      "actualRatingToFinalPositionSpearman": -0.773636,
+      "actualSquadRatingSpread": {
+        "minimum": 7.157895,
+        "maximum": 13.242105,
+        "range": 6.084211
+      },
       "goalsPerMatch": {
         "mean": 3.036742,
         "standardDeviation": 0.156539,
@@ -115,12 +145,27 @@
         "proportion": 0.285,
         "standardError": 0.03192
       },
+      "strongestByActualRatingFinishedTop": {
+        "count": 89,
+        "proportion": 0.445,
+        "standardError": 0.035141
+      },
+      "strongestByLevelAndActualRatingAgreement": {
+        "count": 0,
+        "proportion": 0
+      },
       "strongestTeamFinishingPosition": {
         "mean": 2.79,
         "median": 3
       },
       "strongestTeamMeanSignedPointsMarginToTop": -6.11,
-      "squadRatingToFinalPositionSpearman": -0.786721,
+      "levelToFinalPositionSpearman": -0.786721,
+      "actualRatingToFinalPositionSpearman": -0.789529,
+      "actualSquadRatingSpread": {
+        "minimum": 7.094737,
+        "maximum": 12.884211,
+        "range": 5.789474
+      },
       "goalsPerMatch": {
         "mean": 2.905729,
         "standardDeviation": 0.117579,
@@ -151,12 +196,27 @@
         "proportion": 0.425,
         "standardError": 0.034955
       },
+      "strongestByActualRatingFinishedTop": {
+        "count": 85,
+        "proportion": 0.425,
+        "standardError": 0.034955
+      },
+      "strongestByLevelAndActualRatingAgreement": {
+        "count": 200,
+        "proportion": 1
+      },
       "strongestTeamFinishingPosition": {
         "mean": 2.56,
         "median": 2
       },
       "strongestTeamMeanSignedPointsMarginToTop": -4.95,
-      "squadRatingToFinalPositionSpearman": -0.778105,
+      "levelToFinalPositionSpearman": -0.778105,
+      "actualRatingToFinalPositionSpearman": -0.792783,
+      "actualSquadRatingSpread": {
+        "minimum": 6.978947,
+        "maximum": 13.505263,
+        "range": 6.526316
+      },
       "goalsPerMatch": {
         "mean": 2.995053,
         "standardDeviation": 0.083455,

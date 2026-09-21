@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { deriveSeasonSeed, runSweepForSize, SEASON_NUMBERS as SWEEP_SEASON_NUMBERS } from "../src/season-sweep-evidence.js";
+import { actualSquadRating, makeTeam } from "../src/fixtures.js";
 import {
   createStrengthEvidence,
   formatStrengthOutput,
@@ -33,7 +34,7 @@ describe("strength resolution evidence", () => {
   it("serialises deterministically", () => {
     const rows = [8, 12].map((size) => runStrengthForSize(size, [1, 2, 3]));
     const evidence = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       purpose: "determinism test fixture",
       command: "test",
       timingPolicy: "No timing data.",
@@ -123,6 +124,73 @@ describe("strength resolution evidence", () => {
     expect(row.strongestTeamFinishedTop.count).toBeGreaterThan(0);
     expect(row.strongestTeamFinishedTop.proportion).toBe(row.strongestTeamFinishedTop.count / seasons.length);
     expect(formatStrengthOutput(evidence)).toContain(`top ${row.strongestTeamFinishedTop.count}/${seasons.length}`);
+  });
+
+  it("records disagreement between strongest-by-level and strongest-by-rating", () => {
+    const teamFactory = () => Array.from({ length: 8 }, (_, index) => {
+      const team = makeTeam(`constructed-disagreement-${index}`, 10, {}, { seed: 1000 + index, identity: "balanced" });
+      for (const player of team.starters) {
+        for (const key of Object.keys(player.attributes) as Array<keyof typeof player.attributes>) {
+          player.attributes[key] = index === 0 ? 20 : 2 + index;
+        }
+      }
+      return { level: index + 1, team };
+    });
+
+    const teams = teamFactory();
+    expect(teams[0]!.level).toBeLessThan(teams[7]!.level);
+    expect(actualSquadRating(teams[0]!.team)).toBeGreaterThan(actualSquadRating(teams[7]!.team));
+    const row = runStrengthForSize(8, [1, 2], teamFactory);
+    expect(row.strongestByLevelAndActualRatingAgreement).toEqual({ count: 0, proportion: 0 });
+  });
+
+  it("records full agreement when level and generated rating ordering match", () => {
+    const teamFactory = () => Array.from({ length: 8 }, (_, index) => {
+      const team = makeTeam(`constructed-agreement-${index}`, 10, {}, { seed: 2000 + index, identity: "balanced" });
+      for (const player of team.starters) {
+        for (const key of Object.keys(player.attributes) as Array<keyof typeof player.attributes>) {
+          player.attributes[key] = index + 3;
+        }
+      }
+      return { level: index + 1, team };
+    });
+
+    expect(runStrengthForSize(8, [1, 2, 3], teamFactory).strongestByLevelAndActualRatingAgreement)
+      .toEqual({ count: 3, proportion: 1 });
+  });
+
+  it("keeps all committed strongest-by-level results as a positive control", async () => {
+    const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")) as StrengthEvidence;
+    for (const expected of committed.rows) {
+      let count = 0;
+      for (let start = 0; start < SEASON_NUMBERS.length; start += 25) {
+        count += runStrengthForSize(expected.teamCount, SEASON_NUMBERS.slice(start, start + 25)).strongestTeamFinishedTop.count;
+        await new Promise((resolve) => { setImmediate(resolve); });
+      }
+      const proportion = count / SEASON_NUMBERS.length;
+      expect({
+        count,
+        proportion,
+        standardError: Number(Math.sqrt(proportion * (1 - proportion) / SEASON_NUMBERS.length).toFixed(6)),
+      }).toEqual(expected.strongestTeamFinishedTop);
+    }
+  }, 420_000);
+
+  it("refuses to report a complete sweep when a committed result moves", () => {
+    const rows = [8, 12, 16, 20].map((teamCount) => ({
+      ...runStrengthForSize(teamCount, [1]),
+      strongestTeamFinishedTop: {
+        count: teamCount === 8 ? 81 : ({ 12: 21, 16: 57, 20: 85 } as Record<number, number>)[teamCount]!,
+        proportion: ({ 8: 0.41, 12: 0.105, 16: 0.285, 20: 0.425 } as Record<number, number>)[teamCount]!,
+        standardError: ({ 8: 0.034778, 12: 0.021677, 16: 0.03192, 20: 0.034955 } as Record<number, number>)[teamCount]!,
+      },
+    }));
+    expect(() => createStrengthEvidence(rows, () => [])).toThrow(/COMMITTED POSITIVE CONTROL FAILED/);
+  });
+
+  it("computes actual-rating correlation independently from level", () => {
+    const row = runStrengthForSize(12, [1, 2, 3]);
+    expect(row.actualRatingToFinalPositionSpearman).not.toBe(row.levelToFinalPositionSpearman);
   });
 
   it("keeps subset season numbers on their full-run seeds", () => {

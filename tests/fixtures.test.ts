@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { ENGINE_CONFIG } from "../src/engine-config.js";
+import { ENGINE_CONFIG, stableHash } from "../src/engine-config.js";
 import { simulateMatch } from "../src/engine.js";
-import { makeTeam, resolveSquadGeneration } from "../src/fixtures.js";
+import { actualSquadRating, makeTeam, resolveSquadGeneration } from "../src/fixtures.js";
 import {
   PAIRED_ESTIMATOR_GENERATOR_SEEDS,
   PAIRED_ESTIMATOR_IDENTITIES,
@@ -48,6 +48,33 @@ describe("approved player data model", () => {
 });
 
 describe("seeded squad generation", () => {
+  it("rates only generated starters without rounding", () => {
+    const first = makeTeam("rating-first", 8, {}, { seed: 101, identity: "balanced" });
+    const second = structuredClone(first);
+    for (const player of second.starters) {
+      for (const key of Object.keys(player.attributes) as Array<keyof typeof player.attributes>) {
+        player.attributes[key] += 1;
+      }
+    }
+
+    expect(actualSquadRating(first)).toBe(actualSquadRating(structuredClone(first)));
+    expect(actualSquadRating(second)).toBe(actualSquadRating(first) + 1);
+    expect(Number.isInteger(actualSquadRating(first))).toBe(false);
+
+    const substituteOnly = structuredClone(first);
+    for (const player of substituteOnly.substitutes) {
+      for (const key of Object.keys(player.attributes) as Array<keyof typeof player.attributes>) {
+        player.attributes[key] += 5;
+      }
+    }
+    expect(actualSquadRating(substituteOnly)).toBe(actualSquadRating(first));
+  });
+
+  it("leaves a known generated squad byte-identical", () => {
+    const team = makeTeam("rating-regression", 10, {}, { seed: 24680, identity: "balanced" });
+    expect(stableHash(team)).toBe("fnv1a64:a4160a824dbee722");
+  });
+
   it("reproduces the same squad from the same inputs and seed", () => {
     const first = makeTeam("seeded", 10, {}, { seed: 90210, identity: "balanced" });
     const second = makeTeam("seeded", 10, {}, { seed: 90210, identity: "balanced" });
