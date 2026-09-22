@@ -76,3 +76,59 @@ many times over — varying identities or generator seeds. Briefed as issue #32.
 
 The four committed strongest-by-level figures (82, 21, 57, 85) are unchanged by this work, and
 `createStrengthEvidence` now throws if any sweep — complete or partial — reports different ones.
+
+---
+
+# ADDENDUM — the twelve-team question is answered
+
+**Recorded 22 September 2026, BST.** Issue #17. Run EXECUTED 22 Sep 2026, 08:25 BST.
+200 seasons at 12 and 20 teams, same controls as the committed sweep.
+**Positive control:** the committed title counts were reproduced exactly — 21/200 at twelve, 85/200 at twenty.
+
+## EXECUTED — what the twelve-team league actually does
+
+| Team | Squad rating | Titles (of 200) | Mean points |
+|---|---|---|---|
+| `team-12` | **13.24 (best)** | 21 | **38.0** |
+| `team-10` | 12.54 | 79 | **43.3** |
+| `team-11` | 12.23 | 53 | 42.3 |
+
+Two lower-rated squads beat the best-rated one by four to five points a season, and the order is stable
+across all 200 seasons.
+
+## EXECUTED — three explanations ruled out
+
+- **Not a labelling artefact.** At twelve teams the nominal strongest team *is* the best-rated squad
+  (`strongestByLevelVersusActualRating.sameTeam: true`), so the dip is not the wrong team being called
+  strongest.
+- **Not tight spacing.** Measured top-two rating gaps: 8 → 0.863, 12 → 0.705, 16 → 0.000, 20 → 0.432.
+  Twelve is *better* separated than twenty and does roughly four times worse.
+- **Not the football failing to resolve strength.** The points order is repeatable over 200 seasons, so
+  the engine is resolving *something* consistently — just not the thing `actualSquadRating` measures.
+
+## REASONED — the remaining explanation, not yet tested
+
+`actualSquadRating` is a flat mean of every attribute on the starting eleven. The engine plainly does
+not value attributes equally. At twelve teams the top-rated squad appears to hold a mix the engine
+under-rewards while two rivals hold mixes it over-rewards.
+
+**This is reasoning, not measurement.** It is tested by issue #33 (FM-17-B5), which measures what a
+point of each attribute is worth in league points and rebuilds the rating from those measurements. That
+brief carries a falsifiable prediction: at twelve teams `team-10` and `team-11` should rank above
+`team-12` on the engine-weighted rating. If they do not, the explanation above is wrong and the cause
+lies in the fixture schedule, home/away balance, or how a season is played.
+
+## ⚠ Caveat — the sixteen-team "89" must never be quoted bare
+
+At sixteen teams the top two squads are rated **exactly equal (12.884)**, so "strongest by actual
+rating" is decided there by sort order alone. The committed evidence records two different figures for
+sixteen, and they are not interchangeable:
+
+| Sixteen teams | Team | Tops table |
+|---|---|---|
+| Strongest **by level** | `sweep-16-team-16` | **57/200** |
+| Strongest **by actual rating** | `sweep-16-team-15` | **89/200** |
+
+Sixteen is the only league size where these disagree (`sameTeam: false`). The 89 belongs to whichever
+of two tied squads happened to sort first — it is not evidence that the better squad wins more often.
+Always state which ruler a sixteen-team figure came from.
