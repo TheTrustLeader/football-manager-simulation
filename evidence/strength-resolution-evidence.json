@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "purpose": "Compare nominal team level and generated starting-eleven strength as predictors of final position.",
   "command": "npm run strength:evidence",
   "timingPolicy": "Wall-clock timings are printed only to stdout and excluded from this deterministic JSON.",
@@ -48,9 +48,10 @@
         "proportion": 0.41,
         "standardError": 0.034778
       },
-      "strongestByLevelAndActualRatingAgreement": {
-        "count": 200,
-        "proportion": 1
+      "strongestByLevelVersusActualRating": {
+        "strongestByLevelId": "sweep-8-team-08",
+        "strongestByActualRatingId": "sweep-8-team-08",
+        "sameTeam": true
       },
       "strongestTeamFinishingPosition": {
         "mean": 2.05,
@@ -99,9 +100,10 @@
         "proportion": 0.105,
         "standardError": 0.021677
       },
-      "strongestByLevelAndActualRatingAgreement": {
-        "count": 200,
-        "proportion": 1
+      "strongestByLevelVersusActualRating": {
+        "strongestByLevelId": "sweep-12-team-12",
+        "strongestByActualRatingId": "sweep-12-team-12",
+        "sameTeam": true
       },
       "strongestTeamFinishingPosition": {
         "mean": 3.795,
@@ -150,9 +152,10 @@
         "proportion": 0.445,
         "standardError": 0.035141
       },
-      "strongestByLevelAndActualRatingAgreement": {
-        "count": 0,
-        "proportion": 0
+      "strongestByLevelVersusActualRating": {
+        "strongestByLevelId": "sweep-16-team-16",
+        "strongestByActualRatingId": "sweep-16-team-15",
+        "sameTeam": false
       },
       "strongestTeamFinishingPosition": {
         "mean": 2.79,
@@ -201,9 +204,10 @@
         "proportion": 0.425,
         "standardError": 0.034955
       },
-      "strongestByLevelAndActualRatingAgreement": {
-        "count": 200,
-        "proportion": 1
+      "strongestByLevelVersusActualRating": {
+        "strongestByLevelId": "sweep-20-team-20",
+        "strongestByActualRatingId": "sweep-20-team-20",
+        "sameTeam": true
       },
       "strongestTeamFinishingPosition": {
         "mean": 2.56,

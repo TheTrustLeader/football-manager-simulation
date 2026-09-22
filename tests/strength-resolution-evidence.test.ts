@@ -34,7 +34,7 @@ describe("strength resolution evidence", () => {
   it("serialises deterministically", () => {
     const rows = [8, 12].map((size) => runStrengthForSize(size, [1, 2, 3]));
     const evidence = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       purpose: "determinism test fixture",
       command: "test",
       timingPolicy: "No timing data.",
@@ -76,12 +76,9 @@ describe("strength resolution evidence", () => {
       calls.push({ runner: `sweep-${teamCount}`, seasons });
       return sweepRunner(teamCount, seasons);
     };
-    const evidence = createStrengthEvidence(
-      rows,
-      (controlRows) => verifyPositiveControl(controlRows, strengthRunner, recordingSweepRunner),
-    );
+    const positiveControl = verifyPositiveControl(rows, strengthRunner, recordingSweepRunner);
 
-    expect(evidence.positiveControl).toEqual([
+    expect(positiveControl).toEqual([
       { teamCount: 16, sharedSeasonNumbers: "1-50", status: "REPRODUCED" },
       { teamCount: 20, sharedSeasonNumbers: "1-50", status: "REPRODUCED" },
     ]);
@@ -141,7 +138,11 @@ describe("strength resolution evidence", () => {
     expect(teams[0]!.level).toBeLessThan(teams[7]!.level);
     expect(actualSquadRating(teams[0]!.team)).toBeGreaterThan(actualSquadRating(teams[7]!.team));
     const row = runStrengthForSize(8, [1, 2], teamFactory);
-    expect(row.strongestByLevelAndActualRatingAgreement).toEqual({ count: 0, proportion: 0 });
+    expect(row.strongestByLevelVersusActualRating).toEqual({
+      strongestByLevelId: "constructed-disagreement-7",
+      strongestByActualRatingId: "constructed-disagreement-0",
+      sameTeam: false,
+    });
   });
 
   it("records full agreement when level and generated rating ordering match", () => {
@@ -155,8 +156,11 @@ describe("strength resolution evidence", () => {
       return { level: index + 1, team };
     });
 
-    expect(runStrengthForSize(8, [1, 2, 3], teamFactory).strongestByLevelAndActualRatingAgreement)
-      .toEqual({ count: 3, proportion: 1 });
+    expect(runStrengthForSize(8, [1, 2, 3], teamFactory).strongestByLevelVersusActualRating).toEqual({
+      strongestByLevelId: "constructed-agreement-7",
+      strongestByActualRatingId: "constructed-agreement-7",
+      sameTeam: true,
+    });
   });
 
   it("keeps all committed strongest-by-level results as a positive control", async () => {
@@ -176,13 +180,13 @@ describe("strength resolution evidence", () => {
     }
   }, 420_000);
 
-  it("refuses to report a complete sweep when a committed result moves", () => {
-    const rows = [8, 12, 16, 20].map((teamCount) => ({
+  it("refuses to report a partial sweep when any committed figure moves", () => {
+    const rows = [8].map((teamCount) => ({
       ...runStrengthForSize(teamCount, [1]),
       strongestTeamFinishedTop: {
-        count: teamCount === 8 ? 81 : ({ 12: 21, 16: 57, 20: 85 } as Record<number, number>)[teamCount]!,
-        proportion: ({ 8: 0.41, 12: 0.105, 16: 0.285, 20: 0.425 } as Record<number, number>)[teamCount]!,
-        standardError: ({ 8: 0.034778, 12: 0.021677, 16: 0.03192, 20: 0.034955 } as Record<number, number>)[teamCount]!,
+        count: 82,
+        proportion: 0.42,
+        standardError: 0.034779,
       },
     }));
     expect(() => createStrengthEvidence(rows, () => [])).toThrow(/COMMITTED POSITIVE CONTROL FAILED/);

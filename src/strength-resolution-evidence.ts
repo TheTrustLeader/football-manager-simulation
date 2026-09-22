@@ -39,7 +39,11 @@ export interface StrengthRow {
   totalMatchesSimulated: number;
   strongestTeamFinishedTop: { count: number; proportion: number; standardError: number };
   strongestByActualRatingFinishedTop: { count: number; proportion: number; standardError: number };
-  strongestByLevelAndActualRatingAgreement: { count: number; proportion: number };
+  strongestByLevelVersusActualRating: {
+    strongestByLevelId: string;
+    strongestByActualRatingId: string;
+    sameTeam: boolean;
+  };
   strongestTeamFinishingPosition: { mean: number; median: number };
   strongestTeamMeanSignedPointsMarginToTop: number;
   levelToFinalPositionSpearman: number;
@@ -174,7 +178,6 @@ export function runStrengthForSize(
 
   const proportion = strongestTopCount / seasonNumbers.length;
   const actualRatingProportion = strongestByActualRatingTopCount / seasonNumbers.length;
-  const strongestAgree = strongestByLevelId === strongestByActualRatingId;
   const leagueRatings = entries.map((entry) => entry.actualRating);
   const row: StrengthRow = {
     teamCount,
@@ -190,9 +193,10 @@ export function runStrengthForSize(
       proportion: rounded(actualRatingProportion),
       standardError: rounded(Math.sqrt(actualRatingProportion * (1 - actualRatingProportion) / seasonNumbers.length)),
     },
-    strongestByLevelAndActualRatingAgreement: {
-      count: strongestAgree ? seasonNumbers.length : 0,
-      proportion: strongestAgree ? 1 : 0,
+    strongestByLevelVersusActualRating: {
+      strongestByLevelId,
+      strongestByActualRatingId,
+      sameTeam: strongestByLevelId === strongestByActualRatingId,
     },
     strongestTeamFinishingPosition: { mean: distribution(positions).mean, median: rounded(median(positions)) },
     strongestTeamMeanSignedPointsMarginToTop: distribution(margins).mean,
@@ -267,16 +271,14 @@ export function createStrengthEvidence(
   rows: StrengthRow[],
   positiveControlVerifier: (controlRows: readonly StrengthRow[]) => StrengthEvidence["positiveControl"] = verifyPositiveControl,
 ): StrengthEvidence {
-  if (LEAGUE_SIZES.every((teamCount) => rows.some((row) => row.teamCount === teamCount))) {
-    for (const row of rows) {
-      const expected = COMMITTED_STRONGEST_BY_LEVEL.get(row.teamCount);
-      if (expected && JSON.stringify(row.strongestTeamFinishedTop) !== JSON.stringify(expected)) {
-        throw new Error(`COMMITTED POSITIVE CONTROL FAILED for ${row.teamCount} teams`);
-      }
+  for (const row of rows) {
+    const expected = COMMITTED_STRONGEST_BY_LEVEL.get(row.teamCount);
+    if (expected && JSON.stringify(row.strongestTeamFinishedTop) !== JSON.stringify(expected)) {
+      throw new Error(`COMMITTED POSITIVE CONTROL FAILED for ${row.teamCount} teams`);
     }
   }
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     purpose: "Compare nominal team level and generated starting-eleven strength as predictors of final position.",
     command: "npm run strength:evidence",
     timingPolicy: "Wall-clock timings are printed only to stdout and excluded from this deterministic JSON.",
@@ -300,7 +302,8 @@ export function formatStrengthOutput(evidence: StrengthEvidence): string {
   const lines = evidence.rows.map((row) => {
     const comparison = evidence.strongestTopComparisons.find((entry) => entry.teamCount === row.teamCount)!;
     const conclusions = comparison.comparisons.map((item) => `${item.otherTeamCount}:${item.conclusion}`).join(", ");
-    return `${row.teamCount} teams: level top ${row.strongestTeamFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestTeamFinishedTop.proportion.toFixed(3)} (SE ${row.strongestTeamFinishedTop.standardError.toFixed(3)}); actual-rating top ${row.strongestByActualRatingFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestByActualRatingFinishedTop.proportion.toFixed(3)} (SE ${row.strongestByActualRatingFinishedTop.standardError.toFixed(3)}); agreement ${row.strongestByLevelAndActualRatingAgreement.proportion.toFixed(3)}; position mean/median ${row.strongestTeamFinishingPosition.mean.toFixed(3)}/${row.strongestTeamFinishingPosition.median.toFixed(1)}; margin ${row.strongestTeamMeanSignedPointsMarginToTop.toFixed(3)}; level/actual Spearman ${row.levelToFinalPositionSpearman.toFixed(3)}/${row.actualRatingToFinalPositionSpearman.toFixed(3)}; actual-rating range ${row.actualSquadRatingSpread.range.toFixed(3)}; comparisons [${conclusions}]`;
+    const strongest = row.strongestByLevelVersusActualRating;
+    return `${row.teamCount} teams: level top ${row.strongestTeamFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestTeamFinishedTop.proportion.toFixed(3)} (SE ${row.strongestTeamFinishedTop.standardError.toFixed(3)}); actual-rating top ${row.strongestByActualRatingFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestByActualRatingFinishedTop.proportion.toFixed(3)} (SE ${row.strongestByActualRatingFinishedTop.standardError.toFixed(3)}); strongest level/actual ${strongest.strongestByLevelId}/${strongest.strongestByActualRatingId} (same team: ${strongest.sameTeam}); position mean/median ${row.strongestTeamFinishingPosition.mean.toFixed(3)}/${row.strongestTeamFinishingPosition.median.toFixed(1)}; margin ${row.strongestTeamMeanSignedPointsMarginToTop.toFixed(3)}; level/actual Spearman ${row.levelToFinalPositionSpearman.toFixed(3)}/${row.actualRatingToFinalPositionSpearman.toFixed(3)}; actual-rating range ${row.actualSquadRatingSpread.range.toFixed(3)}; comparisons [${conclusions}]`;
   });
   const controls = evidence.positiveControl.map((control) => `POSITIVE CONTROL ${control.teamCount} teams, seeds ${control.sharedSeasonNumbers}: ${control.status}`);
   return [...controls, ...lines].join("\n");
