@@ -56,7 +56,9 @@ An exact 1981/82 figure needs a **match-level dataset** — the final table alon
 4. ⭐ Give the band a **date range**, not just values — which is the same mechanism the era work needs (see the rules-as-dated-data decision). Do it once, for both jobs.
 
 ## Status
-**SOURCED, 20 Sep 2026 (BST).** The replacement figures are below and the data is committed at `data/english-first-division-seasons.csv`. ⛔ Still open: the bands in `engine-config.ts` have not yet been changed, and season play has never been measured against them. Brief FM-02-B1 covers both.
+**MEASURED, 22 Sep 2026 (BST).** The bands are now dated and derived from the committed CSV in `src/era-bands.ts`, and season play is measured against them by `npm run season:calibration` (`src/season-calibration-evidence.ts`, output `evidence/season-calibration-evidence.json`). PR #34, from brief FM-02-B1 (#29). ⛔ Still open: the bands in `engine-config.ts` are unchanged and the engine is untuned — deliberately, that is a later brief.
+
+**SOURCED, 20 Sep 2026 (BST).** The replacement figures are below and the data is committed at `data/english-first-division-seasons.csv`.
 
 ## ⭐⭐ SOURCED — 20 Sep 2026 (BST)
 
@@ -104,7 +106,19 @@ Measured across the 800 seasons already committed in `evidence/strength-resoluti
 
 ⚠ So the honest headline is narrower than "two of three are wrong": **the game scores too many goals, and home advantage is a little weak. Draw rate is fine.**
 
-⛔ **Nothing currently measures this.** `calibrationTargets` and `ciGuardrails` are read only by `evidence.ts`, `game-state-full-evidence.ts`, `review-002-full-evidence.ts` and the match-lab workflow. No file under `src/season*.ts` ever compares season play to a band. The harness tests a population the game does not play — the house defect again, this time in what is being sampled.
+⭐ **MEASURED — 22 Sep 2026 (BST), PR #34.** This is no longer an assertion in a document. `npm run season:calibration` runs 200 seeds at each of 8/12/16/20 teams, season 1981, and writes a PASS/FAIL statement per measure into `evidence/season-calibration-evidence.json`. Measured, against bands derived from the CSV rather than typed in:
+
+| Measure | Band | 8 | 12 | 16 | 20 |
+|---|---|---|---|---|---|
+| Goals per match | 2.4585–2.8808 | 2.9329 **FAIL** | 3.0367 **FAIL** | 2.9057 **FAIL** | 2.9951 **FAIL** |
+| Home win rate | 0.4335–0.5627 | 0.4338 PASS | 0.4378 PASS | 0.4294 **FAIL** | 0.4312 **FAIL** |
+| Draw rate | 0.2056–0.3156 | 0.2352 PASS | 0.2351 PASS | 0.2474 PASS | 0.2516 PASS |
+
+The run reproduces the committed `strength-resolution-evidence.json` distributions exactly as a positive control, and the evidence file regenerates byte-identically. The estimates in the table above this section were right to two decimals.
+
+⚠ The calibration run reports PASS/FAIL into its JSON; it does **not** exit non-zero and is **not** a blocking CI gate in this change. Making it one, and closing the goals gap, are later briefs.
+
+⛔ The original defect, recorded for the register: `calibrationTargets` and `ciGuardrails` are read only by `evidence.ts`, `game-state-full-evidence.ts`, `review-002-full-evidence.ts` and the match-lab workflow. Before PR #34, no file under `src/season*.ts` ever compared season play to a band — the harness tested a population the game does not play. That is the house defect in what is being sampled, and it is now closed by measurement, not by tuning.
 
 ⚠ Some gap is expected by construction: season play draws teams from a 7–13 level spread, a different population from the 20,000-match lab run. The defensible complaint is not the size of the gap. It is that nobody is measuring it.
 
