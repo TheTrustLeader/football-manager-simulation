@@ -54,21 +54,25 @@ The measured spread of actual squad rating does not behave that way: **6.147, 6.
 level spacing. Quantisation does not close the real quality gap as league size grows, so any future
 explanation of the twelve-team dip cannot rest on a shrinking gap.
 
-## ⚠ Known limitation — do not over-read the agreement figure
+## ⚠ Known limitation — the comparison is one draw per league size
 
-`strongestByLevelAndActualRatingAgreement` is **one comparison per league size, not a rate over 200
-seasons.** Squads are generated once per league from `seedFromText(id|level|identity)`, so the
-strongest-by-level and strongest-by-rating teams are fixed for the whole run. The reported `count` is
-`seasonsSimulated` multiplied by a single true/false. A recorded `200/200` means "yes, once" — not 200
-independent observations, and `0/200` likewise means "no, once".
+The level-versus-rating comparison is **one comparison per league size, not a rate over 200 seasons.**
+Squads are generated once per league from `seedFromText(id|level|identity)`, so the strongest-by-level
+and strongest-by-rating teams are fixed for the whole run.
+
+Round 2 (22 Sep 2026) made the evidence say so. The field is now
+`strongestByLevelVersusActualRating: { strongestByLevelId, strongestByActualRatingId, sameTeam }` —
+no count, no proportion, no standard error, because there is no denominator. It previously reported
+`{count: 200, proportion: 1}`, which was `seasonsSimulated` multiplied by a single true/false and read
+as 200 independent observations.
 
 The conclusions above therefore rest on **four single draws**, one per league size, not on 800
 observations. That is enough to rule out the labelling explanation at twelve teams, because the two
 methods pick the same team there and the dip is measured over the full 200 seasons. It is not enough to
 say how *often* level and actual quality disagree in general. Answering that needs the league generated
-many times over — varying identities or generator seeds — which this brief did not ask for.
+many times over — varying identities or generator seeds. Briefed as issue #32.
 
 ## Positive control
 
 The four committed strongest-by-level figures (82, 21, 57, 85) are unchanged by this work, and
-`createStrengthEvidence` now throws if a complete sweep reports different ones.
+`createStrengthEvidence` now throws if any sweep — complete or partial — reports different ones.
