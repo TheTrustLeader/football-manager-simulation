@@ -48,6 +48,12 @@ const playerTypes = generationConfig.playerTypes as unknown as Record<Position, 
 export const SQUAD_GENERATION_VERSION = generationConfig.version;
 export const SQUAD_GENERATION_HASH = stableHash(generationConfig);
 
+/** Mean of every position-relevant attribute on the generated starting eleven. */
+export function actualSquadRating(team: TeamInput): number {
+  const attributes = team.starters.flatMap((player) => Object.values(player.attributes));
+  return attributes.reduce((sum, value) => sum + value, 0) / attributes.length;
+}
+
 function clampAttribute(value: number): number {
   return Math.max(generationConfig.attributeMinimum, Math.min(generationConfig.attributeMaximum, Math.round(value)));
 }

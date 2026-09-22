@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { deriveSeasonSeed, runSweepForSize, SEASON_NUMBERS as SWEEP_SEASON_NUMBERS } from "../src/season-sweep-evidence.js";
+import { actualSquadRating, makeTeam } from "../src/fixtures.js";
 import {
   createStrengthEvidence,
   formatStrengthOutput,
@@ -33,7 +34,7 @@ describe("strength resolution evidence", () => {
   it("serialises deterministically", () => {
     const rows = [8, 12].map((size) => runStrengthForSize(size, [1, 2, 3]));
     const evidence = {
-      schemaVersion: 1,
+      schemaVersion: 3,
       purpose: "determinism test fixture",
       command: "test",
       timingPolicy: "No timing data.",
@@ -75,12 +76,9 @@ describe("strength resolution evidence", () => {
       calls.push({ runner: `sweep-${teamCount}`, seasons });
       return sweepRunner(teamCount, seasons);
     };
-    const evidence = createStrengthEvidence(
-      rows,
-      (controlRows) => verifyPositiveControl(controlRows, strengthRunner, recordingSweepRunner),
-    );
+    const positiveControl = verifyPositiveControl(rows, strengthRunner, recordingSweepRunner);
 
-    expect(evidence.positiveControl).toEqual([
+    expect(positiveControl).toEqual([
       { teamCount: 16, sharedSeasonNumbers: "1-50", status: "REPRODUCED" },
       { teamCount: 20, sharedSeasonNumbers: "1-50", status: "REPRODUCED" },
     ]);
@@ -123,6 +121,80 @@ describe("strength resolution evidence", () => {
     expect(row.strongestTeamFinishedTop.count).toBeGreaterThan(0);
     expect(row.strongestTeamFinishedTop.proportion).toBe(row.strongestTeamFinishedTop.count / seasons.length);
     expect(formatStrengthOutput(evidence)).toContain(`top ${row.strongestTeamFinishedTop.count}/${seasons.length}`);
+  });
+
+  it("records disagreement between strongest-by-level and strongest-by-rating", () => {
+    const teamFactory = () => Array.from({ length: 8 }, (_, index) => {
+      const team = makeTeam(`constructed-disagreement-${index}`, 10, {}, { seed: 1000 + index, identity: "balanced" });
+      for (const player of team.starters) {
+        for (const key of Object.keys(player.attributes) as Array<keyof typeof player.attributes>) {
+          player.attributes[key] = index === 0 ? 20 : 2 + index;
+        }
+      }
+      return { level: index + 1, team };
+    });
+
+    const teams = teamFactory();
+    expect(teams[0]!.level).toBeLessThan(teams[7]!.level);
+    expect(actualSquadRating(teams[0]!.team)).toBeGreaterThan(actualSquadRating(teams[7]!.team));
+    const row = runStrengthForSize(8, [1, 2], teamFactory);
+    expect(row.strongestByLevelVersusActualRating).toEqual({
+      strongestByLevelId: "constructed-disagreement-7",
+      strongestByActualRatingId: "constructed-disagreement-0",
+      sameTeam: false,
+    });
+  });
+
+  it("records full agreement when level and generated rating ordering match", () => {
+    const teamFactory = () => Array.from({ length: 8 }, (_, index) => {
+      const team = makeTeam(`constructed-agreement-${index}`, 10, {}, { seed: 2000 + index, identity: "balanced" });
+      for (const player of team.starters) {
+        for (const key of Object.keys(player.attributes) as Array<keyof typeof player.attributes>) {
+          player.attributes[key] = index + 3;
+        }
+      }
+      return { level: index + 1, team };
+    });
+
+    expect(runStrengthForSize(8, [1, 2, 3], teamFactory).strongestByLevelVersusActualRating).toEqual({
+      strongestByLevelId: "constructed-agreement-7",
+      strongestByActualRatingId: "constructed-agreement-7",
+      sameTeam: true,
+    });
+  });
+
+  it("keeps all committed strongest-by-level results as a positive control", async () => {
+    const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")) as StrengthEvidence;
+    for (const expected of committed.rows) {
+      let count = 0;
+      for (let start = 0; start < SEASON_NUMBERS.length; start += 25) {
+        count += runStrengthForSize(expected.teamCount, SEASON_NUMBERS.slice(start, start + 25)).strongestTeamFinishedTop.count;
+        await new Promise((resolve) => { setImmediate(resolve); });
+      }
+      const proportion = count / SEASON_NUMBERS.length;
+      expect({
+        count,
+        proportion,
+        standardError: Number(Math.sqrt(proportion * (1 - proportion) / SEASON_NUMBERS.length).toFixed(6)),
+      }).toEqual(expected.strongestTeamFinishedTop);
+    }
+  }, 420_000);
+
+  it("refuses to report a partial sweep when any committed figure moves", () => {
+    const rows = [8].map((teamCount) => ({
+      ...runStrengthForSize(teamCount, [1]),
+      strongestTeamFinishedTop: {
+        count: 82,
+        proportion: 0.42,
+        standardError: 0.034779,
+      },
+    }));
+    expect(() => createStrengthEvidence(rows, () => [])).toThrow(/COMMITTED POSITIVE CONTROL FAILED/);
+  });
+
+  it("computes actual-rating correlation independently from level", () => {
+    const row = runStrengthForSize(12, [1, 2, 3]);
+    expect(row.actualRatingToFinalPositionSpearman).not.toBe(row.levelToFinalPositionSpearman);
   });
 
   it("keeps subset season numbers on their full-run seeds", () => {
