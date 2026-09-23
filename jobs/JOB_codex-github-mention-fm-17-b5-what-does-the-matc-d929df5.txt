@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-fm-17-b5-what-does-the-match-engine-actuall
+head=d929df5b57864b04c23108b723014bb708278f37
+tree=5cf753f75e4f85c417a873ce4b9fd4b58aa888fd
+base=8145d53934568ca45c2c3e4fd729af0dd3290fd8
+item=FM-codex-github-mention-fm-17-b5-what-does-the-matc
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-23 19:23 BST
