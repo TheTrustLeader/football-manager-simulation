@@ -23,11 +23,18 @@ git ls-remote --heads origin >/dev/null 2>&1 && echo PUSH MODE || echo DIFF MODE
 - **DIFF MODE** — no remote, or it refuses. Do the work anyway and hand it back
   as a patch (section 3).
 
-⛔ **A missing remote is a delivery constraint, not a stop condition.** Today it
-is the NORMAL case here: the cloud agent environment has no `origin` and no
-token. That is expected, it is not a fault, and it is not a reason to decline the
-task. An agent that stops before starting has produced nothing, which is strictly
-worse than an unpushed diff.
+⛔ **PUSH MODE is the expected case here, and it has been proved.** On 23 Sept
+2026 FM-17-B5 was delivered from the cloud agent environment as a pushed branch
+and a draft pull request (#36). Earlier rounds came back as diffs because the
+BRIEF forbade pushing — not because the environment could not push. A full day
+went on diagnosing a permissions fault that did not exist. Do not read a
+diff-mode round in this repository's history as evidence that pushing is
+unavailable, and do not assume DIFF MODE before running the check.
+
+⛔ **A missing remote is still a delivery constraint, not a stop condition.** If
+the check genuinely reports DIFF MODE, do the work anyway and hand it back as a
+patch (section 3). An agent that stops before starting has produced nothing,
+which is strictly worse than an unpushed diff.
 
 Do not print remote URLs, credentials, or authentication environment variables.
 Where an error you are asked to quote contains a URL or token, quote the error
@@ -51,6 +58,17 @@ Never treat any of these as evidence of publication: a local commit SHA · a loc
 branch · a zero exit from `git commit` · an attempted push · your own intention
 to push.
 
+**Then open a draft pull request** against `main` (`gh pr create --draft`) and
+report its number. A pushed branch that nobody opened a PR for is easy to miss,
+and the PR is what the reviewer works from. Keep writing the issue report — on
+22 Sept 2026 the report was accurate to the line, including a mutant's red
+output; it was only the code that never arrived.
+
+⛔ **Draft is status, not modesty.** Draft means "code has arrived, nobody
+independent has verified it". It comes off after blind verification by the
+reviewer — never by the agent that wrote the code, and never on the strength of
+your own passing tests.
+
 End every report with exactly one of these three lines:
 
 - `REMOTE SHA VERIFIED — PUBLISHED` — include the SHA the remote returned
@@ -65,8 +83,8 @@ stop.
 
 ## 3. In DIFF MODE, return the work as a patch
 
-A push failure is expected in this repository. **Silence, or a false claim of
-success, is the fault.**
+DIFF MODE is the fallback here, not the norm — see section 1. **Silence, or a
+false claim of success, is the fault.**
 
 1. Post the complete patch as a single fenced diff block: `git diff <base-sha>..HEAD`
    (commit locally first, so there is a HEAD to diff).
