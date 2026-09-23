@@ -34,7 +34,7 @@ describe("strength resolution evidence", () => {
   it("serialises deterministically", () => {
     const rows = [8, 12].map((size) => runStrengthForSize(size, [1, 2, 3]));
     const evidence = {
-      schemaVersion: 3,
+      schemaVersion: 4,
       purpose: "determinism test fixture",
       command: "test",
       timingPolicy: "No timing data.",
@@ -180,6 +180,13 @@ describe("strength resolution evidence", () => {
     }
   }, 420_000);
 
+  it("reports the strongest engine-weighted team alongside the existing rulers", () => {
+    const row = runStrengthForSize(12, [1, 2, 3]);
+    expect(row.strongestByEngineWeightedRating.teamId).toMatch(/^sweep-12-team-/);
+    expect(row.strongestByEngineWeightedRatingFinishedTop.count).toBeGreaterThanOrEqual(0);
+    expect(row.engineWeightedRatingToFinalPositionSpearman).not.toBeUndefined();
+  });
+
   it("refuses to report a partial sweep when any committed figure moves", () => {
     const rows = [8].map((teamCount) => ({
       ...runStrengthForSize(teamCount, [1]),
@@ -214,5 +221,11 @@ describe("strength resolution evidence", () => {
       seedDerivation: "deriveSeasonSeed(teamCount, seasonNumber), shared with season:sweep; seasons 1-50 overlap.",
       levelRange: { weakest: 7, strongest: 13 },
     });
+  });
+
+  it("commits schema version 4 without moving strongest-by-level figures", () => {
+    const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")) as StrengthEvidence;
+    expect(committed.schemaVersion).toBe(4);
+    expect(committed.rows.map((row) => row.strongestTeamFinishedTop.count)).toEqual([82, 21, 57, 85]);
   });
 });

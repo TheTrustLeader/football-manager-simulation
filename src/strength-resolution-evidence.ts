@@ -1,9 +1,9 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import { runSeason } from "./competition.js";
-import { actualSquadRating, makeTeam } from "./fixtures.js";
-import type { TeamInput } from "./types.js";
+import { actualSquadRating, engineWeightedSquadRating, makeTeam } from "./fixtures.js";
+import type { AttributeName, TeamInput } from "./types.js";
 import {
   deriveSeasonSeed,
   distribution,
@@ -39,15 +39,18 @@ export interface StrengthRow {
   totalMatchesSimulated: number;
   strongestTeamFinishedTop: { count: number; proportion: number; standardError: number };
   strongestByActualRatingFinishedTop: { count: number; proportion: number; standardError: number };
+  strongestByEngineWeightedRatingFinishedTop: { count: number; proportion: number; standardError: number };
   strongestByLevelVersusActualRating: {
     strongestByLevelId: string;
     strongestByActualRatingId: string;
     sameTeam: boolean;
   };
+  strongestByEngineWeightedRating: { teamId: string; rating: number };
   strongestTeamFinishingPosition: { mean: number; median: number };
   strongestTeamMeanSignedPointsMarginToTop: number;
   levelToFinalPositionSpearman: number;
   actualRatingToFinalPositionSpearman: number;
+  engineWeightedRatingToFinalPositionSpearman: number;
   actualSquadRatingSpread: { minimum: number; maximum: number; range: number };
   goalsPerMatch: ExtendedDistribution;
   homeWinRate: Distribution;
@@ -131,15 +134,22 @@ export function runStrengthForSize(
   teamCount: number,
   seasonNumbers: readonly number[] = SEASON_NUMBERS,
   teamFactory: (count: number) => EvidenceTeam[] = makeEvidenceTeams,
+  weights: Record<AttributeName, number> = readCommittedWeights(),
 ): StrengthRow {
-  const entries = teamFactory(teamCount).map((entry) => ({ ...entry, actualRating: actualSquadRating(entry.team) }));
+  const entries = teamFactory(teamCount).map((entry) => ({
+    ...entry,
+    actualRating: actualSquadRating(entry.team),
+    engineWeightedRating: engineWeightedSquadRating(entry.team, weights),
+  }));
   const teams = entries.map(({ team }) => team);
   const strongestByLevelId = [...entries].sort((left, right) => right.level - left.level)[0]!.team.id;
   const strongestByActualRatingId = [...entries].sort((left, right) => right.actualRating - left.actualRating)[0]!.team.id;
+  const strongestByEngineWeightedRating = [...entries].sort((left, right) => right.engineWeightedRating - left.engineWeightedRating)[0]!;
   const positions: number[] = [];
   const margins: number[] = [];
   const levels: number[] = [];
   const actualRatings: number[] = [];
+  const engineWeightedRatings: number[] = [];
   const allPositions: number[] = [];
   const goalsPerMatch: number[] = [];
   const homeWinRates: number[] = [];
@@ -148,6 +158,7 @@ export function runStrengthForSize(
   let totalMatchesSimulated = 0;
   let strongestTopCount = 0;
   let strongestByActualRatingTopCount = 0;
+  let strongestByEngineWeightedRatingTopCount = 0;
 
   for (const seasonNumber of seasonNumbers) {
     const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), 1981);
@@ -155,12 +166,14 @@ export function runStrengthForSize(
     const bottom = season.table[season.table.length - 1]!;
     const strongestPosition = season.table.findIndex((row) => row.teamId === strongestByLevelId) + 1;
     const strongestByActualRatingPosition = season.table.findIndex((row) => row.teamId === strongestByActualRatingId) + 1;
+    const strongestByEngineWeightedRatingPosition = season.table.findIndex((row) => row.teamId === strongestByEngineWeightedRating.team.id) + 1;
     const strongest = season.table[strongestPosition - 1]!;
     const totalGoals = season.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0);
     const homeWins = season.matches.filter((match) => match.home.goals > match.away.goals).length;
     const draws = season.matches.filter((match) => match.home.goals === match.away.goals).length;
     if (strongestPosition === 1) strongestTopCount += 1;
     if (strongestByActualRatingPosition === 1) strongestByActualRatingTopCount += 1;
+    if (strongestByEngineWeightedRatingPosition === 1) strongestByEngineWeightedRatingTopCount += 1;
     positions.push(strongestPosition);
     margins.push(strongest.points - champion.points);
     totalMatchesSimulated += season.matches.length;
@@ -172,12 +185,14 @@ export function runStrengthForSize(
       const entry = entries.find((candidate) => candidate.team.id === row.teamId)!;
       levels.push(entry.level);
       actualRatings.push(entry.actualRating);
+      engineWeightedRatings.push(entry.engineWeightedRating);
       allPositions.push(index + 1);
     }
   }
 
   const proportion = strongestTopCount / seasonNumbers.length;
   const actualRatingProportion = strongestByActualRatingTopCount / seasonNumbers.length;
+  const engineWeightedRatingProportion = strongestByEngineWeightedRatingTopCount / seasonNumbers.length;
   const leagueRatings = entries.map((entry) => entry.actualRating);
   const row: StrengthRow = {
     teamCount,
@@ -193,15 +208,25 @@ export function runStrengthForSize(
       proportion: rounded(actualRatingProportion),
       standardError: rounded(Math.sqrt(actualRatingProportion * (1 - actualRatingProportion) / seasonNumbers.length)),
     },
+    strongestByEngineWeightedRatingFinishedTop: {
+      count: strongestByEngineWeightedRatingTopCount,
+      proportion: rounded(engineWeightedRatingProportion),
+      standardError: rounded(Math.sqrt(engineWeightedRatingProportion * (1 - engineWeightedRatingProportion) / seasonNumbers.length)),
+    },
     strongestByLevelVersusActualRating: {
       strongestByLevelId,
       strongestByActualRatingId,
       sameTeam: strongestByLevelId === strongestByActualRatingId,
     },
+    strongestByEngineWeightedRating: {
+      teamId: strongestByEngineWeightedRating.team.id,
+      rating: rounded(strongestByEngineWeightedRating.engineWeightedRating),
+    },
     strongestTeamFinishingPosition: { mean: distribution(positions).mean, median: rounded(median(positions)) },
     strongestTeamMeanSignedPointsMarginToTop: distribution(margins).mean,
     levelToFinalPositionSpearman: spearman(levels, allPositions),
     actualRatingToFinalPositionSpearman: spearman(actualRatings, allPositions),
+    engineWeightedRatingToFinalPositionSpearman: spearman(engineWeightedRatings, allPositions),
     actualSquadRatingSpread: {
       minimum: rounded(Math.min(...leagueRatings)),
       maximum: rounded(Math.max(...leagueRatings)),
@@ -213,6 +238,16 @@ export function runStrengthForSize(
     pointsGapTopToBottom: distribution(pointsGaps),
   };
   return row;
+}
+
+function readCommittedWeights(): Record<AttributeName, number> {
+  const parsed = JSON.parse(readFileSync("evidence/attribute-value-evidence.json", "utf8")) as {
+    attributes: Array<{ attribute: AttributeName; pointsValue: number | "UNMEASURABLE" }>;
+  };
+  return Object.fromEntries(parsed.attributes.map(({ attribute, pointsValue }) => {
+    if (pointsValue === "UNMEASURABLE") throw new Error(`${attribute} is UNMEASURABLE and cannot be used as a weight`);
+    return [attribute, pointsValue];
+  })) as Record<AttributeName, number>;
 }
 
 type EvidenceRunner = (teamCount: number, seasonNumbers: readonly number[]) => StrengthRow;
@@ -278,8 +313,8 @@ export function createStrengthEvidence(
     }
   }
   return {
-    schemaVersion: 3,
-    purpose: "Compare nominal team level and generated starting-eleven strength as predictors of final position.",
+    schemaVersion: 4,
+    purpose: "Compare nominal team level, flat starting-eleven strength, and measured engine-weighted strength as predictors of final position.",
     command: "npm run strength:evidence",
     timingPolicy: "Wall-clock timings are printed only to stdout and excluded from this deterministic JSON.",
     controls: {
@@ -303,7 +338,7 @@ export function formatStrengthOutput(evidence: StrengthEvidence): string {
     const comparison = evidence.strongestTopComparisons.find((entry) => entry.teamCount === row.teamCount)!;
     const conclusions = comparison.comparisons.map((item) => `${item.otherTeamCount}:${item.conclusion}`).join(", ");
     const strongest = row.strongestByLevelVersusActualRating;
-    return `${row.teamCount} teams: level top ${row.strongestTeamFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestTeamFinishedTop.proportion.toFixed(3)} (SE ${row.strongestTeamFinishedTop.standardError.toFixed(3)}); actual-rating top ${row.strongestByActualRatingFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestByActualRatingFinishedTop.proportion.toFixed(3)} (SE ${row.strongestByActualRatingFinishedTop.standardError.toFixed(3)}); strongest level/actual ${strongest.strongestByLevelId}/${strongest.strongestByActualRatingId} (same team: ${strongest.sameTeam}); position mean/median ${row.strongestTeamFinishingPosition.mean.toFixed(3)}/${row.strongestTeamFinishingPosition.median.toFixed(1)}; margin ${row.strongestTeamMeanSignedPointsMarginToTop.toFixed(3)}; level/actual Spearman ${row.levelToFinalPositionSpearman.toFixed(3)}/${row.actualRatingToFinalPositionSpearman.toFixed(3)}; actual-rating range ${row.actualSquadRatingSpread.range.toFixed(3)}; comparisons [${conclusions}]`;
+    return `${row.teamCount} teams: level top ${row.strongestTeamFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestTeamFinishedTop.proportion.toFixed(3)} (SE ${row.strongestTeamFinishedTop.standardError.toFixed(3)}); actual-rating top ${row.strongestByActualRatingFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestByActualRatingFinishedTop.proportion.toFixed(3)} (SE ${row.strongestByActualRatingFinishedTop.standardError.toFixed(3)}); engine-weighted top ${row.strongestByEngineWeightedRatingFinishedTop.count}/${row.seasonsSimulated} = ${row.strongestByEngineWeightedRatingFinishedTop.proportion.toFixed(3)}; strongest engine-weighted ${row.strongestByEngineWeightedRating.teamId} (${row.strongestByEngineWeightedRating.rating.toFixed(3)}); strongest level/actual ${strongest.strongestByLevelId}/${strongest.strongestByActualRatingId} (same team: ${strongest.sameTeam}); position mean/median ${row.strongestTeamFinishingPosition.mean.toFixed(3)}/${row.strongestTeamFinishingPosition.median.toFixed(1)}; margin ${row.strongestTeamMeanSignedPointsMarginToTop.toFixed(3)}; level/actual/weighted Spearman ${row.levelToFinalPositionSpearman.toFixed(3)}/${row.actualRatingToFinalPositionSpearman.toFixed(3)}/${row.engineWeightedRatingToFinalPositionSpearman.toFixed(3)}; actual-rating range ${row.actualSquadRatingSpread.range.toFixed(3)}; comparisons [${conclusions}]`;
   });
   const controls = evidence.positiveControl.map((control) => `POSITIVE CONTROL ${control.teamCount} teams, seeds ${control.sharedSeasonNumbers}: ${control.status}`);
   return [...controls, ...lines].join("\n");

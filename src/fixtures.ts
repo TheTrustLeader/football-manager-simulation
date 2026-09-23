@@ -54,6 +54,16 @@ export function actualSquadRating(team: TeamInput): number {
   return attributes.reduce((sum, value) => sum + value, 0) / attributes.length;
 }
 
+/** Starting-eleven attribute mean, with every attribute multiplied by its measured points value. */
+export function engineWeightedSquadRating(team: TeamInput, weights: Record<AttributeName, number>): number {
+  const weightedAttributes = team.starters.flatMap((player) => Object.entries(player.attributes).map(([attribute, value]) => {
+    const weight = weights[attribute as AttributeName];
+    if (weight === undefined) throw new Error(`Missing measured weight for ${attribute}`);
+    return value * weight;
+  }));
+  return weightedAttributes.reduce((sum, value) => sum + value, 0) / weightedAttributes.length;
+}
+
 function clampAttribute(value: number): number {
   return Math.max(generationConfig.attributeMinimum, Math.min(generationConfig.attributeMaximum, Math.round(value)));
 }
