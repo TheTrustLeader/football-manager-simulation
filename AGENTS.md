@@ -23,9 +23,11 @@ git ls-remote --heads origin >/dev/null 2>&1 && echo PUSH MODE || echo DIFF MODE
 - **DIFF MODE** — no remote, or it refuses. Do the work anyway and hand it back
   as a patch (section 3).
 
-⛔ **PUSH MODE is the expected case here, and it has been proved.** On 23 Sept
-2026 FM-17-B5 was delivered from the cloud agent environment as a pushed branch
-and a draft pull request (#36). Earlier rounds came back as diffs because the
+⛔ **PUSH MODE is the expected case here.** On 23 Sept 2026 the cloud agent
+environment pushed FM-17-B5 as a branch and draft pull request (#36) — started
+by Scott with the task's "Create draft PR" button, not by the agent itself. An
+agent pushing on its own has not yet been proved; issue #38 is the first brief
+that asks for it. Earlier rounds came back as diffs because the
 BRIEF forbade pushing — not because the environment could not push. A full day
 went on diagnosing a permissions fault that did not exist. Do not read a
 diff-mode round in this repository's history as evidence that pushing is
@@ -74,7 +76,7 @@ End every report with exactly one of these three lines:
 - `REMOTE SHA VERIFIED — PUBLISHED` — include the SHA the remote returned
 - `PUSH ATTEMPT FAILED — UNPUBLISHED` — include the error, plus the diff from
   section 3
-- `NO REMOTE — DIFF MODE` — the expected case here, plus the diff from section 3
+- `NO REMOTE — DIFF MODE` — the fallback only, plus the diff from section 3
 
 On 8 Sept 2026 three agents each reported "created the pull request" when no
 branch, commit or pull request existed on GitHub. All three had committed only
