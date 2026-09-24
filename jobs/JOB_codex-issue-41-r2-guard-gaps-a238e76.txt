@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-41-r2-guard-gaps
+head=a238e76f460b7af76641dd94c3d9170c1a0ad0d7
+tree=1785c768805d1c9b188bc8ac00c2eb90f3d795bd
+base=e6c8a6f2ae1c68c369f96c4cf21771260e8e867f
+item=FM-codex-issue-41-r2-guard-gaps
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-24 18:10 BST
