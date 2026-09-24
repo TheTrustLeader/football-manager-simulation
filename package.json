@@ -15,6 +15,7 @@
     "season:sweep": "tsx src/season-sweep-evidence.ts",
     "season:calibration": "tsx src/season-calibration-evidence.ts",
     "strength:evidence": "tsx src/strength-resolution-evidence.ts",
+    "attribute:value": "tsx src/attribute-value-evidence.ts",
     "play:perceptibility": "tsx src/play-perceptibility.ts",
     "playtest": "tsx src/play-series.ts",
     "evidence": "tsx src/evidence.ts",

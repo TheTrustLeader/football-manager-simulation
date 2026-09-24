@@ -7,6 +7,7 @@ import {
   formatStrengthOutput,
   LEAGUE_SIZES,
   makeEvidenceTeams,
+  readCommittedWeights,
   runStrengthForSize,
   serialiseStrengthEvidence,
   SEASON_NUMBERS,
@@ -17,6 +18,7 @@ import {
 } from "../src/strength-resolution-evidence.js";
 
 describe("strength resolution evidence", () => {
+  const weights = readCommittedWeights();
   it("uses the fixed 7-to-13 span at every league size", () => {
     for (const teamCount of LEAGUE_SIZES) {
       const levels = makeEvidenceTeams(teamCount).map(({ level }) => level);
@@ -26,15 +28,20 @@ describe("strength resolution evidence", () => {
     }
   });
 
+  it("requires callers to supply attribute weights", () => {
+    const callWithoutWeights = runStrengthForSize as unknown as (teamCount: number, seasonNumbers: readonly number[]) => StrengthRow;
+    expect(() => callWithoutWeights(8, [1])).toThrow();
+  });
+
   it("calculates Spearman correlation including tied ranks", () => {
     expect(spearman([1, 2, 3], [3, 2, 1])).toBe(-1);
     expect(spearman([1, 1, 2, 2], [1, 1, 2, 2])).toBe(1);
   });
 
   it("serialises deterministically", () => {
-    const rows = [8, 12].map((size) => runStrengthForSize(size, [1, 2, 3]));
+    const rows = [8, 12].map((size) => runStrengthForSize(size, [1, 2, 3], weights));
     const evidence = {
-      schemaVersion: 3,
+      schemaVersion: 4,
       purpose: "determinism test fixture",
       command: "test",
       timingPolicy: "No timing data.",
@@ -50,7 +57,7 @@ describe("strength resolution evidence", () => {
   });
 
   function controlFixtures() {
-    const strengthTemplate = runStrengthForSize(8, [1]);
+    const strengthTemplate = runStrengthForSize(8, [1], weights);
     const sweepTemplate = runSweepForSize(8, [1]);
     const rows = [16, 20].map((teamCount) => ({ ...strengthTemplate, teamCount }));
     const sweepRunner = (teamCount: number, _seasonNumbers: readonly number[]) => ({
@@ -106,12 +113,12 @@ describe("strength resolution evidence", () => {
   });
 
   it("aggregates reordered seasons by season number rather than position", () => {
-    expect(runStrengthForSize(16, [3, 1, 2])).toEqual(runStrengthForSize(16, [1, 2, 3]));
+    expect(runStrengthForSize(16, [3, 1, 2], weights)).toEqual(runStrengthForSize(16, [1, 2, 3], weights));
   });
 
   it("formats subset runs with their actual season count and proportion", () => {
     const seasons = Array.from({ length: 10 }, (_, index) => index + 1);
-    const row = runStrengthForSize(8, seasons);
+    const row = runStrengthForSize(8, seasons, weights);
     const evidence = {
       positiveControl: [],
       rows: [row],
@@ -137,7 +144,7 @@ describe("strength resolution evidence", () => {
     const teams = teamFactory();
     expect(teams[0]!.level).toBeLessThan(teams[7]!.level);
     expect(actualSquadRating(teams[0]!.team)).toBeGreaterThan(actualSquadRating(teams[7]!.team));
-    const row = runStrengthForSize(8, [1, 2], teamFactory);
+    const row = runStrengthForSize(8, [1, 2], weights, teamFactory);
     expect(row.strongestByLevelVersusActualRating).toEqual({
       strongestByLevelId: "constructed-disagreement-7",
       strongestByActualRatingId: "constructed-disagreement-0",
@@ -156,7 +163,7 @@ describe("strength resolution evidence", () => {
       return { level: index + 1, team };
     });
 
-    expect(runStrengthForSize(8, [1, 2, 3], teamFactory).strongestByLevelVersusActualRating).toEqual({
+    expect(runStrengthForSize(8, [1, 2, 3], weights, teamFactory).strongestByLevelVersusActualRating).toEqual({
       strongestByLevelId: "constructed-agreement-7",
       strongestByActualRatingId: "constructed-agreement-7",
       sameTeam: true,
@@ -168,7 +175,7 @@ describe("strength resolution evidence", () => {
     for (const expected of committed.rows) {
       let count = 0;
       for (let start = 0; start < SEASON_NUMBERS.length; start += 25) {
-        count += runStrengthForSize(expected.teamCount, SEASON_NUMBERS.slice(start, start + 25)).strongestTeamFinishedTop.count;
+        count += runStrengthForSize(expected.teamCount, SEASON_NUMBERS.slice(start, start + 25), weights).strongestTeamFinishedTop.count;
         await new Promise((resolve) => { setImmediate(resolve); });
       }
       const proportion = count / SEASON_NUMBERS.length;
@@ -180,9 +187,16 @@ describe("strength resolution evidence", () => {
     }
   }, 420_000);
 
+  it("reports the strongest engine-weighted team alongside the existing rulers", () => {
+    const row = runStrengthForSize(12, [1, 2, 3], weights);
+    expect(row.strongestByEngineWeightedRating.teamId).toMatch(/^sweep-12-team-/);
+    expect(row.strongestByEngineWeightedRatingFinishedTop.count).toBeGreaterThanOrEqual(0);
+    expect(row.engineWeightedRatingToFinalPositionSpearman).not.toBeUndefined();
+  });
+
   it("refuses to report a partial sweep when any committed figure moves", () => {
     const rows = [8].map((teamCount) => ({
-      ...runStrengthForSize(teamCount, [1]),
+      ...runStrengthForSize(teamCount, [1], weights),
       strongestTeamFinishedTop: {
         count: 82,
         proportion: 0.42,
@@ -193,7 +207,7 @@ describe("strength resolution evidence", () => {
   });
 
   it("computes actual-rating correlation independently from level", () => {
-    const row = runStrengthForSize(12, [1, 2, 3]);
+    const row = runStrengthForSize(12, [1, 2, 3], weights);
     expect(row.actualRatingToFinalPositionSpearman).not.toBe(row.levelToFinalPositionSpearman);
   });
 
@@ -203,7 +217,7 @@ describe("strength resolution evidence", () => {
       .toEqual(SEASON_NUMBERS.slice(0, 3).map((season) => deriveSeasonSeed(12, season)));
     expect(subset.map((season) => deriveSeasonSeed(12, season)))
       .toEqual(SWEEP_SEASON_NUMBERS.slice(0, 3).map((season) => deriveSeasonSeed(12, season)));
-    expect(runStrengthForSize(12, subset).seasonsSimulated).toBe(3);
+    expect(runStrengthForSize(12, subset, weights).seasonsSimulated).toBe(3);
   });
 
   it("keeps committed controls aligned with the experiment constants", () => {
@@ -214,5 +228,11 @@ describe("strength resolution evidence", () => {
       seedDerivation: "deriveSeasonSeed(teamCount, seasonNumber), shared with season:sweep; seasons 1-50 overlap.",
       levelRange: { weakest: 7, strongest: 13 },
     });
+  });
+
+  it("commits schema version 4 without moving strongest-by-level figures", () => {
+    const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")) as StrengthEvidence;
+    expect(committed.schemaVersion).toBe(4);
+    expect(committed.rows.map((row) => row.strongestTeamFinishedTop.count)).toEqual([82, 21, 57, 85]);
   });
 });
