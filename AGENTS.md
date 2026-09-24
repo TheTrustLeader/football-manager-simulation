@@ -23,15 +23,29 @@ git ls-remote --heads origin >/dev/null 2>&1 && echo PUSH MODE || echo DIFF MODE
 - **DIFF MODE** — no remote, or it refuses. Do the work anyway and hand it back
   as a patch (section 3).
 
-⛔ **PUSH MODE is the expected case here.** On 23 Sept 2026 the cloud agent
-environment pushed FM-17-B5 as a branch and draft pull request (#36) — started
-by Scott with the task's "Create draft PR" button, not by the agent itself. An
-agent pushing on its own has not yet been proved; issue #38 is the first brief
-that asks for it. Earlier rounds came back as diffs because the
-BRIEF forbade pushing — not because the environment could not push. A full day
-went on diagnosing a permissions fault that did not exist. Do not read a
-diff-mode round in this repository's history as evidence that pushing is
-unavailable, and do not assume DIFF MODE before running the check.
+⛔ **This check tests READ access only — it does not prove you can push.**
+This repository is public, so `git ls-remote` answers anonymously, with no
+credentials at all. PUSH MODE from this check means "a remote answered", not
+"you have somewhere to push to". Attempt the push and believe section 2's SHA
+comparison, never this check.
+
+⛔ **Measured on 23 Sept 2026: the Codex Cloud sandbox could not push.**
+Issue #38 was the first brief that asked an agent to push on its own. It
+attempted it and got
+`fatal: could not read Username for 'https://github.com': No such device or
+address` — an absent credential, not a refusal. The branch never existed on the
+remote and no pull request was created. PR #36 reached GitHub only because Scott
+pressed the task's "Create draft PR" button by hand; that button, not an agent,
+is the only thing that has ever published from that environment. See
+`docs/delivery-log.md`.
+
+⛔ **So expect to need the fallback, and never go quiet.** Earlier rounds came
+back as diffs because the BRIEF forbade pushing, and a full day went on
+diagnosing a permissions fault that did not exist — do not read that history as
+proof that pushing works either. Try the push, verify it per section 2, and if
+it fails, hand the work back as a patch (section 3) in the same report. A
+completed task whose code never left the sandbox is the most expensive outcome
+there is.
 
 ⛔ **A missing remote is still a delivery constraint, not a stop condition.** If
 the check genuinely reports DIFF MODE, do the work anyway and hand it back as a
@@ -75,7 +89,12 @@ End every report with exactly one of these three lines:
 
 - `REMOTE SHA VERIFIED — PUBLISHED` — include the SHA the remote returned
 - `PUSH ATTEMPT FAILED — UNPUBLISHED` — include the error, plus the diff from
-  section 3
+  section 3. ⛔ **This is not optional and no brief may cancel it.** On 23 Sept
+  2026 a brief said "do not paste the diff" (meaning: do not use a diff
+  *instead of* pushing) and, separately, "fall back to the diff if the push
+  fails". The agent obeyed the prohibition, dropped the fallback, and a finished
+  piece of work was stranded in a sandbox. If the push failed, the diff is the
+  delivery — post it.
 - `NO REMOTE — DIFF MODE` — the fallback only, plus the diff from section 3
 
 On 8 Sept 2026 three agents each reported "created the pull request" when no
