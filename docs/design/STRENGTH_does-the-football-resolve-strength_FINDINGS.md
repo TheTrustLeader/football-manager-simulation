@@ -79,7 +79,7 @@ The four committed strongest-by-level figures (82, 21, 57, 85) are unchanged by 
 
 ---
 
-# ADDENDUM — the twelve-team question is answered
+# ADDENDUM — what the twelve-team league does (question still open — see OUTCOME below)
 
 **Recorded 22 September 2026, BST.** Issue #17. Run EXECUTED 22 Sep 2026, 08:25 BST.
 200 seasons at 12 and 20 teams, same controls as the committed sweep.
@@ -132,3 +132,27 @@ sixteen, and they are not interchangeable:
 Sixteen is the only league size where these disagree (`sameTeam: false`). The 89 belongs to whichever
 of two tied squads happened to sort first — it is not evidence that the better squad wins more often.
 Always state which ruler a sixteen-team figure came from.
+
+## OUTCOME — the prediction above was tested and FALSIFIED
+
+**Recorded 24 September 2026, 09:05 BST.** Measured by #33, delivered in PR #40 (merged 24 Sep 2026),
+read from the committed `evidence/strength-resolution-evidence.json` on `main`.
+
+The rebuilt rating weights each attribute by what the engine was measured to reward. At twelve teams it
+still names `sweep-12-team-12` as the strongest squad, and that squad still tops the table only
+**21/200** times. `team-10` and `team-11` do **not** rank above it. **The attribute-mix explanation is
+wrong.**
+
+| league size | strongest on engine-weighted rating | rating | topped table |
+|---|---|---|---|
+| 8 | `sweep-8-team-08` | 3.208280 | 82/200 |
+| **12** | **`sweep-12-team-12`** | **3.263859** | **21/200** |
+| 16 | `sweep-16-team-15` | 3.226807 | 89/200 |
+| 20 | `sweep-20-team-20` | 3.318245 | 85/200 |
+
+**REASONED — where #17 goes next.** The engine-weighted rating ranks teams well at every size
+(rating-to-finish Spearman −0.770 to −0.799; twelve is −0.799, the strongest of the four), yet at twelve
+the top team alone collapses. A ruler that
+works everywhere but fails at exactly one size points at **the season, not the ruler**: the fixture
+schedule, home/away balance, or how a twelve-team season is played. This is untested, so issue #17
+stays open.
