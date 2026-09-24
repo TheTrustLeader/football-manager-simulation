@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { eraBandsForSeason } from "../src/era-bands.js";
 import { describe, expect, it } from "vitest";
 import { type CalibrationBand } from "../src/era-bands.js";
 import { compareWithBand, createCalibrationEvidence, runCalibrationForSize, serialiseCalibrationEvidence, verifyCommittedPositiveControl, type CalibrationRow } from "../src/season-calibration-evidence.js";
@@ -18,7 +19,7 @@ describe("season calibration evidence", () => {
   it("reproduces every committed strength-evidence football distribution", () => {
     const rows = JSON.parse(readFileSync("evidence/season-calibration-evidence.json", "utf8")).rows as CalibrationRow[];
     expect(verifyCommittedPositiveControl(rows)).toEqual([8, 12, 16, 20].map((teamCount) => ({ teamCount, source: "evidence/strength-resolution-evidence.json", status: "REPRODUCED" })));
-    expect(createCalibrationEvidence(rows).positiveControl).toHaveLength(4);
+    expect(createCalibrationEvidence(rows, 1981, eraBandsForSeason(1981)).positiveControl).toHaveLength(4);
     const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8"));
     for (const row of rows) {
       const expected = committed.rows.find((candidate: { teamCount: number }) => candidate.teamCount === row.teamCount);
@@ -32,12 +33,12 @@ describe("season calibration evidence", () => {
   });
 
   it("throws loudly when the committed positive control differs", () => {
-    const row = runCalibrationForSize(8, [1]);
+    const row = runCalibrationForSize(8, [1], 1981, eraBandsForSeason(1981));
     expect(() => verifyCommittedPositiveControl([row], JSON.stringify({ rows: [{ ...row, goalsPerMatch: { ...row.goalsPerMatch, mean: 99 } }] }))).toThrow(/POSITIVE CONTROL FAILED.*STOP/);
   });
 
   it("serialises byte-reproducibly without timings", () => {
-    const row = runCalibrationForSize(8, [1]);
+    const row = runCalibrationForSize(8, [1], 1981, eraBandsForSeason(1981));
     const fixture = { schemaVersion: 1, rows: [row] } as never;
     expect(serialiseCalibrationEvidence(fixture)).toBe(serialiseCalibrationEvidence(fixture));
     expect(serialiseCalibrationEvidence(fixture)).not.toMatch(/elapsed|wallClock/);

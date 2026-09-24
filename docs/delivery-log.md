@@ -117,6 +117,23 @@ button is the only route to it, and only Scott can press it.
 
 ---
 
+## Issue #41 (FM-ERA-1) — 24 Sept 2026 — the diff route worked first time
+
+**EXECUTED** — brief posted 09:16 BST asking for a push OR a complete
+four-backtick diff, with no prohibition against either. Codex reported at
+10:08 BST: push failed (`'origin' does not appear to be a git repository`),
+complete diff posted. Its SHA `ce98609` does not exist on GitHub.
+
+**EXECUTED** — at 10:40 BST Claude extracted the diff, `git apply --check`
+passed, numstat matched Codex's reported 9 files line for line, and it was
+pushed as `ce4bdfe` and opened as draft PR #42. Time from report to PR: about
+30 minutes, with no step needed from Scott.
+
+**REASONED** — with the prohibition gone, the fallback route is now reliable.
+The "Create draft PR" button is still preferred because it cannot truncate.
+
+---
+
 ## Earlier rounds, for context
 
 **REASONED** — recorded from AGENTS.md, which states these as already-paid

@@ -17,16 +17,16 @@ import type { AttributeName } from "../src/types.js";
 describe("attribute value evidence", () => {
   const evidenceSeasonNumbers = [1, 2];
   let zeroControlEvidence: AttributeValueEvidence | undefined;
-  const getZeroControlEvidence = () => (zeroControlEvidence ??= createAttributeValueEvidence(evidenceSeasonNumbers));
+  const getZeroControlEvidence = () => (zeroControlEvidence ??= createAttributeValueEvidence(evidenceSeasonNumbers, 1981));
 
   it("keeps the zero treatment as a distinct, exact zero control", () => {
-    const result = runTreatment("passing", 0, 9, [1, 2]);
+    const result = runTreatment("passing", 0, 9, [1, 2], 1981);
     expect(result).toMatchObject({ kind: "ZERO_CONTROL", playersChanged: 0, totalAttributePointsAdded: 0, pointsChange: 0 });
   });
 
   it("replays seasons and preserves the direction for a larger high-value treatment", () => {
-    const one = runTreatment("finishing", 1, 9, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-    const three = runTreatment("finishing", 3, 9, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    const one = runTreatment("finishing", 1, 9, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 1981);
+    const three = runTreatment("finishing", 3, 9, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 1981);
     expect(one.pointsChange).toEqual(expect.any(Number));
     expect(three.pointsChange).toEqual(expect.any(Number));
     expect(Math.sign(three.pointsChange as number)).toBe(Math.sign(one.pointsChange as number));
@@ -39,7 +39,7 @@ describe("attribute value evidence", () => {
       if (index === 9) for (const player of entry.team.starters) if ("passing" in player.attributes) player.attributes.passing = 20;
       return entry;
     });
-    expect(runTreatment("passing", 1, 9, [1], teamFactory)).toEqual(expect.objectContaining({
+    expect(runTreatment("passing", 1, 9, [1], 1981, teamFactory)).toEqual(expect.objectContaining({
       kind: "UNMEASURABLE",
       playersChanged: 0,
       seasons: 0,
@@ -67,7 +67,7 @@ describe("attribute value evidence", () => {
 
   it("is byte-reproducible for the same seeds and records season-based uncertainty", () => {
     const first = getZeroControlEvidence();
-    const second = createAttributeValueEvidence(evidenceSeasonNumbers);
+    const second = createAttributeValueEvidence(evidenceSeasonNumbers, 1981);
     expect(serialiseAttributeValueEvidence(second)).toBe(serialiseAttributeValueEvidence(first));
     expect(first.attributes.every((result) => result.seasons === evidenceSeasonNumbers.length * 3)).toBe(true);
     expect(first.zeroTreatment).toMatchObject({

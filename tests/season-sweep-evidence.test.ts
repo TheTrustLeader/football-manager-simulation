@@ -20,8 +20,8 @@ describe("season sweep evidence", () => {
   it("serialises byte-identically across repeated sweeps", () => {
     const sizes = [8, 12];
     const seasons = [1, 2, 3];
-    const first = serialiseSweepEvidence(createSweepEvidence(sizes.map((size) => runSweepForSize(size, seasons))));
-    const second = serialiseSweepEvidence(createSweepEvidence(sizes.map((size) => runSweepForSize(size, seasons))));
+    const first = serialiseSweepEvidence(createSweepEvidence(sizes.map((size) => runSweepForSize(size, seasons, 1981))));
+    const second = serialiseSweepEvidence(createSweepEvidence(sizes.map((size) => runSweepForSize(size, seasons, 1981))));
 
     expect(second).toBe(first);
     expect(first).not.toContain("elapsedMs");
@@ -31,7 +31,7 @@ describe("season sweep evidence", () => {
     const subset = [1, 2, 3];
     expect(subset.map((season) => deriveSeasonSeed(12, season)))
       .toEqual(SEASON_NUMBERS.slice(0, 3).map((season) => deriveSeasonSeed(12, season)));
-    expect(runSweepForSize(12, subset).seasonsSimulated).toBe(3);
+    expect(runSweepForSize(12, subset, 1981).seasonsSimulated).toBe(3);
   });
 
   it("keeps committed controls aligned with the experiment constants", () => {

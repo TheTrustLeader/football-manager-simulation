@@ -132,7 +132,8 @@ export function spearman(left: readonly number[], right: readonly number[]): num
 
 export function runStrengthForSize(
   teamCount: number,
-  seasonNumbers: readonly number[] = SEASON_NUMBERS,
+  seasonNumbers: readonly number[],
+  season: number,
   weights: Record<AttributeName, number>,
   teamFactory: (count: number) => EvidenceTeam[] = makeEvidenceTeams,
 ): StrengthRow {
@@ -161,27 +162,27 @@ export function runStrengthForSize(
   let strongestByEngineWeightedRatingTopCount = 0;
 
   for (const seasonNumber of seasonNumbers) {
-    const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), 1981);
-    const champion = season.table[0]!;
-    const bottom = season.table[season.table.length - 1]!;
-    const strongestPosition = season.table.findIndex((row) => row.teamId === strongestByLevelId) + 1;
-    const strongestByActualRatingPosition = season.table.findIndex((row) => row.teamId === strongestByActualRatingId) + 1;
-    const strongestByEngineWeightedRatingPosition = season.table.findIndex((row) => row.teamId === strongestByEngineWeightedRating.team.id) + 1;
-    const strongest = season.table[strongestPosition - 1]!;
-    const totalGoals = season.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0);
-    const homeWins = season.matches.filter((match) => match.home.goals > match.away.goals).length;
-    const draws = season.matches.filter((match) => match.home.goals === match.away.goals).length;
+    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season);
+    const champion = result.table[0]!;
+    const bottom = result.table[result.table.length - 1]!;
+    const strongestPosition = result.table.findIndex((row) => row.teamId === strongestByLevelId) + 1;
+    const strongestByActualRatingPosition = result.table.findIndex((row) => row.teamId === strongestByActualRatingId) + 1;
+    const strongestByEngineWeightedRatingPosition = result.table.findIndex((row) => row.teamId === strongestByEngineWeightedRating.team.id) + 1;
+    const strongest = result.table[strongestPosition - 1]!;
+    const totalGoals = result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0);
+    const homeWins = result.matches.filter((match) => match.home.goals > match.away.goals).length;
+    const draws = result.matches.filter((match) => match.home.goals === match.away.goals).length;
     if (strongestPosition === 1) strongestTopCount += 1;
     if (strongestByActualRatingPosition === 1) strongestByActualRatingTopCount += 1;
     if (strongestByEngineWeightedRatingPosition === 1) strongestByEngineWeightedRatingTopCount += 1;
     positions.push(strongestPosition);
     margins.push(strongest.points - champion.points);
-    totalMatchesSimulated += season.matches.length;
-    goalsPerMatch.push(totalGoals / season.matches.length);
-    homeWinRates.push(homeWins / season.matches.length);
-    drawRates.push(draws / season.matches.length);
+    totalMatchesSimulated += result.matches.length;
+    goalsPerMatch.push(totalGoals / result.matches.length);
+    homeWinRates.push(homeWins / result.matches.length);
+    drawRates.push(draws / result.matches.length);
     pointsGaps.push(champion.points - bottom.points);
-    for (const [index, row] of season.table.entries()) {
+    for (const [index, row] of result.table.entries()) {
       const entry = entries.find((candidate) => candidate.team.id === row.teamId)!;
       levels.push(entry.level);
       actualRatings.push(entry.actualRating);
@@ -255,8 +256,8 @@ type SweepRunner = (teamCount: number, seasonNumbers: readonly number[]) => Retu
 
 export function verifyPositiveControl(
   rows: readonly StrengthRow[],
-  strengthRunner: EvidenceRunner = (teamCount, seasonNumbers) => runStrengthForSize(teamCount, seasonNumbers, readCommittedWeights()),
-  sweepRunner: SweepRunner = runSweepForSize,
+  strengthRunner: EvidenceRunner,
+  sweepRunner: SweepRunner,
 ) {
   return ([16, 20] as const).map((teamCount) => {
     const row = rows.find((candidate) => candidate.teamCount === teamCount);
@@ -304,7 +305,7 @@ function comparisons(rows: readonly StrengthRow[]) {
 
 export function createStrengthEvidence(
   rows: StrengthRow[],
-  positiveControlVerifier: (controlRows: readonly StrengthRow[]) => StrengthEvidence["positiveControl"] = verifyPositiveControl,
+  positiveControlVerifier: (controlRows: readonly StrengthRow[]) => StrengthEvidence["positiveControl"],
 ): StrengthEvidence {
   for (const row of rows) {
     const expected = COMMITTED_STRONGEST_BY_LEVEL.get(row.teamCount);
@@ -346,9 +347,12 @@ export function formatStrengthOutput(evidence: StrengthEvidence): string {
 
 function main(): void {
   const started = performance.now();
+  const season = 1981;
   const weights = readCommittedWeights();
-  const rows = LEAGUE_SIZES.map((teamCount) => runStrengthForSize(teamCount, SEASON_NUMBERS, weights));
-  const evidence = createStrengthEvidence(rows);
+  const strengthRunner = (teamCount: number, seasonNumbers: readonly number[]) => runStrengthForSize(teamCount, seasonNumbers, season, weights);
+  const sweepRunner = (teamCount: number, seasonNumbers: readonly number[]) => runSweepForSize(teamCount, seasonNumbers, season);
+  const rows = LEAGUE_SIZES.map((teamCount) => strengthRunner(teamCount, SEASON_NUMBERS));
+  const evidence = createStrengthEvidence(rows, (controlRows) => verifyPositiveControl(controlRows, strengthRunner, sweepRunner));
   mkdirSync("evidence", { recursive: true });
   writeFileSync(OUTPUT_PATH, serialiseStrengthEvidence(evidence), "utf8");
   console.log(formatStrengthOutput(evidence));
