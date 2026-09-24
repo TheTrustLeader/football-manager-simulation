@@ -34,19 +34,19 @@ export function compareWithBand(measure: CalibrationMeasure, measured: number, b
   };
 }
 
-export function runCalibrationForSize(teamCount: number, seasonNumbers: readonly number[] = SEASON_NUMBERS, era = eraBandsForSeason(1981)): CalibrationRow {
+export function runCalibrationForSize(teamCount: number, seasonNumbers: readonly number[], season: number, era: EraBandRow): CalibrationRow {
   const teams = makeEvidenceTeams(teamCount).map(({ team }) => team);
   const goals: number[] = [];
   const homeWins: number[] = [];
   const draws: number[] = [];
   let totalMatchesSimulated = 0;
   for (const seasonNumber of seasonNumbers) {
-    const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), 1981);
-    const matchCount = season.matches.length;
+    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season);
+    const matchCount = result.matches.length;
     totalMatchesSimulated += matchCount;
-    goals.push(season.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0) / matchCount);
-    homeWins.push(season.matches.filter((match) => match.home.goals > match.away.goals).length / matchCount);
-    draws.push(season.matches.filter((match) => match.home.goals === match.away.goals).length / matchCount);
+    goals.push(result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0) / matchCount);
+    homeWins.push(result.matches.filter((match) => match.home.goals > match.away.goals).length / matchCount);
+    draws.push(result.matches.filter((match) => match.home.goals === match.away.goals).length / matchCount);
   }
   const goalsPerMatch = extendedDistribution(goals);
   const homeWinRate = distribution(homeWins);
@@ -80,13 +80,13 @@ export function verifyCommittedPositiveControl(rows: readonly CalibrationRow[], 
   });
 }
 
-export function createCalibrationEvidence(rows: CalibrationRow[], era: EraBandRow = eraBandsForSeason(1981)) {
+export function createCalibrationEvidence(rows: CalibrationRow[], season: number, era: EraBandRow) {
   return {
     schemaVersion: 1,
     purpose: "Measure the football played by full seasons against dated English First Division calibration bands without tuning the engine.",
     command: "npm run season:calibration",
     timingPolicy: "No wall-clock timings are recorded.",
-    controls: { season: 1981, teamCounts: LEAGUE_SIZES, seasonNumbers: { first: 1, last: 200, count: 200 }, seedDerivation: "deriveSeasonSeed(teamCount, seasonNumber)", levelRange: { weakest: 7, strongest: 13 }, era },
+    controls: { season, teamCounts: LEAGUE_SIZES, seasonNumbers: { first: 1, last: 200, count: 200 }, seedDerivation: "deriveSeasonSeed(teamCount, seasonNumber)", levelRange: { weakest: 7, strongest: 13 }, era },
     positiveControl: verifyCommittedPositiveControl(rows),
     rows,
   };
@@ -97,8 +97,10 @@ export function serialiseCalibrationEvidence(evidence: ReturnType<typeof createC
 }
 
 function main(): void {
-  const rows = LEAGUE_SIZES.map((teamCount) => runCalibrationForSize(teamCount));
-  const evidence = createCalibrationEvidence(rows);
+  const season = 1981;
+  const era = eraBandsForSeason(season);
+  const rows = LEAGUE_SIZES.map((teamCount) => runCalibrationForSize(teamCount, SEASON_NUMBERS, season, era));
+  const evidence = createCalibrationEvidence(rows, season, era);
   mkdirSync("evidence", { recursive: true });
   writeFileSync(OUTPUT_PATH, serialiseCalibrationEvidence(evidence), "utf8");
   for (const row of rows) for (const comparison of Object.values(row.comparisons)) console.log(`${row.teamCount} teams: ${comparison.statement}`);

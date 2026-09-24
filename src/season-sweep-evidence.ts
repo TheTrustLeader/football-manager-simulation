@@ -104,7 +104,7 @@ function bandResult(value: number, band: { minimum: number; maximum: number }) {
   return value >= band.minimum && value <= band.maximum ? "WITHIN BAND" as const : "OUTSIDE BAND" as const;
 }
 
-export function runSweepForSize(teamCount: number, seasonNumbers: readonly number[] = SEASON_NUMBERS): SweepRow {
+export function runSweepForSize(teamCount: number, seasonNumbers: readonly number[], season: number): SweepRow {
   const teams = makeEvidenceTeams(teamCount);
   const goalsPerMatch: number[] = [];
   const homeWinRates: number[] = [];
@@ -114,16 +114,16 @@ export function runSweepForSize(teamCount: number, seasonNumbers: readonly numbe
   let strongestTeamFinishedTop = 0;
 
   for (const seasonNumber of seasonNumbers) {
-    const season = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), 1981);
-    const totalGoals = season.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0);
-    const homeWins = season.matches.filter((match) => match.home.goals > match.away.goals).length;
-    const draws = season.matches.filter((match) => match.home.goals === match.away.goals).length;
-    const champion = season.table[0]!;
-    const bottom = season.table[season.table.length - 1]!;
-    totalMatchesSimulated += season.matches.length;
-    goalsPerMatch.push(totalGoals / season.matches.length);
-    homeWinRates.push(homeWins / season.matches.length);
-    drawRates.push(draws / season.matches.length);
+    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season);
+    const totalGoals = result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0);
+    const homeWins = result.matches.filter((match) => match.home.goals > match.away.goals).length;
+    const draws = result.matches.filter((match) => match.home.goals === match.away.goals).length;
+    const champion = result.table[0]!;
+    const bottom = result.table[result.table.length - 1]!;
+    totalMatchesSimulated += result.matches.length;
+    goalsPerMatch.push(totalGoals / result.matches.length);
+    homeWinRates.push(homeWins / result.matches.length);
+    drawRates.push(draws / result.matches.length);
     pointsGaps.push(champion.points - bottom.points);
     if (champion.teamId === teams[teams.length - 1]!.id) strongestTeamFinishedTop += 1;
   }
@@ -190,7 +190,7 @@ function main(): void {
   const timings = new Map<number, number>();
   const rows = LEAGUE_SIZES.map((teamCount) => {
     const started = performance.now();
-    const row = runSweepForSize(teamCount);
+    const row = runSweepForSize(teamCount, SEASON_NUMBERS, 1981);
     timings.set(teamCount, performance.now() - started);
     return row;
   });

@@ -79,7 +79,8 @@ export function runTreatment(
   attribute: AttributeName,
   amount: number,
   treatedTeamIndex: number,
-  seasonNumbers: readonly number[] = ATTRIBUTE_VALUE_SEASONS,
+  seasonNumbers: readonly number[],
+  season: number,
   teamFactory = makeEvidenceTeams,
 ): TreatmentResult {
   const baseTeams = teamFactory(12).map(({ team }) => team);
@@ -92,8 +93,8 @@ export function runTreatment(
   }
   const differences = seasonNumbers.map((seasonNumber) => {
     const seed = deriveSeasonSeed(12, seasonNumber);
-    const baseline = runSeason(baseTeams, seed, 1981).table.find((row) => row.teamId === treatedTeam.id)!.points;
-    const treated = runSeason(treatedTeams, seed, 1981).table.find((row) => row.teamId === treatedTeam.id)!.points;
+    const baseline = runSeason(baseTeams, seed, season).table.find((row) => row.teamId === treatedTeam.id)!.points;
+    const treated = runSeason(treatedTeams, seed, season).table.find((row) => row.teamId === treatedTeam.id)!.points;
     return treated - baseline;
   });
   return {
@@ -107,11 +108,11 @@ export function runTreatment(
   };
 }
 
-export function createAttributeValueEvidence(seasonNumbers: readonly number[] = ATTRIBUTE_VALUE_SEASONS): AttributeValueEvidence {
-  const zeroTreatment = runTreatment("passing", 0, TREATED_TEAM_INDICES[0], seasonNumbers);
+export function createAttributeValueEvidence(seasonNumbers: readonly number[], season: number): AttributeValueEvidence {
+  const zeroTreatment = runTreatment("passing", 0, TREATED_TEAM_INDICES[0], seasonNumbers, season);
   if (zeroTreatment.pointsChange !== 0) throw new Error(`ZERO TREATMENT MOVED by ${zeroTreatment.pointsChange}; measurement is broken`);
   const attributes = ATTRIBUTE_NAMES.map((attribute): AttributeResult => {
-    const treatments = TREATED_TEAM_INDICES.map((index) => runTreatment(attribute, 1, index, seasonNumbers));
+    const treatments = TREATED_TEAM_INDICES.map((index) => runTreatment(attribute, 1, index, seasonNumbers, season));
     const measured = treatments.filter((result): result is TreatmentResult & { pointsChange: number; standardError: number } => result.kind === "MEASURED");
     if (measured.length === 0) throw new Error(`${attribute} is UNMEASURABLE on every treated team; no weight can be reported`);
     const seasons = measured.reduce((sum, result) => sum + result.seasons, 0);
@@ -151,7 +152,7 @@ export function readAttributeWeights(path = ATTRIBUTE_VALUE_OUTPUT_PATH): Record
 }
 
 function main(): void {
-  const evidence = createAttributeValueEvidence();
+  const evidence = createAttributeValueEvidence(ATTRIBUTE_VALUE_SEASONS, 1981);
   mkdirSync("evidence", { recursive: true });
   writeFileSync(ATTRIBUTE_VALUE_OUTPUT_PATH, serialiseAttributeValueEvidence(evidence), "utf8");
   for (const result of evidence.attributes) console.log(`${result.attribute}: ${result.pointsValue} points (SE ${result.standardError}; playersChanged ${result.playersChanged})`);
