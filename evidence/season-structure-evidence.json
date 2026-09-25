@@ -1,0 +1,456 @@
+{
+  "schemaVersion": 1,
+  "controls": {
+    "season": 1981,
+    "seasons": 200,
+    "ruler": "engine-weighted",
+    "alternativeSeedFunction": "32-bit FNV-1a followed by integer avalanche over season seed, round, homeId and awayId"
+  },
+  "hypotheses": {
+    "H1": {
+      "status": "ruled out",
+      "fixtureBalance": [
+        {
+          "teamCount": 8,
+          "orderedPairsExactlyOnce": true,
+          "teams": [
+            {
+              "teamId": "sweep-8-team-01",
+              "matches": 14,
+              "home": 7,
+              "away": 7
+            },
+            {
+              "teamId": "sweep-8-team-02",
+              "matches": 14,
+              "home": 7,
+              "away": 7
+            },
+            {
+              "teamId": "sweep-8-team-03",
+              "matches": 14,
+              "home": 7,
+              "away": 7
+            },
+            {
+              "teamId": "sweep-8-team-04",
+              "matches": 14,
+              "home": 7,
+              "away": 7
+            },
+            {
+              "teamId": "sweep-8-team-05",
+              "matches": 14,
+              "home": 7,
+              "away": 7
+            },
+            {
+              "teamId": "sweep-8-team-06",
+              "matches": 14,
+              "home": 7,
+              "away": 7
+            },
+            {
+              "teamId": "sweep-8-team-07",
+              "matches": 14,
+              "home": 7,
+              "away": 7
+            },
+            {
+              "teamId": "sweep-8-team-08",
+              "matches": 14,
+              "home": 7,
+              "away": 7
+            }
+          ]
+        },
+        {
+          "teamCount": 12,
+          "orderedPairsExactlyOnce": true,
+          "teams": [
+            {
+              "teamId": "sweep-12-team-01",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-02",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-03",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-04",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-05",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-06",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-07",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-08",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-09",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-10",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-11",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            },
+            {
+              "teamId": "sweep-12-team-12",
+              "matches": 22,
+              "home": 11,
+              "away": 11
+            }
+          ]
+        },
+        {
+          "teamCount": 16,
+          "orderedPairsExactlyOnce": true,
+          "teams": [
+            {
+              "teamId": "sweep-16-team-01",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-02",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-03",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-04",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-05",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-06",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-07",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-08",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-09",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-10",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-11",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-12",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-13",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-14",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-15",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            },
+            {
+              "teamId": "sweep-16-team-16",
+              "matches": 30,
+              "home": 15,
+              "away": 15
+            }
+          ]
+        },
+        {
+          "teamCount": 20,
+          "orderedPairsExactlyOnce": true,
+          "teams": [
+            {
+              "teamId": "sweep-20-team-01",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-02",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-03",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-04",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-05",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-06",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-07",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-08",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-09",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-10",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-11",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-12",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-13",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-14",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-15",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-16",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-17",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-18",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-19",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            },
+            {
+              "teamId": "sweep-20-team-20",
+              "matches": 38,
+              "home": 19,
+              "away": 19
+            }
+          ]
+        }
+      ]
+    },
+    "H2": {
+      "status": "ruled out",
+      "originalStrongestTop": 21,
+      "reversedRoundOrderStrongestTop": 21,
+      "byteIdenticalCount": true
+    },
+    "H3": {
+      "status": "ruled out",
+      "decisionRule": "The mixed proportion must lie outside the original Wilson 95% interval.",
+      "rows": [
+        {
+          "teamCount": 8,
+          "ruler": "engine-weighted",
+          "strongestTeamId": "sweep-8-team-08",
+          "maximumDrawsPerMatch": 716,
+          "overlappingMatchPairs": 0,
+          "overlapsInvolvingStrongestTeam": 0,
+          "legacyStrongestTop": 82,
+          "legacy95PercentWilsonInterval": {
+            "lower": 0.344157,
+            "upper": 0.479235
+          },
+          "mixedStrongestTop": 81,
+          "mixedMovedOutsideOriginal95PercentInterval": false,
+          "identicalMatchSeeds": 0,
+          "totalMatchSeeds": 11200
+        },
+        {
+          "teamCount": 12,
+          "ruler": "engine-weighted",
+          "strongestTeamId": "sweep-12-team-12",
+          "maximumDrawsPerMatch": 717,
+          "overlappingMatchPairs": 0,
+          "overlapsInvolvingStrongestTeam": 0,
+          "legacyStrongestTop": 21,
+          "legacy95PercentWilsonInterval": {
+            "lower": 0.069707,
+            "upper": 0.15518
+          },
+          "mixedStrongestTop": 24,
+          "mixedMovedOutsideOriginal95PercentInterval": false,
+          "identicalMatchSeeds": 0,
+          "totalMatchSeeds": 26400
+        },
+        {
+          "teamCount": 16,
+          "ruler": "engine-weighted",
+          "strongestTeamId": "sweep-16-team-15",
+          "maximumDrawsPerMatch": 717,
+          "overlappingMatchPairs": 0,
+          "overlapsInvolvingStrongestTeam": 0,
+          "legacyStrongestTop": 89,
+          "legacy95PercentWilsonInterval": {
+            "lower": 0.377806,
+            "upper": 0.514267
+          },
+          "mixedStrongestTop": 92,
+          "mixedMovedOutsideOriginal95PercentInterval": false,
+          "identicalMatchSeeds": 0,
+          "totalMatchSeeds": 48000
+        },
+        {
+          "teamCount": 20,
+          "ruler": "engine-weighted",
+          "strongestTeamId": "sweep-20-team-20",
+          "maximumDrawsPerMatch": 711,
+          "overlappingMatchPairs": 0,
+          "overlapsInvolvingStrongestTeam": 0,
+          "legacyStrongestTop": 85,
+          "legacy95PercentWilsonInterval": {
+            "lower": 0.358536,
+            "upper": 0.494291
+          },
+          "mixedStrongestTop": 88,
+          "mixedMovedOutsideOriginal95PercentInterval": false,
+          "identicalMatchSeeds": 0,
+          "totalMatchSeeds": 76000
+        }
+      ]
+    }
+  }
+}

@@ -51,6 +51,12 @@ export interface SeasonResult {
   playerStats: SeasonPlayerStats[];
 }
 
+export interface SeasonRunOptions {
+  matchSeed?: (seasonSeed: number, fixture: Fixture, index: number) => number;
+  orderFixtures?: (fixtures: readonly Fixture[]) => Fixture[];
+  onMatchDrawCount?: (fixture: Fixture, seed: number, draws: number) => void;
+}
+
 const POINTS_FOR_A_DRAW = 1;
 const BYE = " bye";
 
@@ -226,18 +232,30 @@ export function buildSeasonPlayerStats(matches: readonly MatchOutput[]): SeasonP
  * the same season seed with the same teams reproduces the season exactly, and a
  * different seed does not.
  */
-export function runSeason(teams: readonly TeamInput[], seed: number, season: SeasonId): SeasonResult {
+export function runSeason(teams: readonly TeamInput[], seed: number, season: SeasonId, options: SeasonRunOptions = {}): SeasonResult {
   const rules = rulesForSeason(season);
   const byId = new Map(teams.map((team) => [team.id, team]));
   if (byId.size !== teams.length) throw new Error("Team ids must be unique");
 
   const teamIds = teams.map((team) => team.id);
-  const fixtures = generateFixtures(teamIds, seed);
-  const matches = fixtures.map((fixture, index) => simulateMatch({
-    seed: (seed + index * 7919) >>> 0,
-    home: byId.get(fixture.homeId)!,
-    away: byId.get(fixture.awayId)!,
-  }));
+  const generatedFixtures = generateFixtures(teamIds, seed);
+  const fixtures = options.orderFixtures?.(generatedFixtures) ?? generatedFixtures;
+  const defaultIndex = new Map(generatedFixtures.map((fixture, index) => [fixture, index]));
+  const matches = fixtures.map((fixture) => {
+    const index = defaultIndex.get(fixture)!;
+    const matchSeed = options.matchSeed?.(seed, fixture, index) ?? (seed + index * 7919) >>> 0;
+    let draws = 0;
+    const simulate = () => simulateMatch({
+      seed: matchSeed,
+      home: byId.get(fixture.homeId)!,
+      away: byId.get(fixture.awayId)!,
+    });
+    const match = options.onMatchDrawCount
+      ? SeededRandom.withDrawObserver(() => { draws += 1; }, simulate)
+      : simulate();
+    options.onMatchDrawCount?.(fixture, matchSeed, draws);
+    return match;
+  });
 
   return {
     seed,
