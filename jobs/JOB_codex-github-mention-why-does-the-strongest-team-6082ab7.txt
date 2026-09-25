@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-why-does-the-strongest-team-top-the-table-le
+head=6082ab74a134b9c2c3de6f21a955d9b8fb2e28e1
+tree=abce36fd74a7be902211a156eba81c41fd2e03ef
+base=0a81afba0dceb9e7370e354463caa17db93c1177
+item=FM-codex-github-mention-why-does-the-strongest-team
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-25 14:46 BST
