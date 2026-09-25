@@ -156,3 +156,52 @@ the top team alone collapses. A ruler that
 works everywhere but fails at exactly one size points at **the season, not the ruler**: the fixture
 schedule, home/away balance, or how a twelve-team season is played. This is untested, so issue #17
 stays open.
+
+---
+
+# SEASON STRUCTURE — fixture balance, order, and random streams
+
+**Recorded 25 September 2026, UTC.** Issue #17 (FM-17-B7). Evidence:
+`evidence/season-structure-evidence.json`, schema version 1. All runs use season 1981 explicitly and
+the engine-weighted ruler. The default season seed and match-seed behaviour are unchanged.
+
+## EXECUTED — H1 fixture balance: ruled out
+
+At 8, 12, 16 and 20 teams, every team plays exactly `2 × (n − 1)` matches, split into `n − 1` at
+home and `n − 1` away. Every ordered home/away pair occurs exactly once. The test asserts all four
+sizes, and the evidence records every per-team count.
+
+## EXECUTED — H2 fixture order: ruled out
+
+Reversing the round order while retaining each fixture's original match seed produced the same
+engine-weighted strongest-team title count at twelve teams, byte for byte: **21/200 before and
+21/200 after**. Matches are independent; execution order does not explain the dip.
+
+## EXECUTED — H3 random-stream overlap: ruled out
+
+The overlap prediction was wrong. Instrumentation measured a maximum of **716, 717, 717 and 711**
+random draws in any match at 8, 12, 16 and 20 teams respectively. Across seasons 1–200 there were
+**zero pairs of matches in the same season whose Mulberry32 streams overlap within those measured
+limits**, at every league size; consequently zero involved the strongest team's matches.
+
+The decisive control agrees. A well-mixed 32-bit hash of `(season seed, round, homeId, awayId)`
+changed every match seed — **0 identical seeds** out of 11,200, 26,400, 48,000 and 76,000 — but title
+counts barely changed:
+
+| teams | ruler | legacy titles | legacy Wilson 95% interval | mixed titles | moved? |
+|---:|---|---:|---:|---:|---|
+| 8 | engine-weighted | 82/200 | 0.344–0.479 | 81/200 | no |
+| 12 | engine-weighted | **21/200** | **0.070–0.155** | **24/200** | **no** |
+| 16 | engine-weighted | 89/200 | 0.378–0.514 | 92/200 | no |
+| 20 | engine-weighted | 85/200 | 0.359–0.494 | 88/200 | no |
+
+The interval is the two-sided 95% Wilson score interval fixed by the decision rule. Because the
+twelve-team mixed result, 0.120, remains inside the original interval, **H3 is ruled out regardless
+of the overlap census**. The controls also show that reseeding does not materially move the other
+league sizes, so there is no evidence that the legacy derivation distorts every size.
+
+## REASONED — outcome
+
+The twelve-team result is not caused by fixture imbalance, match execution order, or overlapping
+Mulberry32 streams. This round measured season construction only; it does not change the engine or
+fixture generator and does not establish a new cause for the top-spot anomaly.
