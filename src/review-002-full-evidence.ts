@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
+import { calibrationTargetsForSeason, ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
@@ -215,7 +215,7 @@ for (const seed of seeds) {
 }
 
 const baselineRates = aggregateRates(baseline);
-const targets = ENGINE_CONFIG.calibrationTargets;
+const targets = calibrationTargetsForSeason(1981);
 const calibrationChecks = {
   goalsPerMatch: targetCheck(baselineRates.goalsPerMatch, targets.goalsPerMatchMin, targets.goalsPerMatchMax),
   drawRate: targetCheck(baselineRates.drawRate, targets.drawRateMin, targets.drawRateMax),

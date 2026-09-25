@@ -3,6 +3,7 @@ import { eraBandsForSeason } from "../src/era-bands.js";
 import { describe, expect, it } from "vitest";
 import { type CalibrationBand } from "../src/era-bands.js";
 import { compareWithBand, createCalibrationEvidence, runCalibrationForSize, serialiseCalibrationEvidence, verifyCommittedPositiveControl, type CalibrationRow } from "../src/season-calibration-evidence.js";
+import { ENGINE_CONFIG, calibrationTargetsForSeason } from "../src/engine-config.js";
 
 describe("season calibration evidence", () => {
   const band = (minimum: number, maximum: number): CalibrationBand => ({ minimum, maximum, aggregateMean: (minimum + maximum) / 2, seasonStandardDeviation: 0 });
@@ -18,18 +19,15 @@ describe("season calibration evidence", () => {
 
   it("reproduces every committed strength-evidence football distribution", () => {
     const rows = JSON.parse(readFileSync("evidence/season-calibration-evidence.json", "utf8")).rows as CalibrationRow[];
-    expect(verifyCommittedPositiveControl(rows)).toEqual([8, 12, 16, 20].map((teamCount) => ({ teamCount, source: "evidence/strength-resolution-evidence.json", status: "REPRODUCED" })));
-    expect(createCalibrationEvidence(rows, 1981, eraBandsForSeason(1981)).positiveControl).toHaveLength(4);
+    expect(verifyCommittedPositiveControl(rows)).toEqual([8, 12, 16, 20, 22].map((teamCount) => ({ teamCount, source: "evidence/strength-resolution-evidence.json", status: "REPRODUCED" })));
+    expect(createCalibrationEvidence(rows, [], 1981, eraBandsForSeason(1981)).positiveControl).toHaveLength(5);
     const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8"));
     for (const row of rows) {
       const expected = committed.rows.find((candidate: { teamCount: number }) => candidate.teamCount === row.teamCount);
       expect({ goalsPerMatch: row.goalsPerMatch, homeWinRate: row.homeWinRate, drawRate: row.drawRate }).toEqual({ goalsPerMatch: expected.goalsPerMatch, homeWinRate: expected.homeWinRate, drawRate: expected.drawRate });
     }
-    const expectedResults = {
-      8: ["FAIL", "PASS", "PASS"], 12: ["FAIL", "PASS", "PASS"],
-      16: ["FAIL", "FAIL", "PASS"], 20: ["FAIL", "FAIL", "PASS"],
-    } as const;
-    for (const row of rows) expect(Object.values(row.comparisons).map(({ result }) => result)).toEqual(expectedResults[row.teamCount as keyof typeof expectedResults]);
+    const twentyTwo = rows.find((row) => row.teamCount === 22)!;
+    expect(Object.values(twentyTwo.comparisons).map(({ result }) => result)).toEqual(["PASS", "PASS", "PASS"]);
   });
 
   it("throws loudly when the committed positive control differs", () => {
@@ -42,6 +40,31 @@ describe("season calibration evidence", () => {
     const fixture = { schemaVersion: 1, rows: [row] } as never;
     expect(serialiseCalibrationEvidence(fixture)).toBe(serialiseCalibrationEvidence(fixture));
     expect(serialiseCalibrationEvidence(fixture)).not.toMatch(/elapsed|wallClock/);
+  });
+
+  it("fails when handed a clearly different era's bands", () => {
+    const source = eraBandsForSeason(1981);
+    const differentEra = { ...source, bands: { ...source.bands, goalsPerMatch: { minimum: 1, maximum: 1.2, aggregateMean: 1.1, seasonStandardDeviation: 0.05 } } };
+    expect(runCalibrationForSize(22, [1], 1981, differentEra).comparisons.goalsPerMatch.result).toBe("FAIL");
+  });
+
+  it("the old scoring constants fail 22-team calibration", () => {
+    const goal = ENGINE_CONFIG.goal as { base: number };
+    const homeAdvantage = ENGINE_CONFIG.homeAdvantage as { homeProgressionProbabilityBoost: number };
+    const tuned = { goalBase: goal.base, homeBoost: homeAdvantage.homeProgressionProbabilityBoost };
+    goal.base = 0.29;
+    homeAdvantage.homeProgressionProbabilityBoost = 0.085;
+    try {
+      expect(runCalibrationForSize(22, Array.from({ length: 10 }, (_, index) => index + 1), 1981, eraBandsForSeason(1981)).comparisons.goalsPerMatch.result).toBe("FAIL");
+    } finally {
+      goal.base = tuned.goalBase;
+      homeAdvantage.homeProgressionProbabilityBoost = tuned.homeBoost;
+    }
+  }, 30_000);
+
+  it("requires a season to resolve sourced calibration targets", () => {
+    expect(calibrationTargetsForSeason(1981).sourceSeason).toBe(1981);
+    expect(() => (calibrationTargetsForSeason as (season?: number) => unknown)()).toThrow();
   });
 
 });

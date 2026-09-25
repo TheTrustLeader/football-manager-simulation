@@ -1,3 +1,5 @@
+import { eraBandsForSeason } from "./era-bands.js";
+
 const PROFILE_WEIGHTS = {
   retention: { passing: 0.65, creativity: 0.35 },
   progression: { passing: 0.35, creativity: 0.3, pace: 0.2, aerial: 0.15 },
@@ -67,7 +69,7 @@ const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
 } as const;
 
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.10.0",
+  version: "match-engine-config-0.11.0",
   matchMinutes: 90,
   // Substitution windows are deliberately not modelled.
   substitutions: { maximum: 5 },
@@ -76,7 +78,7 @@ export const ENGINE_CONFIG = {
   possessionMax: 0.62,
   retentionDeltaDivisor: 120,
   homeAdvantage: {
-    homeProgressionProbabilityBoost: 0.085,
+    homeProgressionProbabilityBoost: 0.19,
     awayTravelConditionPenalty: 2,
     awayDefendingFoulProbabilityAdd: 0.003,
   },
@@ -123,7 +125,7 @@ export const ENGINE_CONFIG = {
   chance: { base: 0.5, differenceDivisor: 180, min: 0.28, max: 0.68 },
   shot: { base: 0.9, min: 0.55, max: 0.96 },
   onTarget: { base: 0.45, finishingBaseline: 10, finishingDivisor: 80, min: 0.28, max: 0.68 },
-  goal: { base: 0.29, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
+  goal: { base: 0.22, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
   creator: { designatedShare: 0.35 },
   defending: { stopCreditShare: 0.7, stopCreditWeightFloor: 1, majorErrorChance: 0.006 },
   dismissal: { baselinePlayers: 11, profileExponent: 0.75 },
@@ -308,27 +310,37 @@ export const ENGINE_CONFIG = {
     styleMinimumConversionDelta: 0.002,
     ratingCoverageMatches: 1000,
   },
-  calibrationTargets: {
-    goalsPerMatchMin: 2.4,
-    goalsPerMatchMax: 2.7,
-    drawRateMin: 0.27,
-    drawRateMax: 0.31,
-    homeWinRateMin: 0.41,
-    homeWinRateMax: 0.47,
-  },
   ciGuardrails: {
     sampleMatches: 20000,
-    goalsPerMatchMin: 2.375,
-    goalsPerMatchMax: 2.725,
-    drawRateMin: 0.263,
-    drawRateMax: 0.317,
-    homeWinRateMin: 0.403,
-    homeWinRateMax: 0.477,
+    // Fixed for fast CI, but sourced from the committed 1978/79-1985/86 data
+    // selected by eraBandsForSeason(1981), rather than invented allowances.
+    sourceSeason: 1981,
+    goalsPerMatchMin: 2.458477,
+    goalsPerMatchMax: 2.880808,
+    drawRateMin: 0.205553,
+    drawRateMax: 0.315551,
+    homeWinRateMin: 0.433463,
+    homeWinRateMax: 0.562749,
     mirrorWinRateTolerance: 0.025,
     abilityStrongWinRateMin: 0.42,
     abilityWeakWinRateMax: 0.18,
   },
 } as const;
+
+/** Dated acceptance targets: goals and home wins use the brief's one-SD rule. */
+export function calibrationTargetsForSeason(season: number) {
+  const { bands } = eraBandsForSeason(season);
+  return {
+    sourceSeason: season,
+    source: "data/english-first-division-seasons.csv (1978/79-1985/86)",
+    goalsPerMatchMin: bands.goalsPerMatch.aggregateMean - bands.goalsPerMatch.seasonStandardDeviation,
+    goalsPerMatchMax: bands.goalsPerMatch.aggregateMean + bands.goalsPerMatch.seasonStandardDeviation,
+    drawRateMin: bands.drawRate.minimum,
+    drawRateMax: bands.drawRate.maximum,
+    homeWinRateMin: bands.homeWinRate.aggregateMean - bands.homeWinRate.seasonStandardDeviation,
+    homeWinRateMax: bands.homeWinRate.aggregateMean + bands.homeWinRate.seasonStandardDeviation,
+  };
+}
 
 export function canonicalise(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);

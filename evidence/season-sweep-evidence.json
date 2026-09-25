@@ -8,7 +8,8 @@
       8,
       12,
       16,
-      20
+      20,
+      22
     ],
     "seasonNumbers": {
       "first": 1,
@@ -41,28 +42,28 @@
       "seasonsSimulated": 50,
       "totalMatchesSimulated": 2800,
       "goalsPerMatch": {
-        "mean": 2.95,
-        "standardDeviation": 0.198077,
-        "minimum": 2.464286,
-        "maximum": 3.517857,
-        "percentile5": 2.678571,
-        "percentile95": 3.2875
+        "mean": 2.497857,
+        "standardDeviation": 0.219857,
+        "minimum": 2.071429,
+        "maximum": 3.035714,
+        "percentile5": 2.178571,
+        "percentile95": 2.839286
       },
       "homeWinRate": {
-        "mean": 0.435714,
-        "standardDeviation": 0.065075
+        "mean": 0.464643,
+        "standardDeviation": 0.071294
       },
       "drawRate": {
-        "mean": 0.236429,
-        "standardDeviation": 0.046642
+        "mean": 0.249643,
+        "standardDeviation": 0.055958
       },
       "pointsGapTopToBottom": {
-        "mean": 22.76,
-        "standardDeviation": 3.855178
+        "mean": 21.7,
+        "standardDeviation": 3.971146
       },
-      "strongestTeamFinishedTop": 24,
+      "strongestTeamFinishedTop": 26,
       "bandResults": {
-        "goalsPerMatch": "WITHIN BAND",
+        "goalsPerMatch": "OUTSIDE BAND",
         "homeWinRate": "WITHIN BAND",
         "drawRate": "WITHIN BAND"
       }
@@ -72,28 +73,28 @@
       "seasonsSimulated": 50,
       "totalMatchesSimulated": 6600,
       "goalsPerMatch": {
-        "mean": 3.041667,
-        "standardDeviation": 0.161797,
-        "minimum": 2.712121,
-        "maximum": 3.530303,
-        "percentile5": 2.815909,
-        "percentile95": 3.294318
+        "mean": 2.599242,
+        "standardDeviation": 0.155236,
+        "minimum": 2.340909,
+        "maximum": 3.007576,
+        "percentile5": 2.382197,
+        "percentile95": 2.894697
       },
       "homeWinRate": {
-        "mean": 0.443636,
-        "standardDeviation": 0.046482
+        "mean": 0.470758,
+        "standardDeviation": 0.039482
       },
       "drawRate": {
-        "mean": 0.229697,
-        "standardDeviation": 0.035933
+        "mean": 0.24,
+        "standardDeviation": 0.037281
       },
       "pointsGapTopToBottom": {
-        "mean": 33.84,
-        "standardDeviation": 5.356715
+        "mean": 32.34,
+        "standardDeviation": 4.701532
       },
-      "strongestTeamFinishedTop": 5,
+      "strongestTeamFinishedTop": 8,
       "bandResults": {
-        "goalsPerMatch": "WITHIN BAND",
+        "goalsPerMatch": "OUTSIDE BAND",
         "homeWinRate": "WITHIN BAND",
         "drawRate": "WITHIN BAND"
       }
@@ -103,28 +104,28 @@
       "seasonsSimulated": 50,
       "totalMatchesSimulated": 12000,
       "goalsPerMatch": {
-        "mean": 2.929,
-        "standardDeviation": 0.106108,
-        "minimum": 2.654167,
-        "maximum": 3.2,
-        "percentile5": 2.78125,
-        "percentile95": 3.111042
+        "mean": 2.469917,
+        "standardDeviation": 0.11459,
+        "minimum": 2.241667,
+        "maximum": 2.829167,
+        "percentile5": 2.303333,
+        "percentile95": 2.623542
       },
       "homeWinRate": {
-        "mean": 0.428167,
-        "standardDeviation": 0.030986
+        "mean": 0.451583,
+        "standardDeviation": 0.030776
       },
       "drawRate": {
-        "mean": 0.244583,
-        "standardDeviation": 0.028385
+        "mean": 0.2645,
+        "standardDeviation": 0.030599
       },
       "pointsGapTopToBottom": {
-        "mean": 43.34,
-        "standardDeviation": 6.958764
+        "mean": 42.4,
+        "standardDeviation": 6.449806
       },
-      "strongestTeamFinishedTop": 17,
+      "strongestTeamFinishedTop": 9,
       "bandResults": {
-        "goalsPerMatch": "WITHIN BAND",
+        "goalsPerMatch": "OUTSIDE BAND",
         "homeWinRate": "WITHIN BAND",
         "drawRate": "WITHIN BAND"
       }
@@ -134,26 +135,57 @@
       "seasonsSimulated": 50,
       "totalMatchesSimulated": 19000,
       "goalsPerMatch": {
-        "mean": 2.988737,
-        "standardDeviation": 0.082161,
-        "minimum": 2.85,
-        "maximum": 3.176316,
-        "percentile5": 2.861711,
-        "percentile95": 3.132368
+        "mean": 2.544632,
+        "standardDeviation": 0.0908,
+        "minimum": 2.368421,
+        "maximum": 2.792105,
+        "percentile5": 2.419605,
+        "percentile95": 2.739868
       },
       "homeWinRate": {
-        "mean": 0.432737,
-        "standardDeviation": 0.020869
+        "mean": 0.460947,
+        "standardDeviation": 0.024367
       },
       "drawRate": {
-        "mean": 0.245632,
-        "standardDeviation": 0.021135
+        "mean": 0.262579,
+        "standardDeviation": 0.024817
       },
       "pointsGapTopToBottom": {
-        "mean": 48.2,
-        "standardDeviation": 7.191662
+        "mean": 46.6,
+        "standardDeviation": 6.811755
       },
-      "strongestTeamFinishedTop": 24,
+      "strongestTeamFinishedTop": 26,
+      "bandResults": {
+        "goalsPerMatch": "OUTSIDE BAND",
+        "homeWinRate": "WITHIN BAND",
+        "drawRate": "WITHIN BAND"
+      }
+    },
+    {
+      "teamCount": 22,
+      "seasonsSimulated": 50,
+      "totalMatchesSimulated": 23100,
+      "goalsPerMatch": {
+        "mean": 2.671688,
+        "standardDeviation": 0.078275,
+        "minimum": 2.493506,
+        "maximum": 2.835498,
+        "percentile5": 2.55487,
+        "percentile95": 2.794589
+      },
+      "homeWinRate": {
+        "mean": 0.466883,
+        "standardDeviation": 0.0164
+      },
+      "drawRate": {
+        "mean": 0.248225,
+        "standardDeviation": 0.016549
+      },
+      "pointsGapTopToBottom": {
+        "mean": 59.3,
+        "standardDeviation": 7.1
+      },
+      "strongestTeamFinishedTop": 9,
       "bandResults": {
         "goalsPerMatch": "WITHIN BAND",
         "homeWinRate": "WITHIN BAND",
