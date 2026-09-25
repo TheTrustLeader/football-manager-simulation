@@ -134,6 +134,20 @@ The "Create draft PR" button is still preferred because it cannot truncate.
 
 ---
 
+## Issue #17 (FM-17-B7) — 25 Sept 2026 — no diff posted, the button carried it
+
+**EXECUTED** — brief posted ~12:48 BST, asking for a push OR a complete
+four-backtick diff. Codex reported at 13:27 BST with "NO REMOTE — DIFF MODE"
+but **posted no diff block**, only a file list with line counts. The diff route
+was not available. Scott pressed "Create draft PR" at ~14:34 BST, and it arrived
+as PR #45 (non-draft), which Claude converted to draft.
+
+**REASONED** — asking for the diff does not guarantee it. The button is the
+reliable route. When a report arrives without a four-backtick block, go
+straight to the button.
+
+---
+
 ## Earlier rounds, for context
 
 **REASONED** — recorded from AGENTS.md, which states these as already-paid
