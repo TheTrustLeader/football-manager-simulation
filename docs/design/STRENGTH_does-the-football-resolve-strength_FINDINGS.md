@@ -205,3 +205,22 @@ league sizes, so there is no evidence that the legacy derivation distorts every 
 The twelve-team result is not caused by fixture imbalance, match execution order, or overlapping
 Mulberry32 streams. This round measured season construction only; it does not change the engine or
 fixture generator and does not establish a new cause for the top-spot anomaly.
+
+## EXECUTED — blind verification (Claude, 25 Sept 2026, PR #45): what each result can and cannot carry
+
+Build and `npm test` exit 0 (22 files, 166 tests, no Errors line). All five evidence scripts exit 0 and leave `git status` empty. Four mutants were written from the brief, not from the tests. All compiled.
+
+| Mutant | Tests | Evidence file |
+|---|---|---|
+| G1 `runSeason` ignores the injected seed function | **red** ("uses an injected match-seed function…") | — |
+| G2 `runSeason` ignores the reversed round order | green | **byte-identical** |
+| G3 overlap census searches zero draws | green | **byte-identical** |
+| G4 draw counting switched off | green | not rerun |
+
+What that means for each hypothesis:
+- **H1, fixture balance: ruled out, and the test can fail.** It is asserted per team at every size.
+- **H3b, mixed seeding: ruled out, and it rests on a control that fires.** G1 goes red, and 0 of 161,600 seeds are shared with the old method. **This is the result the decision rule named, and it carries the H3 verdict.**
+- **H2, fixture order: ruled out by reading the code, not by the run.** Each match is simulated on its own, with nothing carried between matches. But the reversed-order run cannot fail: with the reversal disabled (G2) it still reports "byte-identical", because nothing changed.
+- **H3a, overlap census: unproven, not disproved.** With the search disabled (G3) it still reports 0 overlaps, and there is no known-overlap positive control. The "zero overlaps" figure is not evidence on its own. It is not needed, because H3b decides H3.
+
+**Claude's lead prediction (H3 supported) was wrong.** Nothing about how a season is built explains the twelve-team result.
