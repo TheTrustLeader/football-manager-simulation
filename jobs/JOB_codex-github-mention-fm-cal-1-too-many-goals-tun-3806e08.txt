@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-fm-cal-1-too-many-goals-tune-the-engine-t-k8x2dq
+head=3806e08a0188a7e8765a9dce8e4441be2159a4b6
+tree=dcf4a3c3f510040b16f8a6bfd8b154141e7c26c2
+base=fd3d66657084d7711255cef59bb98557bd8f5b05
+item=FM-codex-github-mention-fm-cal-1-too-many-goals-tun
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-26 17:22 BST
