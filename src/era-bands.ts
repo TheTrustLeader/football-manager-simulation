@@ -70,14 +70,14 @@ function deriveBand(rows: readonly SeasonCounts[], numerator: (row: SeasonCounts
   };
 }
 
-export function deriveEraBandRow(allRows = readSeasonCounts()): EraBandRow {
-  const rows = allRows.filter((row) => row.startYear >= 1978 && row.startYear <= 1985);
-  if (rows.length !== 8 || rows[0]?.season !== "1978/79" || rows[rows.length - 1]?.season !== "1985/86") {
-    throw new Error("Era source must contain every season from 1978/79 through 1985/86");
+export function deriveEraBandRow(allRows = readSeasonCounts(), firstSeason = 1978, lastSeason = 1985): EraBandRow {
+  const rows = allRows.filter((row) => row.startYear >= firstSeason && row.startYear <= lastSeason);
+  if (rows.length !== lastSeason - firstSeason + 1 || rows[0]?.startYear !== firstSeason || rows[rows.length - 1]?.startYear !== lastSeason) {
+    throw new Error(`Era source must contain every season from ${firstSeason} through ${lastSeason}`);
   }
   const sourceMatches = rows.reduce((sum, row) => sum + row.matches, 0);
   return {
-    firstSeason: 1981,
+    firstSeason: firstSeason === 1978 && lastSeason === 1985 ? 1981 : firstSeason,
     sourceFirstSeason: rows[0].season,
     sourceLastSeason: rows[rows.length - 1]!.season,
     sourceMatches,

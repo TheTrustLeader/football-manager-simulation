@@ -529,7 +529,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       if (random.chance(onTargetProbability)) {
         attackStats.shotsOnTarget += 1;
         shooterContribution.shotsOnTarget += 1;
-        const goalProbability = clamp((c.goal.base + (shooterFinishing - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor) * style.shotQuality, c.goal.min, c.goal.max);
+        const goalProbability = clamp((c.goal.base + (shooterFinishing - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor) * style.shotQuality, c.goal.min, c.goal.max)
+          * c.goal.probabilityMultiplier;
         if (random.chance(goalProbability)) {
           attackStats.goals += 1;
           shooterContribution.goals += 1;
