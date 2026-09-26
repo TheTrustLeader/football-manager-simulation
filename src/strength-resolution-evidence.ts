@@ -19,11 +19,11 @@ export const OUTPUT_PATH = "evidence/strength-resolution-evidence.json";
 
 const SHARED_SEASON_NUMBERS = Array.from({ length: 50 }, (_, index) => index + 1);
 const COMMITTED_STRONGEST_BY_LEVEL = new Map([
-  [8, { count: 87, proportion: 0.435, standardError: 0.035055 }],
-  [12, { count: 21, proportion: 0.105, standardError: 0.021677 }],
-  [16, { count: 44, proportion: 0.22, standardError: 0.029292 }],
-  [20, { count: 85, proportion: 0.425, standardError: 0.034955 }],
-  [22, { count: 38, proportion: 0.19, standardError: 0.02774 }],
+  [8, { count: 84, proportion: 0.42, standardError: 0.0349 }],
+  [12, { count: 28, proportion: 0.14, standardError: 0.024536 }],
+  [16, { count: 54, proportion: 0.27, standardError: 0.031393 }],
+  [20, { count: 73, proportion: 0.365, standardError: 0.034042 }],
+  [22, { count: 40, proportion: 0.2, standardError: 0.028284 }],
 ]);
 
 interface ControlActual {
