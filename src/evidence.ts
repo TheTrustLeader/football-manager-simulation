@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
+import { calibrationTargetsForSeason, ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
@@ -190,7 +190,7 @@ const mirrorRates = rates(mirror);
 const abilityRates = rates(ability);
 const formationBaselineRates = rates(formationBaseline);
 const styleBaselineRates = rates(styleBaseline);
-const targets = ENGINE_CONFIG.calibrationTargets;
+const targets = calibrationTargetsForSeason(1981);
 const guardrails = ENGINE_CONFIG.ciGuardrails;
 const presenceThresholds = ENGINE_CONFIG.presenceTests;
 

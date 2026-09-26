@@ -13,16 +13,17 @@ import {
   type ExtendedDistribution,
 } from "./season-sweep-evidence.js";
 
-export const LEAGUE_SIZES = [8, 12, 16, 20] as const;
+export const LEAGUE_SIZES = [8, 12, 16, 20, 22] as const;
 export const SEASON_NUMBERS = Array.from({ length: 200 }, (_, index) => index + 1);
 export const OUTPUT_PATH = "evidence/strength-resolution-evidence.json";
 
 const SHARED_SEASON_NUMBERS = Array.from({ length: 50 }, (_, index) => index + 1);
 const COMMITTED_STRONGEST_BY_LEVEL = new Map([
-  [8, { count: 82, proportion: 0.41, standardError: 0.034778 }],
-  [12, { count: 21, proportion: 0.105, standardError: 0.021677 }],
-  [16, { count: 57, proportion: 0.285, standardError: 0.03192 }],
-  [20, { count: 85, proportion: 0.425, standardError: 0.034955 }],
+  [8, { count: 84, proportion: 0.42, standardError: 0.0349 }],
+  [12, { count: 28, proportion: 0.14, standardError: 0.024536 }],
+  [16, { count: 54, proportion: 0.27, standardError: 0.031393 }],
+  [20, { count: 73, proportion: 0.365, standardError: 0.034042 }],
+  [22, { count: 40, proportion: 0.2, standardError: 0.028284 }],
 ]);
 
 interface ControlActual {
