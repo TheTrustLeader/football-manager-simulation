@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clubsForSeason, loadPlayableSeason, newPlayableSeason, playMatchday, ruleDescriptions, seasonTable, serializePlayableSeason } from "../src/playable-season.js";
+import { clubsForSeason, loadPlayableSeason, newPlayableSeason, playMatchday, ruleDescriptions, seasonTable, serializePlayableSeason, teamsForPlayableSeason } from "../src/playable-season.js";
 import { SEASON_RULES } from "../src/rules.js";
 import type { PlayableSeason } from "../src/playable-season.js";
 import type { SeasonRule } from "../src/rules.js";
@@ -12,6 +12,20 @@ const finish = (initial: PlayableSeason, approach: "balanced" | "cautious" | "at
 };
 
 describe("playable season", () => {
+  it("builds a repeatable, seed-specific league and strength order", () => {
+    const first = newPlayableSeason(1981, 1234, "club-1");
+    const replay = newPlayableSeason(1981, 1234, "club-1");
+    const other = newPlayableSeason(1981, 5678, "club-1");
+    const strongest = (state: PlayableSeason) => state.clubs.reduce((best, club) => club.strength > best.strength ? club : best).id;
+
+    expect(replay.clubs).toEqual(first.clubs);
+    expect(teamsForPlayableSeason(replay)).toEqual(teamsForPlayableSeason(first));
+    expect(teamsForPlayableSeason(other).map((team) => team.starters)).not.toEqual(teamsForPlayableSeason(first).map((team) => team.starters));
+    expect(strongest(other)).not.toBe(strongest(first));
+    expect(Math.min(...first.clubs.map((club) => club.strength))).toBe(7);
+    expect(Math.max(...first.clubs.map((club) => club.strength))).toBe(13);
+  });
+
   it("plays a reconciled 22-club, 462-match season", () => {
     const state = finish(newPlayableSeason(1981, 13579, "club-1"));
     expect(state.clubs).toHaveLength(22);
