@@ -26,6 +26,7 @@
     "review002:evidence": "tsx src/review-002-full-evidence.ts",
     "game-state:evidence": "tsx src/game-state-full-evidence.ts",
     "golden:print": "tsx src/print-golden.ts",
+    "playable:evidence": "tsx src/playable-season-evidence.ts",
     "web:dev": "vite",
     "web:build": "vite build"
   },

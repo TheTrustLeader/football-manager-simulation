@@ -1,5 +1,5 @@
 import "./web.css";
-import { clubsForSeason, isFinished, loadPlayableSeason, newPlayableSeason, playMatchday, ruleDescriptions, seasonTable, serializePlayableSeason, topScorers } from "./playable-season.js";
+import { isFinished, loadPlayableSeason, playMatchday, prepareNewPlayableSeason, ruleDescriptions, seasonTable, serializePlayableSeason, topScorers } from "./playable-season.js";
 import { SEASON_RULES } from "./rules.js";
 import type { PlayableSeason } from "./playable-season.js";
 import type { Approach, Formation, Style, Tackling } from "./types.js";
@@ -17,10 +17,11 @@ function select(name: string, values: readonly string[], selected: string): stri
 function tableHtml(): string { return `<div class="scroll"><table><thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>GD</th><th>Pts</th></tr></thead><tbody>${seasonTable(state!).map((r, i) => `<tr class="${r.teamId === state!.userClubId ? "mine" : ""}"><td>${i + 1}</td><td>${clubName(r.teamId)}</td><td>${r.played}</td><td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td><td>${r.goalsFor}</td><td>${r.goalsAgainst}</td><td>${r.goalDifference}</td><td>${r.points}</td></tr>`).join("")}</tbody></table></div>`; }
 
 function renderStart(): void {
-  const clubs = clubsForSeason(SEASON, SEASON_RULES, newGameSeed);
+  const newGame = prepareNewPlayableSeason(SEASON, newGameSeed);
+  const clubs = newGame.clubs;
   const descriptions = ruleDescriptions(SEASON);
   app.innerHTML = `<header><p class="eyebrow">1981/82</p><h1>Football Manager Simulation: Eras</h1><p>Pick a fictional First Division club and guide it through all 42 matches.</p></header><section><h2>Rules in force</h2>${SEASON_RULES.map((r, i) => `<p><strong>${descriptions[i]}</strong><br><small>${r.source}</small></p>`).join("")}</section><section><h2>Choose your club</h2><div class="clubs">${clubs.map((c) => `<button data-club="${c.id}"><strong>${c.name}</strong><span>Strength ${"●".repeat(Math.round(c.strength / 2))}</span></button>`).join("")}</div></section>${message ? `<p class="error">${message}</p>` : ""}`;
-  app.querySelectorAll<HTMLButtonElement>("[data-club]").forEach((button) => button.onclick = () => { state = newPlayableSeason(SEASON, newGameSeed, button.dataset.club!); persist(); renderGame(); });
+  app.querySelectorAll<HTMLButtonElement>("[data-club]").forEach((button) => button.onclick = () => { state = newGame.start(button.dataset.club!); persist(); renderGame(); });
 }
 
 function renderGame(): void {

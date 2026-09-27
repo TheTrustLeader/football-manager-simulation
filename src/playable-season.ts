@@ -1,15 +1,15 @@
 import { buildLeagueTable, buildSeasonPlayerStats, generateFixtures } from "./competition.js";
 import { simulateMatch } from "./engine.js";
-import { makeTeam } from "./fixtures.js";
+import { actualSquadRating, makeTeam } from "./fixtures.js";
 import { SeededRandom } from "./random.js";
 import { rulesForSeason, SEASON_RULES } from "./rules.js";
 import type { Fixture, LeagueTableRow, SeasonPlayerStats } from "./competition.js";
 import type { SeasonId, SeasonRule } from "./rules.js";
 import type { MatchOutput, Tactics, TeamInput } from "./types.js";
 
-export const PLAYABLE_SAVE_VERSION = 1;
+export const PLAYABLE_SAVE_VERSION = 2;
 
-export interface Club { id: string; squadId: string; name: string; strength: number }
+export interface Club { id: string; squadId: string; name: string; strength: number; squadLevel: number }
 export interface PlayableSeason {
   version: typeof PLAYABLE_SAVE_VERSION;
   seed: number;
@@ -37,23 +37,33 @@ export function ruleDescriptions(season: SeasonId, table: readonly SeasonRule[] 
       : `${rules.firstDivisionTeams} clubs in the First Division`);
 }
 
-export function clubsForSeason(season: SeasonId, table: readonly SeasonRule[] = SEASON_RULES, seed = 0): Club[] {
+export function clubsForSeason(season: SeasonId, table: readonly SeasonRule[] = SEASON_RULES, seed: number): Club[] {
   const count = rulesForSeason(season, table).firstDivisionTeams;
   if (!Number.isInteger(count) || count < 2 || count > CLUB_NAMES.length) throw new Error(`Unsupported First Division size: ${count}`);
-  const strengths = Array.from({ length: count }, (_, index) => 7 + (6 * index / (count - 1)));
+  // Keep the established 7–13 range, but make genuinely exceptional squads rare
+  // instead of distributing nominal levels uniformly across the division.
+  const strengths = Array.from({ length: count }, (_, index) => 7 + (6 * (index / (count - 1)) ** 2));
   const random = new SeededRandom(seed);
   for (let index = strengths.length - 1; index > 0; index -= 1) {
     const target = Math.floor(random.next() * (index + 1));
     [strengths[index], strengths[target]] = [strengths[target]!, strengths[index]!];
   }
-  return CLUB_NAMES.slice(0, count).map((name, index) => ({
-    id: `club-${index + 1}`, squadId: `game-${seed}-club-${index + 1}`, name, strength: strengths[index]!,
-  }));
+  return CLUB_NAMES.slice(0, count).map((name, index) => {
+    const squadLevel = strengths[index]!;
+    const squadId = `game-${seed}-club-${index + 1}`;
+    return {
+      id: `club-${index + 1}`,
+      squadId,
+      name,
+      squadLevel,
+      strength: actualSquadRating(makeTeam(squadId, squadLevel)),
+    };
+  });
 }
 
 export function teamsForPlayableSeason(state: Pick<PlayableSeason, "clubs" | "tactics" | "userClubId">): TeamInput[] {
   return state.clubs.map((club) => {
-    const team = makeTeam(club.squadId, club.strength);
+    const team = makeTeam(club.squadId, club.squadLevel);
     team.id = club.id;
     team.name = club.name;
     if (club.id === state.userClubId) team.tactics = { ...team.tactics, ...state.tactics };
@@ -65,9 +75,21 @@ export function newPlayableSeason(season: SeasonId, seed: number, userClubId: st
   const clubs = clubsForSeason(season, table, seed);
   if (!clubs.some((club) => club.id === userClubId)) throw new Error("Choose a club in this division");
   const userClub = clubs.find((club) => club.id === userClubId)!;
-  const user = makeTeam(userClub.squadId, userClub.strength);
+  const user = makeTeam(userClub.squadId, userClub.squadLevel);
   const tactics = { ...user.tactics, ...DEFAULT_TACTICS };
   return { version: PLAYABLE_SAVE_VERSION, seed, season, userClubId, clubs, fixtures: generateFixtures(clubs.map((club) => club.id), seed), matches: [], nextRound: 1, tactics };
+}
+
+/** One seeded league shared by club selection and the season that selection starts. */
+export function prepareNewPlayableSeason(season: SeasonId, seed: number, table: readonly SeasonRule[] = SEASON_RULES) {
+  const clubs = clubsForSeason(season, table, seed);
+  return {
+    clubs,
+    start(userClubId: string): PlayableSeason {
+      const state = newPlayableSeason(season, seed, userClubId, table);
+      return { ...state, clubs };
+    },
+  };
 }
 
 export function playMatchday(state: PlayableSeason, choices: Pick<Tactics, "formation" | "style" | "approach" | "tackling">, table: readonly SeasonRule[] = SEASON_RULES): PlayableSeason {

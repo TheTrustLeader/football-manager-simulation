@@ -1,0 +1,16 @@
+{
+  "prediction": {
+    "goalsPerMatch": 2.7,
+    "homeWinRate": 0.475,
+    "drawRate": 0.247,
+    "strongestClubTitles": 95
+  },
+  "actual": {
+    "games": 200,
+    "matches": 92400,
+    "goalsPerMatch": 2.5092424242424243,
+    "homeWinRate": 0.4646861471861472,
+    "drawRate": 0.2592857142857143,
+    "strongestClubTitles": 87
+  }
+}

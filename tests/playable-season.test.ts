@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clubsForSeason, loadPlayableSeason, newPlayableSeason, playMatchday, ruleDescriptions, seasonTable, serializePlayableSeason, teamsForPlayableSeason } from "../src/playable-season.js";
+import { clubsForSeason, loadPlayableSeason, newPlayableSeason, playMatchday, prepareNewPlayableSeason, ruleDescriptions, seasonTable, serializePlayableSeason, teamsForPlayableSeason } from "../src/playable-season.js";
 import { SEASON_RULES } from "../src/rules.js";
 import type { PlayableSeason } from "../src/playable-season.js";
 import type { SeasonRule } from "../src/rules.js";
@@ -22,8 +22,26 @@ describe("playable season", () => {
     expect(teamsForPlayableSeason(replay)).toEqual(teamsForPlayableSeason(first));
     expect(teamsForPlayableSeason(other).map((team) => team.starters)).not.toEqual(teamsForPlayableSeason(first).map((team) => team.starters));
     expect(strongest(other)).not.toBe(strongest(first));
-    expect(Math.min(...first.clubs.map((club) => club.strength))).toBe(7);
-    expect(Math.max(...first.clubs.map((club) => club.strength))).toBe(13);
+    expect(Math.min(...first.clubs.map((club) => club.squadLevel))).toBe(7);
+    expect(Math.max(...first.clubs.map((club) => club.squadLevel))).toBe(13);
+  });
+
+  it("gives every game seed its own players even at the same squad level", () => {
+    const first = clubsForSeason(1981, SEASON_RULES, 1234)[0]!;
+    const generatedOther = clubsForSeason(1981, SEASON_RULES, 5678)[0]!;
+    const other = { ...generatedOther, squadLevel: first.squadLevel };
+    const firstPlayers = teamsForPlayableSeason({ clubs: [first], tactics: newPlayableSeason(1981, 1234, first.id).tactics, userClubId: first.id })[0]!.starters;
+    const otherPlayers = teamsForPlayableSeason({ clubs: [other], tactics: newPlayableSeason(1981, 5678, other.id).tactics, userClubId: other.id })[0]!.starters;
+    expect(other.squadId).not.toBe(first.squadId);
+    expect(otherPlayers).not.toEqual(firstPlayers);
+  });
+
+  it("starts the exact league offered on the club-selection screen", () => {
+    const offered = prepareNewPlayableSeason(1981, 2468);
+    const started = offered.start("club-4");
+    expect(started.seed).toBe(2468);
+    expect(started.clubs).toEqual(offered.clubs);
+    expect(started.fixtures).toEqual(newPlayableSeason(1981, 2468, "club-4").fixtures);
   });
 
   it("plays a reconciled 22-club, 462-match season", () => {
@@ -73,12 +91,12 @@ describe("playable season", () => {
 
   it("builds league size from rules data", () => {
     const custom = SEASON_RULES.map((rule) => rule.rule === "firstDivisionTeams" ? { ...rule, value: 6 } : rule) as SeasonRule[];
-    expect(clubsForSeason(1981, custom)).toHaveLength(6);
+    expect(clubsForSeason(1981, custom, 1)).toHaveLength(6);
     expect(newPlayableSeason(1981, 1, "club-1", custom).clubs).toHaveLength(6);
   });
 
   it("plainly refuses another save version", () => {
-    const json = serializePlayableSeason(newPlayableSeason(1981, 1, "club-1")).replace('"version":1', '"version":999');
+    const json = serializePlayableSeason(newPlayableSeason(1981, 1, "club-1")).replace(`"version":2`, `"version":1`);
     expect(() => loadPlayableSeason(json)).toThrow("different version");
   });
 });
