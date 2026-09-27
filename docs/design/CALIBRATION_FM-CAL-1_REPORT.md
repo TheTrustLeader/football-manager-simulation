@@ -68,3 +68,61 @@ four, while the 8- and 16-team limits pass.
 `PASS/PASS/PASS`; 16: `FAIL/FAIL/PASS` → unchanged; 20:
 `FAIL/FAIL/PASS` → `PASS/PASS/PASS`; and 22 was added as
 `PASS/PASS/PASS`.
+
+## Round 3: CI safety gate
+
+**EXECUTED diagnosis:** restoring only the home progression boost from `0.23`
+to `0.085` made game-state ordering pass (trailing **0.499914**, level
+**0.464741**, leading **0.430113**), so P1 was correct. Restoring only the goal
+multiplier from `0.785` to `1` made every formation-presence check pass, so P1b
+was also correct. With the multiplier left at `0.785`, seasons 1–200 at 22 teams
+scored **2.441288** goals per match at home boost `0.085`, versus **2.688377**
+at `0.23`; P2 was correct that the home boost supplies a material part of the
+season scoring rate.
+
+**REASONED before the final runs:** the final engine would remain near round
+2's **2.69 goals**, **0.47 home wins**, and passing formation/style/invariant
+checks. Measuring game-state response in the equal-team neutral control was
+expected to restore the intended trailing > level > leading ordering without
+changing match play.
+
+**EXECUTED final results:** seasons 1–200 produced **2.688377 goals**,
+**0.471450 home wins**, and **0.248636 draws** per match; held-out seasons
+201–400 produced **2.696320**, **0.473225**, and **0.248950**. The final CI
+sample produced **2.696429**, **0.473304**, and **0.244048**, with goals standard
+error **0.016099**. Formation presence, style presence, game-state ordering and
+invariants all passed; game-state rates were trailing **0.459971**, level
+**0.418651**, and leading **0.379166**. Thus the prediction was correct for all
+three season measures and all three presence/safety checks.
+
+**EXECUTED constants (main → round 2 → round 3):** `4-3-3.attack` is
+**1.12 → 1.12 → 1.18**, making its extra forward produce a measurable attacking
+threat after era finishing is applied; `3-5-2.attack` is
+**1.05 → 1.05 → 1.12**, making the two-forward shape's attacking trade-off
+visible. All scoring and home-advantage constants remain at round 2 values.
+
+**EXECUTED check migration:** old match-lab goals-vs-real-band → 22-team
+1981/82 season goals within one SD; old match-lab home wins → the same season
+sample within one SD; old match-lab draws → the same season sample inside the
+era band. Match-lab goals now live separately as a regression pin at **2.3518 ±
+0.04**. Mirror fairness, ability win rates, formation presence, style presence,
+game-state ordering and invariants remain enforced directly by the match lab.
+
+**EXECUTED controls:** restoring main's `goal.base=0.29`, multiplier `1`, and
+home boost `0.085` makes the existing 22-team season calibration control fail.
+Forcing every formation candidate to `4-4-2` made the evidence command exit 1
+specifically on `formationPresence`; restoring the code returned the full gate
+to green.
+
+**EXECUTED unchanged strength pins:** strongest-by-level counts remained 8 teams
+**84 → 84**, 12 **28 → 28**, 16 **54 → 54**, 20 **73 → 73**, and 22
+**40 → 40**. At 22 teams the strongest squad by engine rating won **103/200**
+seasons and rating-to-position Spearman was **−0.830311**.
+
+**REASONED unchanged tactics pins:** the compensation-out estimator uses the
+unchanged `4-4-2` path, so its identity gaps remain at their pinned figures:
+passing/direct **0.1665 → 0.1665**, passing/defensive
+**0.3060 → 0.3060**, passing/balanced **0.0907 → 0.0907**,
+direct/defensive **0.1327 → 0.1327**, direct/balanced **−0.0839 → −0.0839**,
+and defensive/balanced **−0.2175 → −0.2175**. The full estimator regression
+test passed its unchanged ±0.02 windows.
