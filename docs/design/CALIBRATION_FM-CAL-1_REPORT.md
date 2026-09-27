@@ -126,3 +126,43 @@ passing/direct **0.1665 → 0.1665**, passing/defensive
 direct/defensive **0.1327 → 0.1327**, direct/balanced **−0.0839 → −0.0839**,
 and defensive/balanced **−0.2175 → −0.2175**. The full estimator regression
 test passed its unchanged ±0.02 windows.
+
+## Round 4: many-league calibration
+
+**EXECUTED before retuning:** sixty fresh 22-team leagues at the round-3
+constants produced **2.540620 goals**, **0.466558 home wins**, and **0.263492
+draws** per match. Their goals spread was minimum **2.244589**, 10th percentile
+**2.389610**, median **2.549784**, 90th percentile **2.683983**, and maximum
+**2.772727**; **47/60 (78.33%)** were inside the real season-to-season band.
+The old fixed-squad sample therefore concealed a material league-generation
+effect.
+
+**REASONED before the final runs:** changing only the finishing probability
+multiplier was predicted to produce about **2.67 goals**, **0.471 home wins**,
+and **0.257 draws** in both 200-league samples. The predicted per-league goals
+spread was approximately **2.35 / 2.51 / 2.67 / 2.81 / 2.91** at minimum, 10th
+percentile, median, 90th percentile, and maximum, with about **90%** of leagues
+inside the real season-to-season band.
+
+**REASONED constant choice (main → round 3 → round 4):**
+`goal.probabilityMultiplier` is **1 → 0.785 → 0.825**. In football terms, a
+slightly larger share of shots that have already beaten the defence and keeper
+now become goals; no progression, formation, or home-advantage behavior was
+changed.
+
+**EXECUTED final results:** the 200 tuning leagues produced **2.678874 goals**,
+**0.472175 home wins**, and **0.251829 draws** per match. Their goals spread was
+**2.357143 / 2.545455 / 2.677489 / 2.803030 / 2.945887**, and **190/200
+(95%)** were inside the real band. The sealed 200 held-out leagues produced
+**2.699600 / 0.474437 / 0.249394**; their spread was **2.385281 / 2.567100 /
+2.699134 / 2.841991 / 3.008658**, and **186/200 (93%)** were inside the band.
+Both samples passed all three calibration rules and the 80% individual-league
+rule. The predictions were directionally correct; both samples' upper extremes
+were higher than predicted.
+
+**EXECUTED pinned figures (round 3 → round 4):** the match-lab goals pin moved
+**2.3518 → 2.4722** and was deliberately not rebaselined. The first unchanged
+strength pin measured in the full suite, strongest-by-level at 8 teams, moved
+**84 → 81**; the test stopped at that first exact mismatch, so later pinned
+sizes are not claimed here. Formation/style presence, game-state ordering, and
+all invariants still passed at their unchanged thresholds.

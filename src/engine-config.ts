@@ -69,7 +69,7 @@ const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
 } as const;
 
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.11.2",
+  version: "match-engine-config-0.11.3",
   matchMinutes: 90,
   // Substitution windows are deliberately not modelled.
   substitutions: { maximum: 5 },
@@ -125,7 +125,7 @@ export const ENGINE_CONFIG = {
   chance: { base: 0.5, differenceDivisor: 180, min: 0.28, max: 0.68 },
   shot: { base: 0.9, min: 0.55, max: 0.96 },
   onTarget: { base: 0.45, finishingBaseline: 10, finishingDivisor: 80, min: 0.28, max: 0.68 },
-  goal: { base: 0.29, probabilityMultiplier: 0.785, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
+  goal: { base: 0.29, probabilityMultiplier: 0.825, finishingGoalkeeperDivisor: 90, min: 0.14, max: 0.44 },
   creator: { designatedShare: 0.35 },
   defending: { stopCreditShare: 0.7, stopCreditWeightFloor: 1, majorErrorChance: 0.006 },
   dismissal: { baselinePlayers: 11, profileExponent: 0.75 },

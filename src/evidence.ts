@@ -6,7 +6,7 @@ import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange, type SeedPoolName } from "./seed-pools.js";
 import { eraBandsForSeason } from "./era-bands.js";
-import { runCalibrationForSize } from "./season-calibration-evidence.js";
+import { runManyLeagueCalibration } from "./season-calibration-evidence.js";
 import type { Formation, ScoreState, Style } from "./types.js";
 
 interface Aggregate {
@@ -236,8 +236,8 @@ const gameStateOrderingPass = progressionRates.trailing.rate !== null && progres
 const expectedPoissonDrawRate = poissonDrawRate(baselineRates.homeGoalsPerMatch, baselineRates.awayGoalsPerMatch);
 const drawExcessOverPoisson = baselineRates.drawRate - expectedPoissonDrawRate;
 
-const seasonSampleNumbers = Array.from({ length: 12 }, (_, index) => index + 1);
-const seasonSample = runCalibrationForSize(22, seasonSampleNumbers, 1981, eraBandsForSeason(1981));
+const seasonSampleNumbers = Array.from({ length: 60 }, (_, index) => index + 1);
+const seasonSample = runManyLeagueCalibration(22, seasonSampleNumbers, 1981, eraBandsForSeason(1981));
 const seasonGoalsStandardError = seasonSample.goalsPerMatch.standardDeviation / Math.sqrt(seasonSample.seasonsSimulated);
 const calibrationChecks = {
   goalsPerMatch: { ...seasonSample.comparisons.goalsPerMatch, pass: seasonSample.comparisons.goalsPerMatch.result === "PASS" },

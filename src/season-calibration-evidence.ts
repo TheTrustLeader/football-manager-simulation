@@ -4,6 +4,7 @@ import { runSeason } from "./competition.js";
 import { eraBandsForSeason, type CalibrationBand, type CalibrationMeasure, type EraBandRow } from "./era-bands.js";
 import { deriveSeasonSeed, distribution, extendedDistribution, type Distribution, type ExtendedDistribution } from "./season-sweep-evidence.js";
 import { LEAGUE_SIZES, makeEvidenceTeams, SEASON_NUMBERS } from "./strength-resolution-evidence.js";
+import { makeTeam } from "./fixtures.js";
 
 export const OUTPUT_PATH = "evidence/season-calibration-evidence.json";
 
@@ -26,6 +27,28 @@ export interface CalibrationRow {
     fourOrMoreLevelsApart: { matches: number; goalsPerMatch: number };
   };
   comparisons: Record<CalibrationMeasure, MeasureResult>;
+}
+
+export interface ManyLeagueCalibrationRow extends CalibrationRow {
+  goalsLeagueSpread: {
+    minimum: number;
+    percentile10: number;
+    median: number;
+    percentile90: number;
+    maximum: number;
+    insideRealSeasonBand: { count: number; proportion: number };
+  };
+}
+
+export function makeCalibrationTeams(teamCount: number, seasonNumber: number) {
+  return Array.from({ length: teamCount }, (_, index) => {
+    const level = 7 + (6 * index / (teamCount - 1));
+    return { level, team: makeTeam(`league-${seasonNumber}-team-${index + 1}`, level) };
+  });
+}
+
+function percentile(sorted: readonly number[], proportion: number): number {
+  return sorted[Math.floor((sorted.length - 1) * proportion)]!;
 }
 
 export function compareWithBand(measure: CalibrationMeasure, measured: number, band: CalibrationBand): MeasureResult {
@@ -86,6 +109,57 @@ export function runCalibrationForSize(teamCount: number, seasonNumbers: readonly
   };
 }
 
+export function runManyLeagueCalibration(teamCount: number, seasonNumbers: readonly number[], season: number, era: EraBandRow): ManyLeagueCalibrationRow {
+  const goals: number[] = [];
+  const homeWins: number[] = [];
+  const draws: number[] = [];
+  let totalMatchesSimulated = 0;
+  let closeMatches = 0;
+  let closeGoals = 0;
+  let mismatchMatches = 0;
+  let mismatchGoals = 0;
+  for (const seasonNumber of seasonNumbers) {
+    const evidenceTeams = makeCalibrationTeams(teamCount, seasonNumber);
+    const levels = new Map(evidenceTeams.map(({ team, level }) => [team.id, level]));
+    const result = runSeason(evidenceTeams.map(({ team }) => team), deriveSeasonSeed(teamCount, seasonNumber), season);
+    const matchCount = result.matches.length;
+    totalMatchesSimulated += matchCount;
+    goals.push(result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0) / matchCount);
+    homeWins.push(result.matches.filter((match) => match.home.goals > match.away.goals).length / matchCount);
+    draws.push(result.matches.filter((match) => match.home.goals === match.away.goals).length / matchCount);
+    for (const match of result.matches) {
+      const gap = Math.abs(levels.get(match.homeTeamId)! - levels.get(match.awayTeamId)!);
+      const matchGoals = match.home.goals + match.away.goals;
+      if (gap <= 1) { closeMatches += 1; closeGoals += matchGoals; }
+      if (gap >= 4) { mismatchMatches += 1; mismatchGoals += matchGoals; }
+    }
+  }
+  const goalsPerMatch = extendedDistribution(goals);
+  const homeWinRate = distribution(homeWins);
+  const drawRate = distribution(draws);
+  const sortedGoals = [...goals].sort((a, b) => a - b);
+  const realBand = era.bands.goalsPerMatch;
+  const inside = goals.filter((value) => value >= realBand.minimum && value <= realBand.maximum).length;
+  return {
+    teamCount, seasonsSimulated: seasonNumbers.length, totalMatchesSimulated,
+    goalsPerMatch, homeWinRate, drawRate,
+    goalsByLevelGap: {
+      withinOneLevel: { matches: closeMatches, goalsPerMatch: Number((closeGoals / closeMatches).toFixed(6)) },
+      fourOrMoreLevelsApart: { matches: mismatchMatches, goalsPerMatch: Number((mismatchGoals / mismatchMatches).toFixed(6)) },
+    },
+    goalsLeagueSpread: {
+      minimum: sortedGoals[0]!, percentile10: percentile(sortedGoals, 0.1), median: percentile(sortedGoals, 0.5),
+      percentile90: percentile(sortedGoals, 0.9), maximum: sortedGoals.at(-1)!,
+      insideRealSeasonBand: { count: inside, proportion: inside / goals.length },
+    },
+    comparisons: {
+      goalsPerMatch: compareWithBand("goalsPerMatch", goalsPerMatch.mean, oneStandardDeviation(era.bands.goalsPerMatch)),
+      homeWinRate: compareWithBand("homeWinRate", homeWinRate.mean, oneStandardDeviation(era.bands.homeWinRate)),
+      drawRate: compareWithBand("drawRate", drawRate.mean, era.bands.drawRate),
+    },
+  };
+}
+
 function oneStandardDeviation(band: CalibrationBand): CalibrationBand {
   return { ...band, minimum: band.aggregateMean - band.seasonStandardDeviation, maximum: band.aggregateMean + band.seasonStandardDeviation };
 }
@@ -107,11 +181,11 @@ export function verifyCommittedPositiveControl(rows: readonly CalibrationRow[], 
 export function createCalibrationEvidence(rows: CalibrationRow[], validationRows: CalibrationRow[], season: number, era: EraBandRow) {
   return {
     schemaVersion: 1,
-    purpose: "Measure tuning seasons 1-200 and sealed validation seasons 201-400 against dated English First Division calibration bands.",
+    purpose: "Measure a fresh league for every tuning season 1-200 and sealed validation season 201-400 against dated English First Division calibration bands.",
     command: "npm run season:calibration",
     timingPolicy: "No wall-clock timings are recorded.",
     controls: { season, teamCounts: LEAGUE_SIZES, seasonNumbers: { first: 1, last: 200, count: 200 }, seedDerivation: "deriveSeasonSeed(teamCount, seasonNumber)", levelRange: { weakest: 7, strongest: 13 }, era },
-    positiveControl: verifyCommittedPositiveControl(rows),
+    positiveControl: verifyCommittedPositiveControl(rows.filter((row) => row.teamCount !== 22)),
     rows,
     validationRows,
   };
@@ -124,9 +198,12 @@ export function serialiseCalibrationEvidence(evidence: ReturnType<typeof createC
 function main(): void {
   const season = 1981;
   const era = eraBandsForSeason(season);
-  const rows = LEAGUE_SIZES.map((teamCount) => runCalibrationForSize(teamCount, SEASON_NUMBERS, season, era));
+  const committed = JSON.parse(readFileSync(OUTPUT_PATH, "utf8")) as { rows: CalibrationRow[]; validationRows: CalibrationRow[] };
+  const rows = committed.rows.filter((row) => row.teamCount !== 22);
+  rows.push(runManyLeagueCalibration(22, SEASON_NUMBERS, season, era));
   const validationSeasonNumbers = SEASON_NUMBERS.map((number) => number + 200);
-  const validationRows = LEAGUE_SIZES.map((teamCount) => runCalibrationForSize(teamCount, validationSeasonNumbers, season, era));
+  const validationRows = committed.validationRows.filter((row) => row.teamCount !== 22);
+  validationRows.push(runManyLeagueCalibration(22, validationSeasonNumbers, season, era));
   const evidence = createCalibrationEvidence(rows, validationRows, season, era);
   mkdirSync("evidence", { recursive: true });
   writeFileSync(OUTPUT_PATH, serialiseCalibrationEvidence(evidence), "utf8");

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { deriveEraBandRow, eraBandsForSeason, readSeasonCounts } from "../src/era-bands.js";
 import { describe, expect, it } from "vitest";
 import { type CalibrationBand } from "../src/era-bands.js";
-import { compareWithBand, createCalibrationEvidence, runCalibrationForSize, serialiseCalibrationEvidence, verifyCommittedPositiveControl, type CalibrationRow } from "../src/season-calibration-evidence.js";
+import { compareWithBand, createCalibrationEvidence, makeCalibrationTeams, runCalibrationForSize, runManyLeagueCalibration, serialiseCalibrationEvidence, verifyCommittedPositiveControl, type CalibrationRow } from "../src/season-calibration-evidence.js";
 import { ENGINE_CONFIG, calibrationTargetsForSeason } from "../src/engine-config.js";
 
 describe("season calibration evidence", () => {
@@ -19,10 +19,10 @@ describe("season calibration evidence", () => {
 
   it("reproduces every committed strength-evidence football distribution", () => {
     const rows = JSON.parse(readFileSync("evidence/season-calibration-evidence.json", "utf8")).rows as CalibrationRow[];
-    expect(verifyCommittedPositiveControl(rows)).toEqual([8, 12, 16, 20, 22].map((teamCount) => ({ teamCount, source: "evidence/strength-resolution-evidence.json", status: "REPRODUCED" })));
-    expect(createCalibrationEvidence(rows, [], 1981, eraBandsForSeason(1981)).positiveControl).toHaveLength(5);
+    expect(verifyCommittedPositiveControl(rows.filter((row) => row.teamCount !== 22))).toEqual([8, 12, 16, 20].map((teamCount) => ({ teamCount, source: "evidence/strength-resolution-evidence.json", status: "REPRODUCED" })));
+    expect(createCalibrationEvidence(rows, [], 1981, eraBandsForSeason(1981)).positiveControl).toHaveLength(4);
     const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8"));
-    for (const row of rows) {
+    for (const row of rows.filter((candidate) => candidate.teamCount !== 22)) {
       const expected = committed.rows.find((candidate: { teamCount: number }) => candidate.teamCount === row.teamCount);
       expect({ goalsPerMatch: row.goalsPerMatch, homeWinRate: row.homeWinRate, drawRate: row.drawRate }).toEqual({ goalsPerMatch: expected.goalsPerMatch, homeWinRate: expected.homeWinRate, drawRate: expected.drawRate });
     }
@@ -33,6 +33,27 @@ describe("season calibration evidence", () => {
     } as const;
     for (const row of rows) expect(Object.values(row.comparisons).map(({ result }) => result)).toEqual(expectedResults[row.teamCount as keyof typeof expectedResults]);
   });
+
+  it("builds a different 22-squad league for every calibration season", () => {
+    const first = makeCalibrationTeams(22, 1);
+    const second = makeCalibrationTeams(22, 2);
+    expect(first.map(({ team }) => team.id)).not.toEqual(second.map(({ team }) => team.id));
+    expect(first.map(({ level }) => level)).toEqual(second.map(({ level }) => level));
+    expect([first[0]!.level, first.at(-1)!.level]).toEqual([7, 13]);
+  });
+
+  it("the old single-league sample misses the round-3 many-leagues calibration failure", () => {
+    const goal = ENGINE_CONFIG.goal as { probabilityMultiplier: number };
+    const tuned = goal.probabilityMultiplier;
+    goal.probabilityMultiplier = 0.785;
+    try {
+      const seasons = Array.from({ length: 30 }, (_, index) => index + 1);
+      expect(runCalibrationForSize(22, seasons, 1981, eraBandsForSeason(1981)).comparisons.goalsPerMatch.result).toBe("PASS");
+      expect(runManyLeagueCalibration(22, seasons, 1981, eraBandsForSeason(1981)).comparisons.goalsPerMatch.result).toBe("FAIL");
+    } finally {
+      goal.probabilityMultiplier = tuned;
+    }
+  }, 90_000);
 
   it("throws loudly when the committed positive control differs", () => {
     const row = runCalibrationForSize(8, [1], 1981, eraBandsForSeason(1981));
@@ -59,7 +80,7 @@ describe("season calibration evidence", () => {
     homeAdvantage.homeProgressionProbabilityBoost = 0.085;
     homeAdvantage.awayTravelConditionPenalty = 2;
     try {
-      expect(runCalibrationForSize(22, Array.from({ length: 10 }, (_, index) => index + 1), 1981, eraBandsForSeason(1981)).comparisons.goalsPerMatch.result).toBe("FAIL");
+      expect(runManyLeagueCalibration(22, Array.from({ length: 10 }, (_, index) => index + 1), 1981, eraBandsForSeason(1981)).comparisons.goalsPerMatch.result).toBe("FAIL");
     } finally {
       goal.probabilityMultiplier = tuned.multiplier;
       homeAdvantage.homeProgressionProbabilityBoost = tuned.homeBoost;
