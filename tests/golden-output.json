@@ -1,6 +1,6 @@
 {
   "seed": 424242,
-  "engineConfigVersion": "match-engine-config-0.11.1",
-  "engineConfigHash": "fnv1a64:f7ca5dd0b5fe2adb",
+  "engineConfigVersion": "match-engine-config-0.11.2",
+  "engineConfigHash": "fnv1a64:db0acb43225b9a58",
   "matchResultHash": "fnv1a64:c9df40fade7e201b"
 }
