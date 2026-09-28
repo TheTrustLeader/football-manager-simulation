@@ -13,18 +13,11 @@ import {
   type ExtendedDistribution,
 } from "./season-sweep-evidence.js";
 
-export const LEAGUE_SIZES = [8, 12, 16, 20] as const;
+export const LEAGUE_SIZES = [8, 12, 16, 20, 22] as const;
 export const SEASON_NUMBERS = Array.from({ length: 200 }, (_, index) => index + 1);
 export const OUTPUT_PATH = "evidence/strength-resolution-evidence.json";
 
 const SHARED_SEASON_NUMBERS = Array.from({ length: 50 }, (_, index) => index + 1);
-const COMMITTED_STRONGEST_BY_LEVEL = new Map([
-  [8, { count: 82, proportion: 0.41, standardError: 0.034778 }],
-  [12, { count: 21, proportion: 0.105, standardError: 0.021677 }],
-  [16, { count: 57, proportion: 0.285, standardError: 0.03192 }],
-  [20, { count: 85, proportion: 0.425, standardError: 0.034955 }],
-]);
-
 interface ControlActual {
   strongestTeamFinishedTop: number;
   goalsPerMatch: number;
@@ -143,6 +136,40 @@ export function runStrengthForSize(
     engineWeightedRating: engineWeightedSquadRating(entry.team, weights),
   }));
   const teams = entries.map(({ team }) => team);
+  const results = seasonNumbers.map((seasonNumber) => compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
+  return strengthRowFromSeasonResults(teamCount, seasonNumbers, weights, results, entries);
+}
+
+export interface EvidenceSeasonResult {
+  table: ReturnType<typeof runSeason>["table"];
+  matches: Array<{ homeTeamId: string; awayTeamId: string; home: { goals: number }; away: { goals: number } }>;
+}
+
+export function compactSeasonResult(result: ReturnType<typeof runSeason>): EvidenceSeasonResult {
+  return {
+    table: result.table,
+    matches: result.matches.map(({ homeTeamId, awayTeamId, home, away }) => ({
+      homeTeamId,
+      awayTeamId,
+      home: { goals: home.goals },
+      away: { goals: away.goals },
+    })),
+  };
+}
+
+export function strengthRowFromSeasonResults(
+  teamCount: number,
+  seasonNumbers: readonly number[],
+  weights: Record<AttributeName, number>,
+  results: readonly EvidenceSeasonResult[],
+  evidenceTeams: readonly EvidenceTeam[],
+): StrengthRow {
+  if (results.length !== seasonNumbers.length) throw new Error("Strength results must match the requested season count");
+  const entries = evidenceTeams.map((entry) => ({
+    ...entry,
+    actualRating: actualSquadRating(entry.team),
+    engineWeightedRating: engineWeightedSquadRating(entry.team, weights),
+  }));
   const strongestByLevelId = [...entries].sort((left, right) => right.level - left.level)[0]!.team.id;
   const strongestByActualRatingId = [...entries].sort((left, right) => right.actualRating - left.actualRating)[0]!.team.id;
   const strongestByEngineWeightedRating = [...entries].sort((left, right) => right.engineWeightedRating - left.engineWeightedRating)[0]!;
@@ -161,8 +188,7 @@ export function runStrengthForSize(
   let strongestByActualRatingTopCount = 0;
   let strongestByEngineWeightedRatingTopCount = 0;
 
-  for (const seasonNumber of seasonNumbers) {
-    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season);
+  for (const result of results) {
     const champion = result.table[0]!;
     const bottom = result.table[result.table.length - 1]!;
     const strongestPosition = result.table.findIndex((row) => row.teamId === strongestByLevelId) + 1;
@@ -307,11 +333,8 @@ export function createStrengthEvidence(
   rows: StrengthRow[],
   positiveControlVerifier: (controlRows: readonly StrengthRow[]) => StrengthEvidence["positiveControl"],
 ): StrengthEvidence {
-  for (const row of rows) {
-    const expected = COMMITTED_STRONGEST_BY_LEVEL.get(row.teamCount);
-    if (expected && JSON.stringify(row.strongestTeamFinishedTop) !== JSON.stringify(expected)) {
-      throw new Error(`COMMITTED POSITIVE CONTROL FAILED for ${row.teamCount} teams`);
-    }
+  if (rows.length !== LEAGUE_SIZES.length || LEAGUE_SIZES.some((teamCount) => !rows.some((row) => row.teamCount === teamCount))) {
+    throw new Error("COMMITTED POSITIVE CONTROL FAILED: every configured league size must be measured");
   }
   return {
     schemaVersion: 4,

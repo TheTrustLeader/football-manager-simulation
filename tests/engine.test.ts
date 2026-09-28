@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from "node:util";
 import { describe, expect, it } from "vitest";
 import { ENGINE_CONFIG } from "../src/engine-config.js";
 import { simulateMatch, validateMatchInput } from "../src/engine.js";
@@ -58,6 +59,21 @@ describe("Match Engine", () => {
         previousCondition.set(player.playerId, player.condition);
       }
     }
+  });
+
+  it("can omit unused minute snapshots without changing the match result", () => {
+    const differingSeeds: number[] = [];
+    for (let seed = 1; seed <= 500; seed += 1) {
+      const detailed = simulateMatch(input(seed));
+      const compact = simulateMatch({ ...input(seed), captureMinuteSnapshots: false });
+      const { minuteSnapshots: detailedSnapshots, ...detailedWithoutSnapshots } = detailed;
+      const { minuteSnapshots: compactSnapshots, ...compactWithoutSnapshots } = compact;
+
+      expect(detailedSnapshots).toHaveLength(ENGINE_CONFIG.matchMinutes);
+      expect(compactSnapshots).toEqual([]);
+      if (!isDeepStrictEqual(compactWithoutSnapshots, detailedWithoutSnapshots)) differingSeeds.push(seed);
+    }
+    expect(differingSeeds).toEqual([]);
   });
 
   it("rejects an invalid starting XI", () => {

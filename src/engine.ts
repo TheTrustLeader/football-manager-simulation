@@ -323,9 +323,11 @@ function finishMinute(
   awayStats: TeamStats,
   contributions: Map<string, PlayerContribution>,
   snapshots: MinuteSnapshot[],
+  captureSnapshot: boolean,
 ): void {
   advanceFatigue(homeRuntime, homeTeam, minute);
   advanceFatigue(awayRuntime, awayTeam, minute);
+  if (!captureSnapshot) return;
   const players: MinutePlayerSnapshot[] = [];
   for (const runtime of [homeRuntime, awayRuntime]) {
     for (const playerRuntime of runtime.activePlayers) {
@@ -495,7 +497,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     );
     if (!random.chance(progressionProbability)) {
       creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
-      finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots);
+      finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots, input.captureMinuteSnapshots !== false);
       continue;
     }
     gameStateDiagnostics.attackingState[attackingScoreState].progressions += 1;
@@ -512,7 +514,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     const chanceProbability = clamp((c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor) * style.chanceRate, c.chance.min, c.chance.max);
     if (!majorError && !random.chance(chanceProbability)) {
       creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
-      finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots);
+      finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots, input.captureMinuteSnapshots !== false);
       continue;
     }
 
@@ -529,7 +531,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       if (random.chance(onTargetProbability)) {
         attackStats.shotsOnTarget += 1;
         shooterContribution.shotsOnTarget += 1;
-        const goalProbability = clamp((c.goal.base + (shooterFinishing - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor) * style.shotQuality, c.goal.min, c.goal.max);
+        const goalProbability = clamp((c.goal.base + (shooterFinishing - defenceProfile.goalkeeper) / c.goal.finishingGoalkeeperDivisor) * style.shotQuality, c.goal.min, c.goal.max)
+          * c.goal.probabilityMultiplier;
         if (random.chance(goalProbability)) {
           attackStats.goals += 1;
           shooterContribution.goals += 1;
@@ -571,7 +574,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       }
     }
 
-    finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots);
+    finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots, input.captureMinuteSnapshots !== false);
   }
 
   for (const runtime of [homeRuntime, awayRuntime]) {

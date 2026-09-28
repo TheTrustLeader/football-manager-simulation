@@ -1,0 +1,13 @@
+{
+  "season": 1981,
+  "firstSeed": 900001,
+  "lastSeed": 901000,
+  "userClubId": "club-1",
+  "games": 1000,
+  "matches": 462000,
+  "goalsPerMatch": 2.6907727272727273,
+  "homeWinRate": 0.47284848484848485,
+  "drawRate": 0.24698051948051947,
+  "shownFavouriteTitles": 308,
+  "shownTopFiveTitles": 961
+}

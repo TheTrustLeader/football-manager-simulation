@@ -1,9 +1,18 @@
 export type SeasonId = number;
 export type TableTieBreak = "goalDifference" | "goalAverage";
+export interface LeagueShape {
+  strongClubCount: number;
+  strongMinimum: number;
+  strongMaximum: number;
+  otherMinimum: number;
+  otherMaximum: number;
+}
 
 export interface SeasonRules {
   pointsForAWin: number;
   tableTieBreak: TableTieBreak;
+  firstDivisionTeams: number;
+  leagueShape: LeagueShape;
 }
 
 export type SeasonRule = {
@@ -18,6 +27,24 @@ export type SeasonRule = {
 
 export const SEASON_RULES: readonly SeasonRule[] = [
   {
+    rule: "leagueShape",
+    value: {
+      strongClubCount: 5,
+      strongMinimum: 12,
+      strongMaximum: 13,
+      otherMinimum: 7,
+      otherMaximum: 10.5,
+    },
+    firstSeason: 1981,
+    source: "Design decision by Scott, 28 Sep 2026 (#50): a handful of strong clubs",
+  },
+  {
+    rule: "firstDivisionTeams",
+    value: 22,
+    firstSeason: 1981,
+    source: "The Football League First Division contained 22 clubs in 1981/82.",
+  },
+  {
     rule: "pointsForAWin",
     value: 3,
     firstSeason: 1981,
@@ -31,7 +58,7 @@ export const SEASON_RULES: readonly SeasonRule[] = [
   },
 ];
 
-const RULE_NAMES: readonly (keyof SeasonRules)[] = ["pointsForAWin", "tableTieBreak"];
+const RULE_NAMES: readonly (keyof SeasonRules)[] = ["pointsForAWin", "tableTieBreak", "firstDivisionTeams", "leagueShape"];
 
 /** Resolve every rule in force for a season identified by its starting year. */
 export function rulesForSeason(
@@ -52,8 +79,12 @@ export function rulesForSeason(
     }
     if (rule === "pointsForAWin") {
       resolved.pointsForAWin = matches[0]!.value as number;
-    } else {
+    } else if (rule === "tableTieBreak") {
       resolved.tableTieBreak = matches[0]!.value as TableTieBreak;
+    } else if (rule === "firstDivisionTeams") {
+      resolved.firstDivisionTeams = matches[0]!.value as number;
+    } else {
+      resolved.leagueShape = matches[0]!.value as LeagueShape;
     }
   }
   return resolved;

@@ -1,11 +1,17 @@
 import { readFileSync } from "node:fs";
-import { eraBandsForSeason } from "../src/era-bands.js";
+import { deriveEraBandRow, eraBandsForSeason, readSeasonCounts } from "../src/era-bands.js";
 import { describe, expect, it } from "vitest";
 import { type CalibrationBand } from "../src/era-bands.js";
-import { compareWithBand, createCalibrationEvidence, runCalibrationForSize, serialiseCalibrationEvidence, verifyCommittedPositiveControl, type CalibrationRow } from "../src/season-calibration-evidence.js";
+import { compareWithBand, createCalibrationEvidence, makeCalibrationTeams, runCalibrationForSize, runFixedLeagueEvidenceYielding, runManyLeagueCalibration, runManyLeagueCalibrationYielding, serialiseCalibrationEvidence, verifyCommittedPositiveControl, type CalibrationRow } from "../src/season-calibration-evidence.js";
+import { ENGINE_CONFIG, calibrationTargetsForSeason } from "../src/engine-config.js";
+import { readCommittedWeights, runStrengthForSize } from "../src/strength-resolution-evidence.js";
+import { fixedLeagueEvidence } from "./fixed-league-evidence.js";
 
 describe("season calibration evidence", () => {
   const band = (minimum: number, maximum: number): CalibrationBand => ({ minimum, maximum, aggregateMean: (minimum + maximum) / 2, seasonStandardDeviation: 0 });
+  const committedRows = JSON.parse(readFileSync("evidence/season-calibration-evidence.json", "utf8")).rows as CalibrationRow[];
+  const committedStrengthRows = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")).rows as CalibrationRow[];
+  const seasons = Array.from({ length: 200 }, (_, index) => index + 1);
 
   it("reports a hit as PASS and a miss as FAIL, naming the measure and numbers", () => {
     expect(compareWithBand("drawRate", 0.25, band(0.2, 0.3))).toMatchObject({ result: "PASS", statement: "PASS: drawRate measured 0.250000; band 0.200000-0.300000" });
@@ -16,21 +22,63 @@ describe("season calibration evidence", () => {
     expect(compareWithBand("homeWinRate", 0.7, band(0.4, 0.6)).result).toBe("FAIL");
   });
 
-  it("reproduces every committed strength-evidence football distribution", () => {
-    const rows = JSON.parse(readFileSync("evidence/season-calibration-evidence.json", "utf8")).rows as CalibrationRow[];
-    expect(verifyCommittedPositiveControl(rows)).toEqual([8, 12, 16, 20].map((teamCount) => ({ teamCount, source: "evidence/strength-resolution-evidence.json", status: "REPRODUCED" })));
-    expect(createCalibrationEvidence(rows, 1981, eraBandsForSeason(1981)).positiveControl).toHaveLength(4);
-    const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8"));
-    for (const row of rows) {
-      const expected = committed.rows.find((candidate: { teamCount: number }) => candidate.teamCount === row.teamCount);
+  it.each([8, 12, 16, 20, 22])("reproduces the committed %i-team calibration row", async (teamCount) => {
+    const row = teamCount === 22
+      ? await runManyLeagueCalibrationYielding(teamCount, seasons, 1981, eraBandsForSeason(1981))
+      : (await fixedLeagueEvidence(teamCount)).calibration;
+    expect(row).toEqual(committedRows.find((candidate) => candidate.teamCount === teamCount));
+    if (teamCount !== 22) {
+      const expected = committedStrengthRows.find((candidate) => candidate.teamCount === teamCount)!;
       expect({ goalsPerMatch: row.goalsPerMatch, homeWinRate: row.homeWinRate, drawRate: row.drawRate }).toEqual({ goalsPerMatch: expected.goalsPerMatch, homeWinRate: expected.homeWinRate, drawRate: expected.drawRate });
     }
-    const expectedResults = {
-      8: ["FAIL", "PASS", "PASS"], 12: ["FAIL", "PASS", "PASS"],
-      16: ["FAIL", "FAIL", "PASS"], 20: ["FAIL", "FAIL", "PASS"],
-    } as const;
-    for (const row of rows) expect(Object.values(row.comparisons).map(({ result }) => result)).toEqual(expectedResults[row.teamCount as keyof typeof expectedResults]);
+    expect(Object.values(row.comparisons).map(({ result }) => result)).toEqual(["PASS", "PASS", "PASS"]);
+  }, 900_000);
+
+  it.each([8, 12, 16, 20])("reproduces the committed %i-team strength row from the shared seasons", async (teamCount) => {
+    const row = (await fixedLeagueEvidence(teamCount)).strength;
+    const expected = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")).rows
+      .find((candidate: { teamCount: number }) => candidate.teamCount === teamCount);
+    expect(row).toEqual(expected);
+  }, 900_000);
+
+  it("shares fixed-league seasons without changing either evidence row", async () => {
+    const sampleSeasons = [1, 2, 3, 4, 5];
+    const era = eraBandsForSeason(1981);
+    const weights = readCommittedWeights();
+    const shared = await runFixedLeagueEvidenceYielding(8, sampleSeasons, 1981, era, weights);
+    expect(shared.calibration).toEqual(runCalibrationForSize(8, sampleSeasons, 1981, era));
+    expect(shared.strength).toEqual(runStrengthForSize(8, sampleSeasons, 1981, weights));
   });
+
+  it("keeps the committed calibration positive control complete", () => {
+    expect(verifyCommittedPositiveControl(committedRows.filter((row) => row.teamCount !== 22))).toEqual([8, 12, 16, 20].map((teamCount) => ({ teamCount, source: "evidence/strength-resolution-evidence.json", status: "REPRODUCED" })));
+    expect(createCalibrationEvidence(committedRows, [], 1981, eraBandsForSeason(1981)).positiveControl).toHaveLength(4);
+  });
+
+  it("pins the calibrated finishing multiplier", () => {
+    expect(ENGINE_CONFIG.goal.probabilityMultiplier).toBe(0.825);
+  });
+
+  it("builds a different 22-squad league for every calibration season", () => {
+    const first = makeCalibrationTeams(22, 1);
+    const second = makeCalibrationTeams(22, 2);
+    expect(first.map(({ team }) => team.id)).not.toEqual(second.map(({ team }) => team.id));
+    expect(first.map(({ level }) => level)).toEqual(second.map(({ level }) => level));
+    expect([first[0]!.level, first.at(-1)!.level]).toEqual([7, 13]);
+  });
+
+  it("the old single-league sample misses the round-3 many-leagues calibration failure", () => {
+    const goal = ENGINE_CONFIG.goal as { probabilityMultiplier: number };
+    const tuned = goal.probabilityMultiplier;
+    goal.probabilityMultiplier = 0.785;
+    try {
+      const seasons = Array.from({ length: 30 }, (_, index) => index + 1);
+      expect(runCalibrationForSize(22, seasons, 1981, eraBandsForSeason(1981)).comparisons.goalsPerMatch.result).toBe("PASS");
+      expect(runManyLeagueCalibration(22, seasons, 1981, eraBandsForSeason(1981)).comparisons.goalsPerMatch.result).toBe("FAIL");
+    } finally {
+      goal.probabilityMultiplier = tuned;
+    }
+  }, 90_000);
 
   it("throws loudly when the committed positive control differs", () => {
     const row = runCalibrationForSize(8, [1], 1981, eraBandsForSeason(1981));
@@ -42,6 +90,44 @@ describe("season calibration evidence", () => {
     const fixture = { schemaVersion: 1, rows: [row] } as never;
     expect(serialiseCalibrationEvidence(fixture)).toBe(serialiseCalibrationEvidence(fixture));
     expect(serialiseCalibrationEvidence(fixture)).not.toMatch(/elapsed|wallClock/);
+  });
+
+  it("fails when handed real bands from a different era", () => {
+    const differentEra = deriveEraBandRow(readSeasonCounts(), 1991, 1998);
+    expect(runCalibrationForSize(22, [1], 1981, differentEra).comparisons.goalsPerMatch.result).toBe("FAIL");
+  });
+
+  it("the old scoring constants fail 22-team calibration", () => {
+    const goal = ENGINE_CONFIG.goal as { probabilityMultiplier: number };
+    const homeAdvantage = ENGINE_CONFIG.homeAdvantage as { homeProgressionProbabilityBoost: number; awayTravelConditionPenalty: number };
+    const tuned = { multiplier: goal.probabilityMultiplier, homeBoost: homeAdvantage.homeProgressionProbabilityBoost, awayPenalty: homeAdvantage.awayTravelConditionPenalty };
+    goal.probabilityMultiplier = 1;
+    homeAdvantage.homeProgressionProbabilityBoost = 0.085;
+    homeAdvantage.awayTravelConditionPenalty = 2;
+    try {
+      expect(runManyLeagueCalibration(22, Array.from({ length: 10 }, (_, index) => index + 1), 1981, eraBandsForSeason(1981)).comparisons.goalsPerMatch.result).toBe("FAIL");
+    } finally {
+      goal.probabilityMultiplier = tuned.multiplier;
+      homeAdvantage.homeProgressionProbabilityBoost = tuned.homeBoost;
+      homeAdvantage.awayTravelConditionPenalty = tuned.awayPenalty;
+    }
+  }, 30_000);
+
+  it("requires a season to resolve sourced calibration targets", () => {
+    expect(calibrationTargetsForSeason(1981).sourceSeason).toBe(1981);
+    expect(() => (calibrationTargetsForSeason as (season?: number) => unknown)()).toThrow();
+  });
+
+  it("derives every fixed CI calibration guardrail from its named season", () => {
+    const bands = eraBandsForSeason(ENGINE_CONFIG.ciGuardrails.sourceSeason).bands;
+    expect(ENGINE_CONFIG.ciGuardrails).toMatchObject({
+      goalsPerMatchMin: bands.goalsPerMatch.minimum,
+      goalsPerMatchMax: bands.goalsPerMatch.maximum,
+      drawRateMin: bands.drawRate.minimum,
+      drawRateMax: bands.drawRate.maximum,
+      homeWinRateMin: bands.homeWinRate.minimum,
+      homeWinRateMax: bands.homeWinRate.maximum,
+    });
   });
 
 });

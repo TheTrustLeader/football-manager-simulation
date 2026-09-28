@@ -98,23 +98,17 @@ function addCounts(target: PairCounts, source: PairCounts): void {
 function countMatchSeeds(
   firstIdentity: PlayingIdentity,
   secondIdentity: PlayingIdentity,
-  generatorSeed: number,
   matchSeeds: readonly number[],
+  first: ReturnType<typeof makeTeam>,
+  second: ReturnType<typeof makeTeam>,
 ): PairCounts {
-  const first = makeTeam(`paired-${generatorSeed}-${firstIdentity}`, 10, FIXED_TACTICS, {
-    seed: generatorSeed,
-    identity: firstIdentity,
-  });
-  const second = makeTeam(`paired-${generatorSeed}-${secondIdentity}`, 10, FIXED_TACTICS, {
-    seed: generatorSeed,
-    identity: secondIdentity,
-  });
   const counts = emptyCounts();
 
   for (const matchSeed of matchSeeds) {
     const firstHome = matchSeed % 2 === 1;
     const match = simulateMatch({
       seed: matchSeed,
+      captureMinuteSnapshots: false,
       home: firstHome ? first : second,
       away: firstHome ? second : first,
     });
@@ -189,10 +183,18 @@ function generatorSeedPair(
 ): GeneratorSeedPairResult {
   const blocks: PairedIdentityGapResult[] = [];
   const combinedCounts = emptyCounts();
+  const first = makeTeam(`paired-${generatorSeed}-${firstIdentity}`, 10, FIXED_TACTICS, {
+    seed: generatorSeed,
+    identity: firstIdentity,
+  });
+  const second = makeTeam(`paired-${generatorSeed}-${secondIdentity}`, 10, FIXED_TACTICS, {
+    seed: generatorSeed,
+    identity: secondIdentity,
+  });
 
   for (let start = 0; start < matchSeeds.length; start += blockSize) {
     const blockSeeds = matchSeeds.slice(start, start + blockSize);
-    const counts = countMatchSeeds(firstIdentity, secondIdentity, generatorSeed, blockSeeds);
+    const counts = countMatchSeeds(firstIdentity, secondIdentity, blockSeeds, first, second);
     addCounts(combinedCounts, counts);
     blocks.push(gapResult(firstIdentity, secondIdentity, blockSeeds, counts));
   }

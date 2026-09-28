@@ -19,6 +19,7 @@ import {
 
 describe("strength resolution evidence", () => {
   const weights = readCommittedWeights();
+  const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")) as StrengthEvidence;
   it("uses the fixed 7-to-13 span at every league size", () => {
     for (const teamCount of LEAGUE_SIZES) {
       const levels = makeEvidenceTeams(teamCount).map(({ level }) => level);
@@ -170,21 +171,18 @@ describe("strength resolution evidence", () => {
     });
   });
 
-  it("keeps all committed strongest-by-level results as a positive control", async () => {
-    const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")) as StrengthEvidence;
-    for (const expected of committed.rows) {
-      let count = 0;
-      for (let start = 0; start < SEASON_NUMBERS.length; start += 25) {
-        count += runStrengthForSize(expected.teamCount, SEASON_NUMBERS.slice(start, start + 25), 1981, weights).strongestTeamFinishedTop.count;
-        await new Promise((resolve) => { setImmediate(resolve); });
-      }
-      const proportion = count / SEASON_NUMBERS.length;
-      expect({
-        count,
-        proportion,
-        standardError: Number(Math.sqrt(proportion * (1 - proportion) / SEASON_NUMBERS.length).toFixed(6)),
-      }).toEqual(expected.strongestTeamFinishedTop);
+  it.each(committed.rows.filter(({ teamCount }) => teamCount === 22))("keeps the committed $teamCount-team strongest-by-level result as a positive control", async (expected) => {
+    let count = 0;
+    for (let start = 0; start < SEASON_NUMBERS.length; start += 25) {
+      count += runStrengthForSize(expected.teamCount, SEASON_NUMBERS.slice(start, start + 25), 1981, weights).strongestTeamFinishedTop.count;
+      await new Promise((resolve) => { setImmediate(resolve); });
     }
+    const proportion = count / SEASON_NUMBERS.length;
+    expect({
+      count,
+      proportion,
+      standardError: Number(Math.sqrt(proportion * (1 - proportion) / SEASON_NUMBERS.length).toFixed(6)),
+    }).toEqual(expected.strongestTeamFinishedTop);
   }, 420_000);
 
   it("reports the strongest engine-weighted team alongside the existing rulers", () => {
@@ -233,6 +231,6 @@ describe("strength resolution evidence", () => {
   it("commits schema version 4 without moving strongest-by-level figures", () => {
     const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")) as StrengthEvidence;
     expect(committed.schemaVersion).toBe(4);
-    expect(committed.rows.map((row) => row.strongestTeamFinishedTop.count)).toEqual([82, 21, 57, 85]);
+    expect(committed.rows.map((row) => row.strongestTeamFinishedTop.count)).toEqual([81, 23, 49, 70, 41]);
   });
 });

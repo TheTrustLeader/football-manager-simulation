@@ -9,7 +9,7 @@ export const GOALS_PER_MATCH_BAND = { minimum: 2.60, maximum: 3.10 } as const;
 export const HOME_WIN_RATE_BAND = { minimum: 0.40, maximum: 0.50 } as const;
 export const DRAW_RATE_BAND = { minimum: 0.20, maximum: 0.30 } as const;
 
-export const LEAGUE_SIZES = [8, 12, 16, 20] as const;
+export const LEAGUE_SIZES = [8, 12, 16, 20, 22] as const;
 export const SEASON_NUMBERS = Array.from({ length: 50 }, (_, index) => index + 1);
 export const OUTPUT_PATH = "evidence/season-sweep-evidence.json";
 

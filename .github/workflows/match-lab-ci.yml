@@ -20,6 +20,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  playable-season-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Re-measure and verify the 1,000-game playable-season report
+        run: npm run playable:verify
+
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 10
