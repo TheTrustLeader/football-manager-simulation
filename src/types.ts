@@ -90,7 +90,9 @@ export interface MatchInput {
   home: TeamInput;
   away: TeamInput;
   neutralVenue?: boolean;
-  decisions?: MatchDecision[];
+  decisions?: MatchDecision[] | undefined;
+  /** Dated competition rules. Required by season play; omitted only by isolated engine harnesses. */
+  seasonRules?: { substitutesNamed: number; substitutesUsed: number };
 }
 
 export interface MatchDecision {
@@ -99,6 +101,7 @@ export interface MatchDecision {
   type: "substitution";
   playerOff: string;
   playerOn: string;
+  whenTrailing?: boolean;
 }
 
 export type MatchEventType =

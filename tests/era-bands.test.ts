@@ -3,6 +3,15 @@ import { describe, expect, it } from "vitest";
 import { deriveEraBandRow, eraBandsForSeason, readSeasonCounts } from "../src/era-bands.js";
 
 describe("dated era bands", () => {
+  it("uses Node's filesystem and loads the real 1981 era bands inside vitest", () => {
+    expect(JSON.parse(readFileSync("package.json", "utf8"))).toMatchObject({ name: "football-manager-simulation" });
+    expect(eraBandsForSeason(1981)).toMatchObject({
+      sourceFirstSeason: "1978/79",
+      sourceLastSeason: "1985/86",
+      sourceMatches: 3696,
+    });
+  });
+
   it("derives the 1978/79-1985/86 bands from the committed counts", () => {
     const row = deriveEraBandRow();
     expect({ first: row.sourceFirstSeason, last: row.sourceLastSeason, matches: row.sourceMatches }).toEqual({ first: "1978/79", last: "1985/86", matches: 3696 });

@@ -160,7 +160,7 @@ describe("substitution decisions", () => {
     expect(buildSeasonPlayerStats([result]).some((entry) => entry.playerId === off.id)).toBe(true);
   });
 
-  it("rejects a repeat entrant and the configured maximum up front", () => {
+  it("rejects a repeat entrant and the season's maximum up front", () => {
     const repeated = input();
     repeated.decisions = [
       decision(repeated, 20, repeated.home.starters[1]!, repeated.home.substitutes[1]!),
@@ -169,7 +169,8 @@ describe("substitution decisions", () => {
     expect(() => simulateMatch(repeated)).toThrow(/brought on twice|not an available substitute/);
 
     const excessive = input();
-    excessive.decisions = Array.from({ length: ENGINE_CONFIG.substitutions.maximum + 1 }, (_, index) =>
+    excessive.seasonRules = { substitutesNamed: 11, substitutesUsed: 5 };
+    excessive.decisions = Array.from({ length: 6 }, (_, index) =>
       decision(excessive, 20 + index, excessive.home.starters[index + 1]!, excessive.home.substitutes[index + 1]!));
     expect(() => simulateMatch(excessive)).toThrow(/cannot make more than 5 substitutions/);
   });

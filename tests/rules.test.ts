@@ -6,6 +6,12 @@ import type { SeasonRule, SeasonRules } from "../src/rules.js";
 import type { MatchOutput } from "../src/types.js";
 
 const CHANGING_RULES: readonly SeasonRule[] = [
+  { rule: "substitutesNamed", value: 1, firstSeason: 1981, source: "Test named substitutes row." },
+  { rule: "substitutesUsed", value: 1, firstSeason: 1981, source: "Test used substitutes row." },
+  {
+    rule: "firstDivisionTeams", value: 22, firstSeason: 1981,
+    source: "Test division-size row.",
+  },
   {
     rule: "pointsForAWin", value: 3, firstSeason: 1981, lastSeason: 1989,
     source: "Test boundary before the invented change.",
@@ -30,7 +36,7 @@ const MATCHES = [
 ];
 
 function rules(tableTieBreak: SeasonRules["tableTieBreak"]): SeasonRules {
-  return { pointsForAWin: 3, tableTieBreak };
+  return { pointsForAWin: 3, tableTieBreak, firstDivisionTeams: 22, substitutesNamed: 1, substitutesUsed: 1 };
 }
 
 describe("season rules", () => {
@@ -51,6 +57,9 @@ describe("season rules", () => {
     expect(rulesForSeason(1981)).toEqual({
       pointsForAWin: 3,
       tableTieBreak: "goalDifference",
+      firstDivisionTeams: 22,
+      substitutesNamed: 1,
+      substitutesUsed: 1,
     });
   });
 
@@ -118,6 +127,9 @@ describe("season rules", () => {
     expect(() => buildLeagueTable(MATCHES, {
       pointsForAWin: 3,
       tableTieBreak: "headToHead" as SeasonRules["tableTieBreak"],
+      firstDivisionTeams: 22,
+      substitutesNamed: 1,
+      substitutesUsed: 1,
     })).toThrow("Unknown table tie-break: headToHead");
   });
 });

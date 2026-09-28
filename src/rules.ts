@@ -4,6 +4,9 @@ export type TableTieBreak = "goalDifference" | "goalAverage";
 export interface SeasonRules {
   pointsForAWin: number;
   tableTieBreak: TableTieBreak;
+  firstDivisionTeams: number;
+  substitutesNamed: number;
+  substitutesUsed: number;
 }
 
 export type SeasonRule = {
@@ -18,6 +21,20 @@ export type SeasonRule = {
 
 export const SEASON_RULES: readonly SeasonRule[] = [
   {
+    rule: "substitutesNamed", value: 1, firstSeason: 1981,
+    source: "Football League regulations for 1981/82 allowed one named substitute.",
+  },
+  {
+    rule: "substitutesUsed", value: 1, firstSeason: 1981,
+    source: "Football League regulations for 1981/82 allowed one substitute to be used.",
+  },
+  {
+    rule: "firstDivisionTeams",
+    value: 22,
+    firstSeason: 1981,
+    source: "The Football League First Division contained 22 clubs in 1981/82.",
+  },
+  {
     rule: "pointsForAWin",
     value: 3,
     firstSeason: 1981,
@@ -31,7 +48,7 @@ export const SEASON_RULES: readonly SeasonRule[] = [
   },
 ];
 
-const RULE_NAMES: readonly (keyof SeasonRules)[] = ["pointsForAWin", "tableTieBreak"];
+const RULE_NAMES: readonly (keyof SeasonRules)[] = ["pointsForAWin", "tableTieBreak", "firstDivisionTeams", "substitutesNamed", "substitutesUsed"];
 
 /** Resolve every rule in force for a season identified by its starting year. */
 export function rulesForSeason(
@@ -52,8 +69,14 @@ export function rulesForSeason(
     }
     if (rule === "pointsForAWin") {
       resolved.pointsForAWin = matches[0]!.value as number;
-    } else {
+    } else if (rule === "tableTieBreak") {
       resolved.tableTieBreak = matches[0]!.value as TableTieBreak;
+    } else if (rule === "firstDivisionTeams") {
+      resolved.firstDivisionTeams = matches[0]!.value as number;
+    } else if (rule === "substitutesNamed") {
+      resolved.substitutesNamed = matches[0]!.value as number;
+    } else {
+      resolved.substitutesUsed = matches[0]!.value as number;
     }
   }
   return resolved;

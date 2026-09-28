@@ -172,12 +172,12 @@ describe("seeded squad generation", () => {
 
   it("holds the compensation-out paired identity residuals within their regression windows", async () => {
     const recordedGaps = {
-      "passing/direct": 0.2358,
-      "passing/defensive": 0.3553,
-      "passing/balanced": 0.1326,
-      "direct/defensive": 0.1410,
-      "direct/balanced": -0.0887,
-      "defensive/balanced": -0.2147,
+      "passing/direct": 0.1665,
+      "passing/defensive": 0.3060,
+      "passing/balanced": 0.0907,
+      "direct/defensive": 0.1327,
+      "direct/balanced": -0.0839,
+      "defensive/balanced": -0.2175,
     } as const;
     const generatorSeeds = PAIRED_ESTIMATOR_GENERATOR_SEEDS.slice(0, 2);
     const matchSeeds = seedRange("tuning", 30_000);

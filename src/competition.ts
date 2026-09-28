@@ -245,10 +245,12 @@ export function runSeason(teams: readonly TeamInput[], seed: number, season: Sea
     const index = defaultIndex.get(fixture)!;
     const matchSeed = options.matchSeed?.(seed, fixture, index) ?? (seed + index * 7919) >>> 0;
     let draws = 0;
+    const matchTeam = (team: TeamInput): TeamInput => ({ ...team, substitutes: team.substitutes.slice(0, rules.substitutesNamed) });
     const simulate = () => simulateMatch({
       seed: matchSeed,
-      home: byId.get(fixture.homeId)!,
-      away: byId.get(fixture.awayId)!,
+      home: matchTeam(byId.get(fixture.homeId)!),
+      away: matchTeam(byId.get(fixture.awayId)!),
+      seasonRules: rules,
     });
     const match = options.onMatchDrawCount
       ? SeededRandom.withDrawObserver(() => { draws += 1; }, simulate)

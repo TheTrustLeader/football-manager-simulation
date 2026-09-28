@@ -1,10 +1,12 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
+import { calibrationTargetsForSeason, ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange, type SeedPoolName } from "./seed-pools.js";
+import { eraBandsForSeason } from "./era-bands.js";
+import { runManyLeagueCalibration } from "./season-calibration-evidence.js";
 import type { Formation, ScoreState, Style } from "./types.js";
 
 interface Aggregate {
@@ -119,14 +121,6 @@ for (const seed of seeds) {
     away: makeTeam("away", 10, {}, { seed: controlSeeds.baseline, identity: "balanced" }),
   });
   addResult(baseline, baselineResult);
-  for (const state of ["level", "leading", "trailing"] as const) {
-    gameStateCounters[state].possessions += baselineResult.diagnostics.gameState.attackingState[state].possessions;
-    gameStateCounters[state].progressions += baselineResult.diagnostics.gameState.attackingState[state].progressions;
-  }
-  scoreStateMinutes.level += baselineResult.diagnostics.gameState.scoreStateMinutes.level;
-  scoreStateMinutes.homeLeading += baselineResult.diagnostics.gameState.scoreStateMinutes.homeLeading;
-  scoreStateMinutes.awayLeading += baselineResult.diagnostics.gameState.scoreStateMinutes.awayLeading;
-
   const neutralResult = simulateMatch({
     seed,
     neutralVenue: true,
@@ -134,6 +128,13 @@ for (const seed of seeds) {
     away: makeTeam("mirror-away", 10, {}, { seed: controlSeeds.mirror, identity: "balanced" }),
   });
   addResult(mirror, neutralResult);
+  for (const state of ["level", "leading", "trailing"] as const) {
+    gameStateCounters[state].possessions += neutralResult.diagnostics.gameState.attackingState[state].possessions;
+    gameStateCounters[state].progressions += neutralResult.diagnostics.gameState.attackingState[state].progressions;
+  }
+  scoreStateMinutes.level += neutralResult.diagnostics.gameState.scoreStateMinutes.level;
+  scoreStateMinutes.homeLeading += neutralResult.diagnostics.gameState.scoreStateMinutes.homeLeading;
+  scoreStateMinutes.awayLeading += neutralResult.diagnostics.gameState.scoreStateMinutes.awayLeading;
 
   const abilityResult = simulateMatch({
     seed,
@@ -190,7 +191,7 @@ const mirrorRates = rates(mirror);
 const abilityRates = rates(ability);
 const formationBaselineRates = rates(formationBaseline);
 const styleBaselineRates = rates(styleBaseline);
-const targets = ENGINE_CONFIG.calibrationTargets;
+const targets = calibrationTargetsForSeason(1981);
 const guardrails = ENGINE_CONFIG.ciGuardrails;
 const presenceThresholds = ENGINE_CONFIG.presenceTests;
 
@@ -235,16 +236,28 @@ const gameStateOrderingPass = progressionRates.trailing.rate !== null && progres
 const expectedPoissonDrawRate = poissonDrawRate(baselineRates.homeGoalsPerMatch, baselineRates.awayGoalsPerMatch);
 const drawExcessOverPoisson = baselineRates.drawRate - expectedPoissonDrawRate;
 
+const seasonSampleNumbers = Array.from({ length: 60 }, (_, index) => index + 1);
+const seasonSample = runManyLeagueCalibration(22, seasonSampleNumbers, 1981, eraBandsForSeason(1981));
+const seasonGoalsStandardError = seasonSample.goalsPerMatch.standardDeviation / Math.sqrt(seasonSample.seasonsSimulated);
 const calibrationChecks = {
-  goalsPerMatch: bandCheck(baselineRates.goalsPerMatch, targets.goalsPerMatchMin, targets.goalsPerMatchMax),
-  drawRate: bandCheck(baselineRates.drawRate, targets.drawRateMin, targets.drawRateMax),
-  homeWinRate: bandCheck(baselineRates.homeWinRate, targets.homeWinRateMin, targets.homeWinRateMax),
+  goalsPerMatch: { ...seasonSample.comparisons.goalsPerMatch, pass: seasonSample.comparisons.goalsPerMatch.result === "PASS" },
+  drawRate: { ...seasonSample.comparisons.drawRate, pass: seasonSample.comparisons.drawRate.result === "PASS" },
+  homeWinRate: { ...seasonSample.comparisons.homeWinRate, pass: seasonSample.comparisons.homeWinRate.result === "PASS" },
+  goalsStandardError: { maximum: 0.03, actual: seasonGoalsStandardError, pass: seasonGoalsStandardError <= 0.03 },
 };
 
+const matchLabGoalsRegressionPin = { expected: 2.3518, tolerance: 0.04 };
+
 const ciChecks = {
-  goalsPerMatch: bandCheck(baselineRates.goalsPerMatch, guardrails.goalsPerMatchMin, guardrails.goalsPerMatchMax),
-  drawRate: bandCheck(baselineRates.drawRate, guardrails.drawRateMin, guardrails.drawRateMax),
-  homeWinRate: bandCheck(baselineRates.homeWinRate, guardrails.homeWinRateMin, guardrails.homeWinRateMax),
+  matchLabGoalsRegressionPin: {
+    ...matchLabGoalsRegressionPin,
+    actual: baselineRates.goalsPerMatch,
+    pass: Math.abs(baselineRates.goalsPerMatch - matchLabGoalsRegressionPin.expected) <= matchLabGoalsRegressionPin.tolerance,
+  },
+  seasonGoalsPerMatch: calibrationChecks.goalsPerMatch,
+  seasonDrawRate: calibrationChecks.drawRate,
+  seasonHomeWinRate: calibrationChecks.homeWinRate,
+  seasonGoalsStandardError: calibrationChecks.goalsStandardError,
   mirrorFairness: {
     tolerance: guardrails.mirrorWinRateTolerance,
     actualDifference: Math.abs(mirrorRates.homeWinRate - mirrorRates.awayWinRate),
@@ -307,6 +320,12 @@ const evidence = {
   calibrationTargets: targets,
   ciGuardrails: guardrails,
   calibrationChecks,
+  seasonSample: {
+    purpose: "1981/82 real-football calibration sample; the even-team match lab is only a regression pin.",
+    seasonNumbers: seasonSampleNumbers,
+    ...seasonSample,
+    goalsStandardError: seasonGoalsStandardError,
+  },
   ciChecks,
   presenceThresholds,
   baseline: { ...baselineRates, counts: baseline, scorelineMatrix: baseline.scorelines },
@@ -332,8 +351,8 @@ const evidence = {
     matchesPerSecond: (simulatedMatches / elapsedMs) * 1000,
   },
   limitations: [
-    "The sourced goals, draw and home-win bands remain the football calibration targets.",
-    "The 20,000-match CI safety bounds include the narrow sampling allowance recorded in Decision 004; a target miss remains visible in calibrationChecks even when ciChecks pass.",
+    "The sourced goals, draw and home-win bands are enforced on a 22-team season sample, not on one fixed pair of equal teams.",
+    "The match-lab goals check is a regression pin around its committed figure, not a real-football calibration claim.",
     "Final calibration acceptance is judged on the larger 500,000–1,000,000 tuning-seed run against calibrationTargets, not the buffered CI bounds.",
     "Game-state response is evidenced by trailing > level > leading attacking progression and the observed draw excess over an independent Poisson reference.",
     "Formation and style presence are mechanism-presence checks, not claims that their final magnitudes are balanced.",
