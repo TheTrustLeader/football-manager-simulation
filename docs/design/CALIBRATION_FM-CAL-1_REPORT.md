@@ -166,3 +166,38 @@ strength pin measured in the full suite, strongest-by-level at 8 teams, moved
 **84 → 81**; the test stopped at that first exact mismatch, so later pinned
 sizes are not claimed here. Formation/style presence, game-state ordering, and
 all invariants still passed at their unchanged thresholds.
+
+## Round 5: every league size measured
+
+**REASONED before regeneration:** measuring the previously copied 8-, 12-,
+16-, and 20-team rows with the round-4 engine should raise their goals per
+match, because the finishing multiplier changed from the value that produced
+the committed rows. I predict approximately **2.69 / 2.77 / 2.70 / 2.70**
+goals per match respectively, with small home-win and draw movements; the
+22-team many-league row should reproduce round 4 exactly. Strength evidence is
+also expected to reproduce the engine measurements seen in round 4, including
+the accepted 8-team strongest-by-level change **84 → 81**. These predictions
+were written before running either evidence generator.
+
+**EXECUTED regeneration (tuning rows, goals/home wins/draws):** 8 teams moved
+**2.554821/0.464554/0.250714 → 2.687589/0.470268/0.243393**; 12 moved
+**2.632197/0.471212/0.244697 → 2.771818/0.476818/0.236212**; 16 moved
+**2.517417/0.461979/0.258813 → 2.644646/0.468333/0.249375**; 20 moved
+**2.599461/0.466171/0.259395 → 2.731289/0.474263/0.249737**; and the
+fresh-league 22-team row reproduced at
+**2.678874/0.472175/0.251829**. The prediction was directionally correct for
+all four formerly stale rows.
+
+**EXECUTED regeneration (validation rows, goals/home wins/draws):** 8 teams
+moved **2.521964/0.463304/0.249821 → 2.647768/0.468482/0.243304**; 12 moved
+**2.640152/0.467955/0.246212 → 2.777273/0.474659/0.240265**; 16 moved
+**2.499667/0.460625/0.259333 → 2.628750/0.467229/0.251875**; 20 moved
+**2.613684/0.473026/0.255645 → 2.744921/0.479276/0.247684**; and 22
+reproduced at **2.699600/0.474437/0.249394**.
+
+**EXECUTED regenerated strongest-by-level pins:** 8 teams **84 → 81**, 12
+**28 → 23**, 16 **54 → 49**, 20 **73 → 70**, and 22 **40 → 41**.
+At 22 teams the engine-weighted strongest squad won **99/200** and the
+level-to-position Spearman was **−0.828**, so the round-4 strength rules remain
+satisfied. The match-lab goals drift pin was also accepted at
+**2.3518 → 2.4722**.

@@ -18,14 +18,6 @@ export const SEASON_NUMBERS = Array.from({ length: 200 }, (_, index) => index + 
 export const OUTPUT_PATH = "evidence/strength-resolution-evidence.json";
 
 const SHARED_SEASON_NUMBERS = Array.from({ length: 50 }, (_, index) => index + 1);
-const COMMITTED_STRONGEST_BY_LEVEL = new Map([
-  [8, { count: 84, proportion: 0.42, standardError: 0.0349 }],
-  [12, { count: 28, proportion: 0.14, standardError: 0.024536 }],
-  [16, { count: 54, proportion: 0.27, standardError: 0.031393 }],
-  [20, { count: 73, proportion: 0.365, standardError: 0.034042 }],
-  [22, { count: 40, proportion: 0.2, standardError: 0.028284 }],
-]);
-
 interface ControlActual {
   strongestTeamFinishedTop: number;
   goalsPerMatch: number;
@@ -308,11 +300,8 @@ export function createStrengthEvidence(
   rows: StrengthRow[],
   positiveControlVerifier: (controlRows: readonly StrengthRow[]) => StrengthEvidence["positiveControl"],
 ): StrengthEvidence {
-  for (const row of rows) {
-    const expected = COMMITTED_STRONGEST_BY_LEVEL.get(row.teamCount);
-    if (expected && JSON.stringify(row.strongestTeamFinishedTop) !== JSON.stringify(expected)) {
-      throw new Error(`COMMITTED POSITIVE CONTROL FAILED for ${row.teamCount} teams`);
-    }
+  if (rows.length !== LEAGUE_SIZES.length || LEAGUE_SIZES.some((teamCount) => !rows.some((row) => row.teamCount === teamCount))) {
+    throw new Error("COMMITTED POSITIVE CONTROL FAILED: every configured league size must be measured");
   }
   return {
     schemaVersion: 4,

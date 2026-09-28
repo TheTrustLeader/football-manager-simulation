@@ -198,12 +198,13 @@ export function serialiseCalibrationEvidence(evidence: ReturnType<typeof createC
 function main(): void {
   const season = 1981;
   const era = eraBandsForSeason(season);
-  const committed = JSON.parse(readFileSync(OUTPUT_PATH, "utf8")) as { rows: CalibrationRow[]; validationRows: CalibrationRow[] };
-  const rows = committed.rows.filter((row) => row.teamCount !== 22);
-  rows.push(runManyLeagueCalibration(22, SEASON_NUMBERS, season, era));
+  const rows = LEAGUE_SIZES.map((teamCount) => teamCount === 22
+    ? runManyLeagueCalibration(teamCount, SEASON_NUMBERS, season, era)
+    : runCalibrationForSize(teamCount, SEASON_NUMBERS, season, era));
   const validationSeasonNumbers = SEASON_NUMBERS.map((number) => number + 200);
-  const validationRows = committed.validationRows.filter((row) => row.teamCount !== 22);
-  validationRows.push(runManyLeagueCalibration(22, validationSeasonNumbers, season, era));
+  const validationRows = LEAGUE_SIZES.map((teamCount) => teamCount === 22
+    ? runManyLeagueCalibration(teamCount, validationSeasonNumbers, season, era)
+    : runCalibrationForSize(teamCount, validationSeasonNumbers, season, era));
   const evidence = createCalibrationEvidence(rows, validationRows, season, era);
   mkdirSync("evidence", { recursive: true });
   writeFileSync(OUTPUT_PATH, serialiseCalibrationEvidence(evidence), "utf8");

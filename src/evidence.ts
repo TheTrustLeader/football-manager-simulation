@@ -246,7 +246,7 @@ const calibrationChecks = {
   goalsStandardError: { maximum: 0.03, actual: seasonGoalsStandardError, pass: seasonGoalsStandardError <= 0.03 },
 };
 
-const matchLabGoalsRegressionPin = { expected: 2.3518, tolerance: 0.04 };
+const matchLabGoalsRegressionPin = { expected: 2.4722, tolerance: 0.04 };
 
 const ciChecks = {
   matchLabGoalsRegressionPin: {
