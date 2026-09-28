@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-fm-play-2-pick-your-matchday-squad-and-mana
+head=bbc9b801e5ad852e1d237a6dcaf0cdbf4e3ee67f
+tree=c7809c353cf9cc1189cbf90a254cb3666fed08ee
+base=fd3d66657084d7711255cef59bb98557bd8f5b05
+item=FM-codex-github-mention-fm-play-2-pick-your-matchda
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-28 14:53 BST
