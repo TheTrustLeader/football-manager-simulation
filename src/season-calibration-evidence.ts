@@ -109,6 +109,56 @@ export function runCalibrationForSize(teamCount: number, seasonNumbers: readonly
   };
 }
 
+/** Test-facing equivalent that lets the Vitest worker service RPC between seasons. */
+export async function runCalibrationForSizeYielding(teamCount: number, seasonNumbers: readonly number[], season: number, era: EraBandRow): Promise<CalibrationRow> {
+  const evidenceTeams = makeEvidenceTeams(teamCount);
+  const teams = evidenceTeams.map(({ team }) => team);
+  const levels = new Map(evidenceTeams.map(({ team, level }) => [team.id, level]));
+  const goals: number[] = [];
+  const homeWins: number[] = [];
+  const draws: number[] = [];
+  let totalMatchesSimulated = 0;
+  let closeMatches = 0;
+  let closeGoals = 0;
+  let mismatchMatches = 0;
+  let mismatchGoals = 0;
+  for (const seasonNumber of seasonNumbers) {
+    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season);
+    const matchCount = result.matches.length;
+    totalMatchesSimulated += matchCount;
+    goals.push(result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0) / matchCount);
+    homeWins.push(result.matches.filter((match) => match.home.goals > match.away.goals).length / matchCount);
+    draws.push(result.matches.filter((match) => match.home.goals === match.away.goals).length / matchCount);
+    for (const match of result.matches) {
+      const gap = Math.abs(levels.get(match.homeTeamId)! - levels.get(match.awayTeamId)!);
+      const matchGoals = match.home.goals + match.away.goals;
+      if (gap <= 1) { closeMatches += 1; closeGoals += matchGoals; }
+      if (gap >= 4) { mismatchMatches += 1; mismatchGoals += matchGoals; }
+    }
+    await new Promise<void>((resolve) => { setImmediate(resolve); });
+  }
+  const goalsPerMatch = extendedDistribution(goals);
+  const homeWinRate = distribution(homeWins);
+  const drawRate = distribution(draws);
+  return {
+    teamCount,
+    seasonsSimulated: seasonNumbers.length,
+    totalMatchesSimulated,
+    goalsPerMatch,
+    homeWinRate,
+    drawRate,
+    goalsByLevelGap: {
+      withinOneLevel: { matches: closeMatches, goalsPerMatch: Number((closeGoals / closeMatches).toFixed(6)) },
+      fourOrMoreLevelsApart: { matches: mismatchMatches, goalsPerMatch: Number((mismatchGoals / mismatchMatches).toFixed(6)) },
+    },
+    comparisons: {
+      goalsPerMatch: compareWithBand("goalsPerMatch", goalsPerMatch.mean, oneStandardDeviation(era.bands.goalsPerMatch)),
+      homeWinRate: compareWithBand("homeWinRate", homeWinRate.mean, oneStandardDeviation(era.bands.homeWinRate)),
+      drawRate: compareWithBand("drawRate", drawRate.mean, era.bands.drawRate),
+    },
+  };
+}
+
 export function runManyLeagueCalibration(teamCount: number, seasonNumbers: readonly number[], season: number, era: EraBandRow): ManyLeagueCalibrationRow {
   const goals: number[] = [];
   const homeWins: number[] = [];
@@ -133,6 +183,59 @@ export function runManyLeagueCalibration(teamCount: number, seasonNumbers: reado
       if (gap <= 1) { closeMatches += 1; closeGoals += matchGoals; }
       if (gap >= 4) { mismatchMatches += 1; mismatchGoals += matchGoals; }
     }
+  }
+  const goalsPerMatch = extendedDistribution(goals);
+  const homeWinRate = distribution(homeWins);
+  const drawRate = distribution(draws);
+  const sortedGoals = [...goals].sort((a, b) => a - b);
+  const realBand = era.bands.goalsPerMatch;
+  const inside = goals.filter((value) => value >= realBand.minimum && value <= realBand.maximum).length;
+  return {
+    teamCount, seasonsSimulated: seasonNumbers.length, totalMatchesSimulated,
+    goalsPerMatch, homeWinRate, drawRate,
+    goalsByLevelGap: {
+      withinOneLevel: { matches: closeMatches, goalsPerMatch: Number((closeGoals / closeMatches).toFixed(6)) },
+      fourOrMoreLevelsApart: { matches: mismatchMatches, goalsPerMatch: Number((mismatchGoals / mismatchMatches).toFixed(6)) },
+    },
+    goalsLeagueSpread: {
+      minimum: sortedGoals[0]!, percentile10: percentile(sortedGoals, 0.1), median: percentile(sortedGoals, 0.5),
+      percentile90: percentile(sortedGoals, 0.9), maximum: sortedGoals.at(-1)!,
+      insideRealSeasonBand: { count: inside, proportion: inside / goals.length },
+    },
+    comparisons: {
+      goalsPerMatch: compareWithBand("goalsPerMatch", goalsPerMatch.mean, oneStandardDeviation(era.bands.goalsPerMatch)),
+      homeWinRate: compareWithBand("homeWinRate", homeWinRate.mean, oneStandardDeviation(era.bands.homeWinRate)),
+      drawRate: compareWithBand("drawRate", drawRate.mean, era.bands.drawRate),
+    },
+  };
+}
+
+/** Test-facing equivalent that lets the Vitest worker service RPC between seasons. */
+export async function runManyLeagueCalibrationYielding(teamCount: number, seasonNumbers: readonly number[], season: number, era: EraBandRow): Promise<ManyLeagueCalibrationRow> {
+  const goals: number[] = [];
+  const homeWins: number[] = [];
+  const draws: number[] = [];
+  let totalMatchesSimulated = 0;
+  let closeMatches = 0;
+  let closeGoals = 0;
+  let mismatchMatches = 0;
+  let mismatchGoals = 0;
+  for (const seasonNumber of seasonNumbers) {
+    const evidenceTeams = makeCalibrationTeams(teamCount, seasonNumber);
+    const levels = new Map(evidenceTeams.map(({ team, level }) => [team.id, level]));
+    const result = runSeason(evidenceTeams.map(({ team }) => team), deriveSeasonSeed(teamCount, seasonNumber), season);
+    const matchCount = result.matches.length;
+    totalMatchesSimulated += matchCount;
+    goals.push(result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0) / matchCount);
+    homeWins.push(result.matches.filter((match) => match.home.goals > match.away.goals).length / matchCount);
+    draws.push(result.matches.filter((match) => match.home.goals === match.away.goals).length / matchCount);
+    for (const match of result.matches) {
+      const gap = Math.abs(levels.get(match.homeTeamId)! - levels.get(match.awayTeamId)!);
+      const matchGoals = match.home.goals + match.away.goals;
+      if (gap <= 1) { closeMatches += 1; closeGoals += matchGoals; }
+      if (gap >= 4) { mismatchMatches += 1; mismatchGoals += matchGoals; }
+    }
+    await new Promise<void>((resolve) => { setImmediate(resolve); });
   }
   const goalsPerMatch = extendedDistribution(goals);
   const homeWinRate = distribution(homeWins);
