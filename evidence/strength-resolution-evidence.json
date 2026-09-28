@@ -8,7 +8,8 @@
       8,
       12,
       16,
-      20
+      20,
+      22
     ],
     "seasonNumbers": {
       "first": 1,
@@ -39,19 +40,19 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 11200,
       "strongestTeamFinishedTop": {
-        "count": 82,
-        "proportion": 0.41,
-        "standardError": 0.034778
+        "count": 81,
+        "proportion": 0.405,
+        "standardError": 0.034711
       },
       "strongestByActualRatingFinishedTop": {
-        "count": 82,
-        "proportion": 0.41,
-        "standardError": 0.034778
+        "count": 81,
+        "proportion": 0.405,
+        "standardError": 0.034711
       },
       "strongestByEngineWeightedRatingFinishedTop": {
-        "count": 82,
-        "proportion": 0.41,
-        "standardError": 0.034778
+        "count": 81,
+        "proportion": 0.405,
+        "standardError": 0.034711
       },
       "strongestByLevelVersusActualRating": {
         "strongestByLevelId": "sweep-8-team-08",
@@ -63,37 +64,37 @@
         "rating": 3.20828
       },
       "strongestTeamFinishingPosition": {
-        "mean": 2.05,
+        "mean": 2.14,
         "median": 2
       },
-      "strongestTeamMeanSignedPointsMarginToTop": -3.22,
-      "levelToFinalPositionSpearman": -0.770119,
-      "actualRatingToFinalPositionSpearman": -0.754405,
-      "engineWeightedRatingToFinalPositionSpearman": -0.770119,
+      "strongestTeamMeanSignedPointsMarginToTop": -3.405,
+      "levelToFinalPositionSpearman": -0.749762,
+      "actualRatingToFinalPositionSpearman": -0.736786,
+      "engineWeightedRatingToFinalPositionSpearman": -0.749762,
       "actualSquadRatingSpread": {
         "minimum": 7.073684,
         "maximum": 13.221053,
         "range": 6.147368
       },
       "goalsPerMatch": {
-        "mean": 2.932857,
-        "standardDeviation": 0.204542,
-        "minimum": 2.428571,
-        "maximum": 3.517857,
-        "percentile5": 2.624107,
-        "percentile95": 3.269643
+        "mean": 2.687589,
+        "standardDeviation": 0.208539,
+        "minimum": 2.232143,
+        "maximum": 3.285714,
+        "percentile5": 2.357143,
+        "percentile95": 3.072321
       },
       "homeWinRate": {
-        "mean": 0.43375,
-        "standardDeviation": 0.058374
+        "mean": 0.470268,
+        "standardDeviation": 0.06377
       },
       "drawRate": {
-        "mean": 0.235179,
-        "standardDeviation": 0.053664
+        "mean": 0.243393,
+        "standardDeviation": 0.053551
       },
       "pointsGapTopToBottom": {
-        "mean": 22.745,
-        "standardDeviation": 4.070623
+        "mean": 21.39,
+        "standardDeviation": 4.242393
       }
     },
     {
@@ -101,19 +102,19 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 26400,
       "strongestTeamFinishedTop": {
-        "count": 21,
-        "proportion": 0.105,
-        "standardError": 0.021677
+        "count": 23,
+        "proportion": 0.115,
+        "standardError": 0.022558
       },
       "strongestByActualRatingFinishedTop": {
-        "count": 21,
-        "proportion": 0.105,
-        "standardError": 0.021677
+        "count": 23,
+        "proportion": 0.115,
+        "standardError": 0.022558
       },
       "strongestByEngineWeightedRatingFinishedTop": {
-        "count": 21,
-        "proportion": 0.105,
-        "standardError": 0.021677
+        "count": 23,
+        "proportion": 0.115,
+        "standardError": 0.022558
       },
       "strongestByLevelVersusActualRating": {
         "strongestByLevelId": "sweep-12-team-12",
@@ -125,37 +126,37 @@
         "rating": 3.263859
       },
       "strongestTeamFinishingPosition": {
-        "mean": 3.795,
+        "mean": 3.845,
         "median": 4
       },
-      "strongestTeamMeanSignedPointsMarginToTop": -9.375,
-      "levelToFinalPositionSpearman": -0.777832,
-      "actualRatingToFinalPositionSpearman": -0.773636,
-      "engineWeightedRatingToFinalPositionSpearman": -0.799161,
+      "strongestTeamMeanSignedPointsMarginToTop": -8.98,
+      "levelToFinalPositionSpearman": -0.764091,
+      "actualRatingToFinalPositionSpearman": -0.761189,
+      "engineWeightedRatingToFinalPositionSpearman": -0.786259,
       "actualSquadRatingSpread": {
         "minimum": 7.157895,
         "maximum": 13.242105,
         "range": 6.084211
       },
       "goalsPerMatch": {
-        "mean": 3.036742,
-        "standardDeviation": 0.156539,
-        "minimum": 2.613636,
-        "maximum": 3.530303,
-        "percentile5": 2.75,
-        "percentile95": 3.295833
+        "mean": 2.771818,
+        "standardDeviation": 0.143343,
+        "minimum": 2.424242,
+        "maximum": 3.128788,
+        "percentile5": 2.529545,
+        "percentile95": 3.030682
       },
       "homeWinRate": {
-        "mean": 0.437841,
-        "standardDeviation": 0.043442
+        "mean": 0.476818,
+        "standardDeviation": 0.040192
       },
       "drawRate": {
-        "mean": 0.235076,
-        "standardDeviation": 0.039005
+        "mean": 0.236212,
+        "standardDeviation": 0.035628
       },
       "pointsGapTopToBottom": {
-        "mean": 33.165,
-        "standardDeviation": 5.4688
+        "mean": 30.985,
+        "standardDeviation": 5.179264
       }
     },
     {
@@ -163,19 +164,19 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 48000,
       "strongestTeamFinishedTop": {
-        "count": 57,
-        "proportion": 0.285,
-        "standardError": 0.03192
+        "count": 49,
+        "proportion": 0.245,
+        "standardError": 0.030412
       },
       "strongestByActualRatingFinishedTop": {
-        "count": 89,
-        "proportion": 0.445,
-        "standardError": 0.035141
+        "count": 79,
+        "proportion": 0.395,
+        "standardError": 0.034567
       },
       "strongestByEngineWeightedRatingFinishedTop": {
-        "count": 89,
-        "proportion": 0.445,
-        "standardError": 0.035141
+        "count": 79,
+        "proportion": 0.395,
+        "standardError": 0.034567
       },
       "strongestByLevelVersusActualRating": {
         "strongestByLevelId": "sweep-16-team-16",
@@ -187,37 +188,37 @@
         "rating": 3.226807
       },
       "strongestTeamFinishingPosition": {
-        "mean": 2.79,
+        "mean": 3.02,
         "median": 3
       },
-      "strongestTeamMeanSignedPointsMarginToTop": -6.11,
-      "levelToFinalPositionSpearman": -0.786721,
-      "actualRatingToFinalPositionSpearman": -0.789529,
-      "engineWeightedRatingToFinalPositionSpearman": -0.795118,
+      "strongestTeamMeanSignedPointsMarginToTop": -7.07,
+      "levelToFinalPositionSpearman": -0.745765,
+      "actualRatingToFinalPositionSpearman": -0.748271,
+      "engineWeightedRatingToFinalPositionSpearman": -0.750971,
       "actualSquadRatingSpread": {
         "minimum": 7.094737,
         "maximum": 12.884211,
         "range": 5.789474
       },
       "goalsPerMatch": {
-        "mean": 2.905729,
-        "standardDeviation": 0.117579,
-        "minimum": 2.533333,
-        "maximum": 3.354167,
-        "percentile5": 2.720208,
-        "percentile95": 3.092292
+        "mean": 2.644646,
+        "standardDeviation": 0.112828,
+        "minimum": 2.329167,
+        "maximum": 3.075,
+        "percentile5": 2.475,
+        "percentile95": 2.829167
       },
       "homeWinRate": {
-        "mean": 0.429417,
-        "standardDeviation": 0.030344
+        "mean": 0.468333,
+        "standardDeviation": 0.031416
       },
       "drawRate": {
-        "mean": 0.247375,
-        "standardDeviation": 0.027561
+        "mean": 0.249375,
+        "standardDeviation": 0.028876
       },
       "pointsGapTopToBottom": {
-        "mean": 42.855,
-        "standardDeviation": 6.461732
+        "mean": 39.845,
+        "standardDeviation": 6.470006
       }
     },
     {
@@ -225,19 +226,19 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 76000,
       "strongestTeamFinishedTop": {
-        "count": 85,
-        "proportion": 0.425,
-        "standardError": 0.034955
+        "count": 70,
+        "proportion": 0.35,
+        "standardError": 0.033727
       },
       "strongestByActualRatingFinishedTop": {
-        "count": 85,
-        "proportion": 0.425,
-        "standardError": 0.034955
+        "count": 70,
+        "proportion": 0.35,
+        "standardError": 0.033727
       },
       "strongestByEngineWeightedRatingFinishedTop": {
-        "count": 85,
-        "proportion": 0.425,
-        "standardError": 0.034955
+        "count": 70,
+        "proportion": 0.35,
+        "standardError": 0.033727
       },
       "strongestByLevelVersusActualRating": {
         "strongestByLevelId": "sweep-20-team-20",
@@ -249,37 +250,99 @@
         "rating": 3.318245
       },
       "strongestTeamFinishingPosition": {
-        "mean": 2.56,
+        "mean": 2.91,
         "median": 2
       },
-      "strongestTeamMeanSignedPointsMarginToTop": -4.95,
-      "levelToFinalPositionSpearman": -0.778105,
-      "actualRatingToFinalPositionSpearman": -0.792783,
-      "engineWeightedRatingToFinalPositionSpearman": -0.796977,
+      "strongestTeamMeanSignedPointsMarginToTop": -5.39,
+      "levelToFinalPositionSpearman": -0.746586,
+      "actualRatingToFinalPositionSpearman": -0.760169,
+      "engineWeightedRatingToFinalPositionSpearman": -0.765586,
       "actualSquadRatingSpread": {
         "minimum": 6.978947,
         "maximum": 13.505263,
         "range": 6.526316
       },
       "goalsPerMatch": {
-        "mean": 2.995053,
-        "standardDeviation": 0.083455,
-        "minimum": 2.781579,
-        "maximum": 3.221053,
-        "percentile5": 2.863158,
-        "percentile95": 3.124474
+        "mean": 2.731289,
+        "standardDeviation": 0.082403,
+        "minimum": 2.502632,
+        "maximum": 2.973684,
+        "percentile5": 2.6025,
+        "percentile95": 2.881711
       },
       "homeWinRate": {
-        "mean": 0.431211,
-        "standardDeviation": 0.024225
+        "mean": 0.474263,
+        "standardDeviation": 0.025639
       },
       "drawRate": {
-        "mean": 0.251553,
-        "standardDeviation": 0.023337
+        "mean": 0.249737,
+        "standardDeviation": 0.022842
       },
       "pointsGapTopToBottom": {
-        "mean": 48.625,
-        "standardDeviation": 6.929962
+        "mean": 44.955,
+        "standardDeviation": 6.677048
+      }
+    },
+    {
+      "teamCount": 22,
+      "seasonsSimulated": 200,
+      "totalMatchesSimulated": 92400,
+      "strongestTeamFinishedTop": {
+        "count": 41,
+        "proportion": 0.205,
+        "standardError": 0.028546
+      },
+      "strongestByActualRatingFinishedTop": {
+        "count": 99,
+        "proportion": 0.495,
+        "standardError": 0.035354
+      },
+      "strongestByEngineWeightedRatingFinishedTop": {
+        "count": 99,
+        "proportion": 0.495,
+        "standardError": 0.035354
+      },
+      "strongestByLevelVersusActualRating": {
+        "strongestByLevelId": "sweep-22-team-22",
+        "strongestByActualRatingId": "sweep-22-team-21",
+        "sameTeam": false
+      },
+      "strongestByEngineWeightedRating": {
+        "teamId": "sweep-22-team-21",
+        "rating": 3.467649
+      },
+      "strongestTeamFinishingPosition": {
+        "mean": 3.515,
+        "median": 3
+      },
+      "strongestTeamMeanSignedPointsMarginToTop": -9.505,
+      "levelToFinalPositionSpearman": -0.827736,
+      "actualRatingToFinalPositionSpearman": -0.824766,
+      "engineWeightedRatingToFinalPositionSpearman": -0.832688,
+      "actualSquadRatingSpread": {
+        "minimum": 7.305263,
+        "maximum": 13.715789,
+        "range": 6.410526
+      },
+      "goalsPerMatch": {
+        "mean": 2.823452,
+        "standardDeviation": 0.072628,
+        "minimum": 2.651515,
+        "maximum": 3.002165,
+        "percentile5": 2.709848,
+        "percentile95": 2.941667
+      },
+      "homeWinRate": {
+        "mean": 0.477208,
+        "standardDeviation": 0.020374
+      },
+      "drawRate": {
+        "mean": 0.241169,
+        "standardDeviation": 0.019283
+      },
+      "pointsGapTopToBottom": {
+        "mean": 55.27,
+        "standardDeviation": 6.943133
       }
     }
   ],
@@ -289,24 +352,31 @@
       "comparisons": [
         {
           "otherTeamCount": 12,
-          "difference": 0.305,
-          "combinedStandardError": 0.040981,
+          "difference": 0.29,
+          "combinedStandardError": 0.041397,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
         },
         {
           "otherTeamCount": 16,
-          "difference": 0.125,
-          "combinedStandardError": 0.047206,
+          "difference": 0.16,
+          "combinedStandardError": 0.046149,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
         },
         {
           "otherTeamCount": 20,
-          "difference": 0.015,
-          "combinedStandardError": 0.049309,
+          "difference": 0.055,
+          "combinedStandardError": 0.048398,
           "moreThanTwoStandardErrors": false,
           "conclusion": "NOT A FINDING"
+        },
+        {
+          "otherTeamCount": 22,
+          "difference": 0.2,
+          "combinedStandardError": 0.044941,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
         }
       ]
     },
@@ -315,22 +385,29 @@
       "comparisons": [
         {
           "otherTeamCount": 8,
-          "difference": 0.305,
-          "combinedStandardError": 0.040981,
+          "difference": 0.29,
+          "combinedStandardError": 0.041397,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
         },
         {
           "otherTeamCount": 16,
-          "difference": 0.18,
-          "combinedStandardError": 0.038585,
+          "difference": 0.13,
+          "combinedStandardError": 0.037865,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
         },
         {
           "otherTeamCount": 20,
-          "difference": 0.32,
-          "combinedStandardError": 0.041131,
+          "difference": 0.235,
+          "combinedStandardError": 0.040576,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 22,
+          "difference": 0.09,
+          "combinedStandardError": 0.036383,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
         }
@@ -341,24 +418,31 @@
       "comparisons": [
         {
           "otherTeamCount": 8,
-          "difference": 0.125,
-          "combinedStandardError": 0.047206,
+          "difference": 0.16,
+          "combinedStandardError": 0.046149,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
         },
         {
           "otherTeamCount": 12,
-          "difference": 0.18,
-          "combinedStandardError": 0.038585,
+          "difference": 0.13,
+          "combinedStandardError": 0.037865,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
         },
         {
           "otherTeamCount": 20,
-          "difference": 0.14,
-          "combinedStandardError": 0.047336,
+          "difference": 0.105,
+          "combinedStandardError": 0.045414,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 22,
+          "difference": 0.04,
+          "combinedStandardError": 0.04171,
+          "moreThanTwoStandardErrors": false,
+          "conclusion": "NOT A FINDING"
         }
       ]
     },
@@ -367,22 +451,62 @@
       "comparisons": [
         {
           "otherTeamCount": 8,
-          "difference": 0.015,
-          "combinedStandardError": 0.049309,
+          "difference": 0.055,
+          "combinedStandardError": 0.048398,
           "moreThanTwoStandardErrors": false,
           "conclusion": "NOT A FINDING"
         },
         {
           "otherTeamCount": 12,
-          "difference": 0.32,
-          "combinedStandardError": 0.041131,
+          "difference": 0.235,
+          "combinedStandardError": 0.040576,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
         },
         {
           "otherTeamCount": 16,
-          "difference": 0.14,
-          "combinedStandardError": 0.047336,
+          "difference": 0.105,
+          "combinedStandardError": 0.045414,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 22,
+          "difference": 0.145,
+          "combinedStandardError": 0.044186,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        }
+      ]
+    },
+    {
+      "teamCount": 22,
+      "comparisons": [
+        {
+          "otherTeamCount": 8,
+          "difference": 0.2,
+          "combinedStandardError": 0.044941,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 12,
+          "difference": 0.09,
+          "combinedStandardError": 0.036383,
+          "moreThanTwoStandardErrors": true,
+          "conclusion": "FINDING"
+        },
+        {
+          "otherTeamCount": 16,
+          "difference": 0.04,
+          "combinedStandardError": 0.04171,
+          "moreThanTwoStandardErrors": false,
+          "conclusion": "NOT A FINDING"
+        },
+        {
+          "otherTeamCount": 20,
+          "difference": 0.145,
+          "combinedStandardError": 0.044186,
           "moreThanTwoStandardErrors": true,
           "conclusion": "FINDING"
         }

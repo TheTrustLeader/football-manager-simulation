@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
+import { calibrationTargetsForSeason, ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
@@ -71,7 +71,7 @@ const progressionRates = Object.fromEntries((["level", "leading", "trailing"] as
   rate: state[scoreState].possessions === 0 ? null : state[scoreState].progressions / state[scoreState].possessions,
 }])) as Record<ScoreState, { possessions: number; progressions: number; rate: number | null }>;
 
-const targets = ENGINE_CONFIG.calibrationTargets;
+const targets = calibrationTargetsForSeason(1981);
 const checks = {
   goalsPerMatch: { actual: goalsPerMatch, min: targets.goalsPerMatchMin, max: targets.goalsPerMatchMax, pass: goalsPerMatch >= targets.goalsPerMatchMin && goalsPerMatch <= targets.goalsPerMatchMax },
   drawRate: { actual: drawRate, min: targets.drawRateMin, max: targets.drawRateMax, pass: drawRate >= targets.drawRateMin && drawRate <= targets.drawRateMax },
