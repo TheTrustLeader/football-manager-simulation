@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-50-play-1-round-4
+head=d77b9b4338bb53d1d91f9bf846fd7ace8a42c688
+tree=74a1d1807d7ce2647c6507665dfd9d02789539cf
+base=959951de1c39fe1d5c838e6892f46e6986c37f16
+item=FM-codex-issue-50-play-1-round-4
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-28 21:33 BST
