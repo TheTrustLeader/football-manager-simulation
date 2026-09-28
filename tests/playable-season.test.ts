@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { clubsForSeason, loadPlayableSeason, newPlayableSeason, playMatchday, prepareNewPlayableSeason, ruleDescriptions, seasonTable, serializePlayableSeason, teamsForPlayableSeason } from "../src/playable-season.js";
 import { SEASON_RULES } from "../src/rules.js";
+import { actualSquadRating, makeTeam } from "../src/fixtures.js";
 import type { PlayableSeason } from "../src/playable-season.js";
 import type { SeasonRule } from "../src/rules.js";
 
@@ -12,6 +13,26 @@ const finish = (initial: PlayableSeason, approach: "balanced" | "cautious" | "at
 };
 
 describe("playable season", () => {
+  it("uses the dated 1981/82 five-strong-club league shape for several seeds", () => {
+    for (const seed of [1, 1234, 900001, 0xffffffff]) {
+      const levels = clubsForSeason(1981, SEASON_RULES, seed).map((club) => club.squadLevel);
+      expect(levels.filter((level) => level >= 12 && level <= 13)).toHaveLength(5);
+      expect(levels.filter((level) => level >= 7 && level <= 10.5)).toHaveLength(17);
+      expect(levels.every((level) => (level >= 12 && level <= 13) || (level >= 7 && level <= 10.5))).toBe(true);
+    }
+  });
+
+  it("shows each club's actual generated squad rating", () => {
+    for (const club of clubsForSeason(1981, SEASON_RULES, 900001)) {
+      expect(club.strength).toBe(actualSquadRating(makeTeam(club.squadId, club.squadLevel)));
+    }
+  });
+
+  it("throws clearly when the season has no league-shape rule", () => {
+    const withoutShape = SEASON_RULES.filter((rule) => rule.rule !== "leagueShape");
+    expect(() => clubsForSeason(1981, withoutShape, 1)).toThrow("leagueShape for season 1981: no matching row");
+  });
+
   it("builds a repeatable, seed-specific league and strength order", () => {
     const first = newPlayableSeason(1981, 1234, "club-1");
     const replay = newPlayableSeason(1981, 1234, "club-1");

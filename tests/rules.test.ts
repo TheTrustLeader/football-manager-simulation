@@ -7,6 +7,10 @@ import type { MatchOutput } from "../src/types.js";
 
 const CHANGING_RULES: readonly SeasonRule[] = [
   {
+    rule: "leagueShape", value: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 }, firstSeason: 1981,
+    source: "Test league-shape row.",
+  },
+  {
     rule: "firstDivisionTeams", value: 22, firstSeason: 1981,
     source: "Test division-size row.",
   },
@@ -34,7 +38,7 @@ const MATCHES = [
 ];
 
 function rules(tableTieBreak: SeasonRules["tableTieBreak"]): SeasonRules {
-  return { pointsForAWin: 3, tableTieBreak, firstDivisionTeams: 22 };
+  return { pointsForAWin: 3, tableTieBreak, firstDivisionTeams: 22, leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 } };
 }
 
 describe("season rules", () => {
@@ -56,6 +60,7 @@ describe("season rules", () => {
       pointsForAWin: 3,
       tableTieBreak: "goalDifference",
       firstDivisionTeams: 22,
+      leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
     });
   });
 
@@ -124,6 +129,7 @@ describe("season rules", () => {
       pointsForAWin: 3,
       tableTieBreak: "headToHead" as SeasonRules["tableTieBreak"],
       firstDivisionTeams: 22,
+      leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
     })).toThrow("Unknown table tie-break: headToHead");
   });
 });

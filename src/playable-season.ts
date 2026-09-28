@@ -34,15 +34,29 @@ export function ruleDescriptions(season: SeasonId, table: readonly SeasonRule[] 
     ? `${rules.pointsForAWin} points for a win`
     : row.rule === "tableTieBreak"
       ? rules.tableTieBreak === "goalDifference" ? "Goal difference" : "Goal average"
-      : `${rules.firstDivisionTeams} clubs in the First Division`);
+      : row.rule === "firstDivisionTeams"
+        ? `${rules.firstDivisionTeams} clubs in the First Division`
+        : `${rules.leagueShape.strongClubCount} strong clubs`);
+}
+
+function evenlySpread(count: number, minimum: number, maximum: number): number[] {
+  if (count <= 0) return [];
+  if (count === 1) return [minimum];
+  return Array.from({ length: count }, (_, index) => minimum + ((maximum - minimum) * index / (count - 1)));
 }
 
 export function clubsForSeason(season: SeasonId, table: readonly SeasonRule[] = SEASON_RULES, seed: number): Club[] {
-  const count = rulesForSeason(season, table).firstDivisionTeams;
+  const rules = rulesForSeason(season, table);
+  const count = rules.firstDivisionTeams;
   if (!Number.isInteger(count) || count < 2 || count > CLUB_NAMES.length) throw new Error(`Unsupported First Division size: ${count}`);
-  // Keep the established 7–13 range, but make genuinely exceptional squads rare
-  // instead of distributing nominal levels uniformly across the division.
-  const strengths = Array.from({ length: count }, (_, index) => 7 + (6 * (index / (count - 1)) ** 2));
+  const shape = rules.leagueShape;
+  if (!Number.isInteger(shape.strongClubCount) || shape.strongClubCount < 0 || shape.strongClubCount > count) {
+    throw new Error(`Invalid league shape for season ${season}: ${shape.strongClubCount} strong clubs for ${count} teams`);
+  }
+  const strengths = [
+    ...evenlySpread(count - shape.strongClubCount, shape.otherMinimum, shape.otherMaximum),
+    ...evenlySpread(shape.strongClubCount, shape.strongMinimum, shape.strongMaximum),
+  ];
   const random = new SeededRandom(seed);
   for (let index = strengths.length - 1; index > 0; index -= 1) {
     const target = Math.floor(random.next() * (index + 1));
