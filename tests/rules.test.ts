@@ -7,6 +7,10 @@ import type { MatchOutput } from "../src/types.js";
 
 const CHANGING_RULES: readonly SeasonRule[] = [
   {
+    rule: "firstDivisionTeams", value: 22, firstSeason: 1981,
+    source: "Test division-size row.",
+  },
+  {
     rule: "pointsForAWin", value: 3, firstSeason: 1981, lastSeason: 1989,
     source: "Test boundary before the invented change.",
   },
@@ -30,7 +34,7 @@ const MATCHES = [
 ];
 
 function rules(tableTieBreak: SeasonRules["tableTieBreak"]): SeasonRules {
-  return { pointsForAWin: 3, tableTieBreak };
+  return { pointsForAWin: 3, tableTieBreak, firstDivisionTeams: 22 };
 }
 
 describe("season rules", () => {
@@ -51,6 +55,7 @@ describe("season rules", () => {
     expect(rulesForSeason(1981)).toEqual({
       pointsForAWin: 3,
       tableTieBreak: "goalDifference",
+      firstDivisionTeams: 22,
     });
   });
 
@@ -118,6 +123,7 @@ describe("season rules", () => {
     expect(() => buildLeagueTable(MATCHES, {
       pointsForAWin: 3,
       tableTieBreak: "headToHead" as SeasonRules["tableTieBreak"],
+      firstDivisionTeams: 22,
     })).toThrow("Unknown table tie-break: headToHead");
   });
 });

@@ -79,7 +79,7 @@ describe("required evidence inputs", () => {
   });
 
   it("createCalibrationEvidence records its season input", () => {
-    expect(createCalibrationEvidence([], 2001, eraBandsForSeason(1981)).controls.season).toBe(2001);
+    expect(createCalibrationEvidence([], [], 2001, eraBandsForSeason(1981)).controls.season).toBe(2001);
   });
 
   it("runSweepForSize uses its season input", () => {
