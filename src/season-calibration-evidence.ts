@@ -3,7 +3,8 @@ import { fileURLToPath } from "node:url";
 import { runSeason } from "./competition.js";
 import { eraBandsForSeason, type CalibrationBand, type CalibrationMeasure, type EraBandRow } from "./era-bands.js";
 import { deriveSeasonSeed, distribution, extendedDistribution, type Distribution, type ExtendedDistribution } from "./season-sweep-evidence.js";
-import { LEAGUE_SIZES, makeEvidenceTeams, SEASON_NUMBERS } from "./strength-resolution-evidence.js";
+import { compactSeasonResult, LEAGUE_SIZES, makeEvidenceTeams, SEASON_NUMBERS, strengthRowFromSeasonResults, type EvidenceSeasonResult, type StrengthRow } from "./strength-resolution-evidence.js";
+import type { AttributeName } from "./types.js";
 import { makeTeam } from "./fixtures.js";
 
 export const OUTPUT_PATH = "evidence/season-calibration-evidence.json";
@@ -64,6 +65,18 @@ export function compareWithBand(measure: CalibrationMeasure, measured: number, b
 export function runCalibrationForSize(teamCount: number, seasonNumbers: readonly number[], season: number, era: EraBandRow): CalibrationRow {
   const evidenceTeams = makeEvidenceTeams(teamCount);
   const teams = evidenceTeams.map(({ team }) => team);
+  const results = seasonNumbers.map((seasonNumber) => compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
+  return calibrationRowFromSeasonResults(teamCount, seasonNumbers, era, evidenceTeams, results);
+}
+
+function calibrationRowFromSeasonResults(
+  teamCount: number,
+  seasonNumbers: readonly number[],
+  era: EraBandRow,
+  evidenceTeams: ReturnType<typeof makeEvidenceTeams>,
+  results: readonly EvidenceSeasonResult[],
+): CalibrationRow {
+  if (results.length !== seasonNumbers.length) throw new Error("Calibration results must match the requested season count");
   const levels = new Map(evidenceTeams.map(({ team, level }) => [team.id, level]));
   const goals: number[] = [];
   const homeWins: number[] = [];
@@ -73,8 +86,7 @@ export function runCalibrationForSize(teamCount: number, seasonNumbers: readonly
   let closeGoals = 0;
   let mismatchMatches = 0;
   let mismatchGoals = 0;
-  for (const seasonNumber of seasonNumbers) {
-    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season);
+  for (const result of results) {
     const matchCount = result.matches.length;
     totalMatchesSimulated += matchCount;
     goals.push(result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0) / matchCount);
@@ -113,49 +125,31 @@ export function runCalibrationForSize(teamCount: number, seasonNumbers: readonly
 export async function runCalibrationForSizeYielding(teamCount: number, seasonNumbers: readonly number[], season: number, era: EraBandRow): Promise<CalibrationRow> {
   const evidenceTeams = makeEvidenceTeams(teamCount);
   const teams = evidenceTeams.map(({ team }) => team);
-  const levels = new Map(evidenceTeams.map(({ team, level }) => [team.id, level]));
-  const goals: number[] = [];
-  const homeWins: number[] = [];
-  const draws: number[] = [];
-  let totalMatchesSimulated = 0;
-  let closeMatches = 0;
-  let closeGoals = 0;
-  let mismatchMatches = 0;
-  let mismatchGoals = 0;
+  const results: EvidenceSeasonResult[] = [];
   for (const seasonNumber of seasonNumbers) {
-    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season);
-    const matchCount = result.matches.length;
-    totalMatchesSimulated += matchCount;
-    goals.push(result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0) / matchCount);
-    homeWins.push(result.matches.filter((match) => match.home.goals > match.away.goals).length / matchCount);
-    draws.push(result.matches.filter((match) => match.home.goals === match.away.goals).length / matchCount);
-    for (const match of result.matches) {
-      const gap = Math.abs(levels.get(match.homeTeamId)! - levels.get(match.awayTeamId)!);
-      const matchGoals = match.home.goals + match.away.goals;
-      if (gap <= 1) { closeMatches += 1; closeGoals += matchGoals; }
-      if (gap >= 4) { mismatchMatches += 1; mismatchGoals += matchGoals; }
-    }
+    results.push(compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
     await new Promise<void>((resolve) => { setImmediate(resolve); });
   }
-  const goalsPerMatch = extendedDistribution(goals);
-  const homeWinRate = distribution(homeWins);
-  const drawRate = distribution(draws);
+  return calibrationRowFromSeasonResults(teamCount, seasonNumbers, era, evidenceTeams, results);
+}
+
+export async function runFixedLeagueEvidenceYielding(
+  teamCount: number,
+  seasonNumbers: readonly number[],
+  season: number,
+  era: EraBandRow,
+  weights: Record<AttributeName, number>,
+): Promise<{ calibration: CalibrationRow; strength: StrengthRow }> {
+  const evidenceTeams = makeEvidenceTeams(teamCount);
+  const teams = evidenceTeams.map(({ team }) => team);
+  const results: EvidenceSeasonResult[] = [];
+  for (const seasonNumber of seasonNumbers) {
+    results.push(compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
+    await new Promise<void>((resolve) => { setImmediate(resolve); });
+  }
   return {
-    teamCount,
-    seasonsSimulated: seasonNumbers.length,
-    totalMatchesSimulated,
-    goalsPerMatch,
-    homeWinRate,
-    drawRate,
-    goalsByLevelGap: {
-      withinOneLevel: { matches: closeMatches, goalsPerMatch: Number((closeGoals / closeMatches).toFixed(6)) },
-      fourOrMoreLevelsApart: { matches: mismatchMatches, goalsPerMatch: Number((mismatchGoals / mismatchMatches).toFixed(6)) },
-    },
-    comparisons: {
-      goalsPerMatch: compareWithBand("goalsPerMatch", goalsPerMatch.mean, oneStandardDeviation(era.bands.goalsPerMatch)),
-      homeWinRate: compareWithBand("homeWinRate", homeWinRate.mean, oneStandardDeviation(era.bands.homeWinRate)),
-      drawRate: compareWithBand("drawRate", drawRate.mean, era.bands.drawRate),
-    },
+    calibration: calibrationRowFromSeasonResults(teamCount, seasonNumbers, era, evidenceTeams, results),
+    strength: strengthRowFromSeasonResults(teamCount, seasonNumbers, weights, results, evidenceTeams),
   };
 }
 

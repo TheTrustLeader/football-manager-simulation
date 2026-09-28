@@ -90,6 +90,7 @@ export interface MatchInput {
   home: TeamInput;
   away: TeamInput;
   neutralVenue?: boolean;
+  captureMinuteSnapshots?: boolean;
   decisions?: MatchDecision[];
 }
 

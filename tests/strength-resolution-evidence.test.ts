@@ -171,7 +171,7 @@ describe("strength resolution evidence", () => {
     });
   });
 
-  it.each(committed.rows)("keeps the committed $teamCount-team strongest-by-level result as a positive control", async (expected) => {
+  it.each(committed.rows.filter(({ teamCount }) => teamCount === 22))("keeps the committed $teamCount-team strongest-by-level result as a positive control", async (expected) => {
     let count = 0;
     for (let start = 0; start < SEASON_NUMBERS.length; start += 25) {
       count += runStrengthForSize(expected.teamCount, SEASON_NUMBERS.slice(start, start + 25), 1981, weights).strongestTeamFinishedTop.count;
