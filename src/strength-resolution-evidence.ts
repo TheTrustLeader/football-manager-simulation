@@ -136,6 +136,40 @@ export function runStrengthForSize(
     engineWeightedRating: engineWeightedSquadRating(entry.team, weights),
   }));
   const teams = entries.map(({ team }) => team);
+  const results = seasonNumbers.map((seasonNumber) => compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
+  return strengthRowFromSeasonResults(teamCount, seasonNumbers, weights, results, entries);
+}
+
+export interface EvidenceSeasonResult {
+  table: ReturnType<typeof runSeason>["table"];
+  matches: Array<{ homeTeamId: string; awayTeamId: string; home: { goals: number }; away: { goals: number } }>;
+}
+
+export function compactSeasonResult(result: ReturnType<typeof runSeason>): EvidenceSeasonResult {
+  return {
+    table: result.table,
+    matches: result.matches.map(({ homeTeamId, awayTeamId, home, away }) => ({
+      homeTeamId,
+      awayTeamId,
+      home: { goals: home.goals },
+      away: { goals: away.goals },
+    })),
+  };
+}
+
+export function strengthRowFromSeasonResults(
+  teamCount: number,
+  seasonNumbers: readonly number[],
+  weights: Record<AttributeName, number>,
+  results: readonly EvidenceSeasonResult[],
+  evidenceTeams: readonly EvidenceTeam[],
+): StrengthRow {
+  if (results.length !== seasonNumbers.length) throw new Error("Strength results must match the requested season count");
+  const entries = evidenceTeams.map((entry) => ({
+    ...entry,
+    actualRating: actualSquadRating(entry.team),
+    engineWeightedRating: engineWeightedSquadRating(entry.team, weights),
+  }));
   const strongestByLevelId = [...entries].sort((left, right) => right.level - left.level)[0]!.team.id;
   const strongestByActualRatingId = [...entries].sort((left, right) => right.actualRating - left.actualRating)[0]!.team.id;
   const strongestByEngineWeightedRating = [...entries].sort((left, right) => right.engineWeightedRating - left.engineWeightedRating)[0]!;
@@ -154,8 +188,7 @@ export function runStrengthForSize(
   let strongestByActualRatingTopCount = 0;
   let strongestByEngineWeightedRatingTopCount = 0;
 
-  for (const seasonNumber of seasonNumbers) {
-    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season);
+  for (const result of results) {
     const champion = result.table[0]!;
     const bottom = result.table[result.table.length - 1]!;
     const strongestPosition = result.table.findIndex((row) => row.teamId === strongestByLevelId) + 1;

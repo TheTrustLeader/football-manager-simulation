@@ -2,8 +2,10 @@ import { readFileSync } from "node:fs";
 import { deriveEraBandRow, eraBandsForSeason, readSeasonCounts } from "../src/era-bands.js";
 import { describe, expect, it } from "vitest";
 import { type CalibrationBand } from "../src/era-bands.js";
-import { compareWithBand, createCalibrationEvidence, makeCalibrationTeams, runCalibrationForSize, runCalibrationForSizeYielding, runManyLeagueCalibration, runManyLeagueCalibrationYielding, serialiseCalibrationEvidence, verifyCommittedPositiveControl, type CalibrationRow } from "../src/season-calibration-evidence.js";
+import { compareWithBand, createCalibrationEvidence, makeCalibrationTeams, runCalibrationForSize, runFixedLeagueEvidenceYielding, runManyLeagueCalibration, runManyLeagueCalibrationYielding, serialiseCalibrationEvidence, verifyCommittedPositiveControl, type CalibrationRow } from "../src/season-calibration-evidence.js";
 import { ENGINE_CONFIG, calibrationTargetsForSeason } from "../src/engine-config.js";
+import { readCommittedWeights, runStrengthForSize } from "../src/strength-resolution-evidence.js";
+import { fixedLeagueEvidence } from "./fixed-league-evidence.js";
 
 describe("season calibration evidence", () => {
   const band = (minimum: number, maximum: number): CalibrationBand => ({ minimum, maximum, aggregateMean: (minimum + maximum) / 2, seasonStandardDeviation: 0 });
@@ -20,10 +22,10 @@ describe("season calibration evidence", () => {
     expect(compareWithBand("homeWinRate", 0.7, band(0.4, 0.6)).result).toBe("FAIL");
   });
 
-  it.each([8, 12, 16, 20, 22])("reproduces the committed %i-team football distribution", async (teamCount) => {
+  it.each([8, 12, 16, 20, 22])("reproduces the committed %i-team calibration row", async (teamCount) => {
     const row = teamCount === 22
       ? await runManyLeagueCalibrationYielding(teamCount, seasons, 1981, eraBandsForSeason(1981))
-      : await runCalibrationForSizeYielding(teamCount, seasons, 1981, eraBandsForSeason(1981));
+      : (await fixedLeagueEvidence(teamCount)).calibration;
     expect(row).toEqual(committedRows.find((candidate) => candidate.teamCount === teamCount));
     if (teamCount !== 22) {
       const expected = committedStrengthRows.find((candidate) => candidate.teamCount === teamCount)!;
@@ -31,6 +33,22 @@ describe("season calibration evidence", () => {
     }
     expect(Object.values(row.comparisons).map(({ result }) => result)).toEqual(["PASS", "PASS", "PASS"]);
   }, 900_000);
+
+  it.each([8, 12, 16, 20])("reproduces the committed %i-team strength row from the shared seasons", async (teamCount) => {
+    const row = (await fixedLeagueEvidence(teamCount)).strength;
+    const expected = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")).rows
+      .find((candidate: { teamCount: number }) => candidate.teamCount === teamCount);
+    expect(row).toEqual(expected);
+  }, 900_000);
+
+  it("shares fixed-league seasons without changing either evidence row", async () => {
+    const sampleSeasons = [1, 2, 3, 4, 5];
+    const era = eraBandsForSeason(1981);
+    const weights = readCommittedWeights();
+    const shared = await runFixedLeagueEvidenceYielding(8, sampleSeasons, 1981, era, weights);
+    expect(shared.calibration).toEqual(runCalibrationForSize(8, sampleSeasons, 1981, era));
+    expect(shared.strength).toEqual(runStrengthForSize(8, sampleSeasons, 1981, weights));
+  });
 
   it("keeps the committed calibration positive control complete", () => {
     expect(verifyCommittedPositiveControl(committedRows.filter((row) => row.teamCount !== 22))).toEqual([8, 12, 16, 20].map((teamCount) => ({ teamCount, source: "evidence/strength-resolution-evidence.json", status: "REPRODUCED" })));

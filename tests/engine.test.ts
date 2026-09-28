@@ -60,6 +60,13 @@ describe("Match Engine", () => {
     }
   });
 
+  it("can omit unused minute snapshots without changing the match result", () => {
+    const detailed = simulateMatch(input(24680));
+    const compact = simulateMatch({ ...input(24680), captureMinuteSnapshots: false });
+    expect(compact.minuteSnapshots).toEqual([]);
+    expect({ home: compact.home, away: compact.away }).toEqual({ home: detailed.home, away: detailed.away });
+  });
+
   it("rejects an invalid starting XI", () => {
     const bad = input();
     bad.home.starters = bad.home.starters.slice(0, 10);
