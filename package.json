@@ -25,12 +25,16 @@
     "gate1a:four-style-baseline": "tsx src/gate-1a-four-style-baseline.ts",
     "review002:evidence": "tsx src/review-002-full-evidence.ts",
     "game-state:evidence": "tsx src/game-state-full-evidence.ts",
-    "golden:print": "tsx src/print-golden.ts"
+    "golden:print": "tsx src/print-golden.ts",
+    "playable:evidence": "tsx src/playable-season-evidence.ts",
+    "web:dev": "vite",
+    "web:build": "vite build"
   },
   "devDependencies": {
     "@types/node": "^24.2.1",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "vite": "^7.1.7"
   }
 }
