@@ -169,8 +169,9 @@ describe("substitution decisions", () => {
     expect(() => simulateMatch(repeated)).toThrow(/brought on twice|not an available substitute/);
 
     const excessive = input();
-    excessive.decisions = Array.from({ length: ENGINE_CONFIG.substitutions.maximum + 1 }, (_, index) =>
+    excessive.decisions = Array.from({ length: 6 }, (_, index) =>
       decision(excessive, 20 + index, excessive.home.starters[index + 1]!, excessive.home.substitutes[index + 1]!));
+    excessive.seasonRules = { substitutesNamed: 11, substitutesUsed: 5 };
     expect(() => simulateMatch(excessive)).toThrow(/cannot make more than 5 substitutions/);
   });
 

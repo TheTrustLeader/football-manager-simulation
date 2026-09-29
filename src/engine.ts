@@ -446,6 +446,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
   for (let minute = 1; minute <= c.matchMinutes; minute += 1) {
     for (const decision of input.decisions?.filter((candidate) => candidate.minute === minute) ?? []) {
       const homeDecision = decision.teamId === input.home.id;
+      if (decision.whenTrailing && (homeDecision ? homeStats.goals >= awayStats.goals : awayStats.goals >= homeStats.goals)) continue;
       applySubstitution(
         decision,
         homeDecision ? input.home : input.away,
@@ -620,6 +621,9 @@ export function validateMatchInput(input: MatchInput): void {
     if (team.starters.filter((p) => p.primaryPosition === "FW").length === 0) throw new Error(`${team.name} must have at least one starting forward`);
     const ids = new Set([...team.starters, ...team.substitutes].map((p) => p.id));
     if (ids.size !== team.starters.length + team.substitutes.length) throw new Error(`${team.name} contains duplicate player ids`);
+    if (input.seasonRules && team.substitutes.length > input.seasonRules.substitutesNamed) {
+      throw new Error(`${team.name} cannot name more than ${input.seasonRules.substitutesNamed} substitutes`);
+    }
   }
   for (const decision of input.decisions ?? []) {
     if (!Number.isInteger(decision.minute) || decision.minute < 1 || decision.minute > ENGINE_CONFIG.matchMinutes) {
@@ -633,8 +637,9 @@ export function validateMatchInput(input: MatchInput): void {
   }
   for (const team of [input.home, input.away]) {
     const decisions = (input.decisions ?? []).filter((decision) => decision.teamId === team.id);
-    if (decisions.length > ENGINE_CONFIG.substitutions.maximum) {
-      throw new Error(`${team.name} cannot make more than ${ENGINE_CONFIG.substitutions.maximum} substitutions`);
+    const allowed = input.seasonRules?.substitutesUsed ?? team.substitutes.length;
+    if (decisions.length > allowed) {
+      throw new Error(`${team.name} cannot make more than ${allowed} substitutions`);
     }
     const active = new Set(team.starters.map((player) => player.id));
     const available = new Set(team.substitutes.map((player) => player.id));

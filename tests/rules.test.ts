@@ -6,6 +6,8 @@ import type { SeasonRule, SeasonRules } from "../src/rules.js";
 import type { MatchOutput } from "../src/types.js";
 
 const CHANGING_RULES: readonly SeasonRule[] = [
+  { rule: "substitutesNamed", value: 1, firstSeason: 1981, source: "Test named substitutes row." },
+  { rule: "substitutesUsed", value: 1, firstSeason: 1981, source: "Test used substitutes row." },
   {
     rule: "leagueShape", value: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 }, firstSeason: 1981,
     source: "Test league-shape row.",
@@ -38,7 +40,7 @@ const MATCHES = [
 ];
 
 function rules(tableTieBreak: SeasonRules["tableTieBreak"]): SeasonRules {
-  return { pointsForAWin: 3, tableTieBreak, firstDivisionTeams: 22, leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 } };
+  return { pointsForAWin: 3, tableTieBreak, firstDivisionTeams: 22, substitutesNamed: 1, substitutesUsed: 1, leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 } };
 }
 
 describe("season rules", () => {
@@ -60,6 +62,8 @@ describe("season rules", () => {
       pointsForAWin: 3,
       tableTieBreak: "goalDifference",
       firstDivisionTeams: 22,
+      substitutesNamed: 1,
+      substitutesUsed: 1,
       leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
     });
   });
@@ -129,6 +133,8 @@ describe("season rules", () => {
       pointsForAWin: 3,
       tableTieBreak: "headToHead" as SeasonRules["tableTieBreak"],
       firstDivisionTeams: 22,
+      substitutesNamed: 1,
+      substitutesUsed: 1,
       leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
     })).toThrow("Unknown table tie-break: headToHead");
   });

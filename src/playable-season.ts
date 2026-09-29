@@ -5,9 +5,9 @@ import { SeededRandom } from "./random.js";
 import { rulesForSeason, SEASON_RULES } from "./rules.js";
 import type { Fixture, LeagueTableRow, SeasonPlayerStats } from "./competition.js";
 import type { SeasonId, SeasonRule } from "./rules.js";
-import type { MatchOutput, Tactics, TeamInput } from "./types.js";
+import type { MatchDecision, MatchOutput, Player, Tactics, TeamInput } from "./types.js";
 
-export const PLAYABLE_SAVE_VERSION = 2;
+export const PLAYABLE_SAVE_VERSION = 3;
 
 export interface Club { id: string; squadId: string; name: string; strength: number; squadLevel: number }
 export interface PlayableSeason {
@@ -20,6 +20,18 @@ export interface PlayableSeason {
   matches: MatchOutput[];
   nextRound: number;
   tactics: Tactics;
+  selection: MatchdaySelection;
+  playerConditions: Record<string, number>;
+}
+
+export interface MatchdaySelection {
+  starterIds: string[];
+  substituteIds: string[];
+  substitutePlan?: { minute: number; playerOff: string; playerOn: string; whenTrailing: boolean };
+}
+
+export interface MatchdayChoices extends Pick<Tactics, "formation" | "style" | "approach" | "tackling"> {
+  selection?: MatchdaySelection;
 }
 
 const CLUB_NAMES = ["Ashford Athletic", "Bramble Town", "Cedar Rovers", "Dunwich City", "Elmstead", "Foxley United", "Grantham Vale", "Hartwick", "Ironbridge", "Juniper Albion", "Kingsmere", "Larchfield", "Moorland County", "Northport", "Oakham Wanderers", "Penrose", "Queensbury", "Redcliffe", "Stonehaven", "Thornbury", "Upton Rangers", "Westcombe"];
@@ -36,7 +48,11 @@ export function ruleDescriptions(season: SeasonId, table: readonly SeasonRule[] 
       ? rules.tableTieBreak === "goalDifference" ? "Goal difference" : "Goal average"
       : row.rule === "firstDivisionTeams"
         ? `${rules.firstDivisionTeams} clubs in the First Division`
-        : `${rules.leagueShape.strongClubCount} strong clubs`);
+        : row.rule === "leagueShape"
+          ? `${rules.leagueShape.strongClubCount} strong clubs`
+          : row.rule === "substitutesNamed"
+            ? `${rules.substitutesNamed} substitute named`
+            : `${rules.substitutesUsed} substitute used`);
 }
 
 function evenlySpread(count: number, minimum: number, maximum: number): number[] {
@@ -85,13 +101,40 @@ export function teamsForPlayableSeason(state: Pick<PlayableSeason, "clubs" | "ta
   });
 }
 
+export function playableSquad(state: Pick<PlayableSeason, "clubs" | "userClubId">): Player[] {
+  const club = state.clubs.find((candidate) => candidate.id === state.userClubId)!;
+  const team = makeTeam(club.squadId, club.squadLevel);
+  return [...team.starters, ...team.substitutes];
+}
+
+function selectedTeam(team: TeamInput, selection: MatchdaySelection, formation: Tactics["formation"]): TeamInput {
+  const squad = new Map([...team.starters, ...team.substitutes].map((player) => [player.id, player]));
+  if (selection.starterIds.length !== 11 || new Set(selection.starterIds).size !== 11) throw new Error("Choose exactly 11 different starters");
+  const starters = selection.starterIds.map((id) => squad.get(id));
+  const substitutes = selection.substituteIds.map((id) => squad.get(id));
+  if ([...starters, ...substitutes].some((player) => !player)) throw new Error("Selection contains a player outside the squad");
+  if (new Set([...selection.starterIds, ...selection.substituteIds]).size !== 11 + selection.substituteIds.length) throw new Error("A player cannot be both starter and substitute");
+  const picked = starters as Player[];
+  const [defenders, midfielders, forwards] = formation.split("-").map(Number);
+  if (picked.filter((player) => player.primaryPosition === "GK").length !== 1
+    || picked.filter((player) => player.primaryPosition === "CB" || player.primaryPosition === "FB").length !== defenders
+    || picked.filter((player) => player.primaryPosition === "CM" || player.primaryPosition === "WM").length !== midfielders
+    || picked.filter((player) => player.primaryPosition === "FW").length !== forwards) throw new Error(`The chosen eleven cannot fill ${formation}`);
+  return { ...team, starters: picked, substitutes: substitutes as Player[] };
+}
+
 export function newPlayableSeason(season: SeasonId, seed: number, userClubId: string, table: readonly SeasonRule[] = SEASON_RULES): PlayableSeason {
   const clubs = clubsForSeason(season, table, seed);
   if (!clubs.some((club) => club.id === userClubId)) throw new Error("Choose a club in this division");
   const userClub = clubs.find((club) => club.id === userClubId)!;
   const user = makeTeam(userClub.squadId, userClub.squadLevel);
   const tactics = { ...user.tactics, ...DEFAULT_TACTICS };
-  return { version: PLAYABLE_SAVE_VERSION, seed, season, userClubId, clubs, fixtures: generateFixtures(clubs.map((club) => club.id), seed), matches: [], nextRound: 1, tactics };
+  const teams = clubs.map((club) => makeTeam(club.squadId, club.squadLevel));
+  const selectedUser = teams[clubs.findIndex((club) => club.id === userClubId)]!;
+  const rules = rulesForSeason(season, table);
+  const selection = { starterIds: selectedUser.starters.map((player) => player.id), substituteIds: selectedUser.substitutes.slice(0, rules.substitutesNamed).map((player) => player.id) };
+  const playerConditions = Object.fromEntries(teams.flatMap((team) => [...team.starters, ...team.substitutes]).map((player) => [player.id, player.state.condition]));
+  return { version: PLAYABLE_SAVE_VERSION, seed, season, userClubId, clubs, fixtures: generateFixtures(clubs.map((club) => club.id), seed), matches: [], nextRound: 1, tactics, selection, playerConditions };
 }
 
 /** One seeded league shared by club selection and the season that selection starts. */
@@ -106,19 +149,36 @@ export function prepareNewPlayableSeason(season: SeasonId, seed: number, table: 
   };
 }
 
-export function playMatchday(state: PlayableSeason, choices: Pick<Tactics, "formation" | "style" | "approach" | "tackling">, table: readonly SeasonRule[] = SEASON_RULES): PlayableSeason {
+export function playMatchday(state: PlayableSeason, choices: MatchdayChoices, table: readonly SeasonRule[] = SEASON_RULES): PlayableSeason {
   if (state.nextRound > state.clubs.length * 2 - 2) throw new Error("The season is already complete");
   const tactics = { ...state.tactics, ...choices };
-  const current = { ...state, tactics };
-  const byId = new Map(teamsForPlayableSeason(current).map((team) => [team.id, team]));
+  const rules = rulesForSeason(state.season, table);
+  const selection = choices.selection ?? state.selection;
+  if (selection.substituteIds.length !== rules.substitutesNamed) throw new Error(`Name exactly ${rules.substitutesNamed} substitute${rules.substitutesNamed === 1 ? "" : "s"}`);
+  const current = { ...state, tactics, selection };
+  const teams = teamsForPlayableSeason(current).map((team) => ({ ...team,
+    starters: team.starters.map((player) => ({ ...player, state: { ...player.state, condition: state.playerConditions[player.id] ?? player.state.condition } })),
+    substitutes: team.substitutes.map((player) => ({ ...player, state: { ...player.state, condition: state.playerConditions[player.id] ?? player.state.condition } })),
+  }));
+  const byId = new Map(teams.map((team) => [team.id, team]));
+  byId.set(state.userClubId, selectedTeam(byId.get(state.userClubId)!, selection, tactics.formation));
   const roundFixtures = state.fixtures.filter((fixture) => fixture.round === state.nextRound);
   const additions = roundFixtures.map((fixture) => {
     const index = state.fixtures.findIndex((candidate) => candidate.round === fixture.round && candidate.homeId === fixture.homeId && candidate.awayId === fixture.awayId);
-    return simulateMatch({ seed: (state.seed + index * 7919) >>> 0, home: byId.get(fixture.homeId)!, away: byId.get(fixture.awayId)! });
+    const home = byId.get(fixture.homeId)!;
+    const away = byId.get(fixture.awayId)!;
+    const matchHome = { ...home, substitutes: home.substitutes.slice(0, rules.substitutesNamed) };
+    const matchAway = { ...away, substitutes: away.substitutes.slice(0, rules.substitutesNamed) };
+    const user = fixture.homeId === state.userClubId ? matchHome : fixture.awayId === state.userClubId ? matchAway : undefined;
+    const plan = selection.substitutePlan;
+    const decisions: MatchDecision[] | undefined = user && plan ? [{ ...plan, teamId: user.id, type: "substitution" }] : undefined;
+    return simulateMatch({ seed: (state.seed + index * 7919) >>> 0, home: matchHome, away: matchAway, ...(decisions ? { decisions } : {}), seasonRules: rules });
   });
   // Resolve rules now as well as when presenting the table, so invalid/custom data cannot be ignored.
-  rulesForSeason(state.season, table);
-  return { ...current, matches: [...state.matches, ...additions], nextRound: state.nextRound + 1 };
+  const playerConditions = Object.assign({}, state.playerConditions, ...additions.map((match) => match.finalCondition));
+  const appeared = new Set(additions.flatMap((match) => match.contributions.filter((entry) => entry.minutesPlayed > 0).map((entry) => entry.playerId)));
+  for (const id of Object.keys(playerConditions)) if (!appeared.has(id)) playerConditions[id] = Math.min(100, playerConditions[id]! + 12);
+  return { ...current, matches: [...state.matches, ...additions], nextRound: state.nextRound + 1, playerConditions };
 }
 
 export function seasonTable(state: PlayableSeason, table: readonly SeasonRule[] = SEASON_RULES): LeagueTableRow[] {
