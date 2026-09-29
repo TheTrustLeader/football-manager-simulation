@@ -92,6 +92,8 @@ export interface MatchInput {
   neutralVenue?: boolean;
   captureMinuteSnapshots?: boolean;
   decisions?: MatchDecision[];
+  /** Dated competition rules. Every match must state which rules govern it. */
+  seasonRules: { substitutesNamed: number; substitutesUsed: number };
 }
 
 export interface MatchDecision {
@@ -100,6 +102,7 @@ export interface MatchDecision {
   type: "substitution";
   playerOff: string;
   playerOn: string;
+  whenTrailing?: boolean;
 }
 
 export type MatchEventType =

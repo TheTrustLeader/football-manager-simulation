@@ -122,7 +122,7 @@ export function simulatePerceptibilityPair(seed: number, managedHome: boolean): 
   function run(tactics: Partial<Tactics>): DisplayStats {
     const northbridge = makeTeam("northbridge", 10, tactics);
     const redmere = makeTeam("redmere", 10);
-    const result = simulateMatch({
+    const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
       seed,
       home: managedHome ? northbridge : redmere,
       away: managedHome ? redmere : northbridge,

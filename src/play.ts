@@ -446,7 +446,7 @@ async function playOne(provenance: GitProvenance): Promise<void> {
   console.log(`Seed:      ${seed}`);
   await rl.question("\nPress Enter to kick off...");
 
-  const result = simulateMatch({ seed, home: northbridge, away: redmere });
+  const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, home: northbridge, away: redmere });
   await playMatchCommentary(result, northbridge, redmere, pace);
 
   console.log(`\n${line("=")}`);

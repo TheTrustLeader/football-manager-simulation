@@ -16,7 +16,7 @@ let awayGoals = 0;
 const started = performance.now();
 
 for (let seed = 1; seed <= count; seed += 1) {
-  const result = simulateMatch({
+  const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
     seed,
     home: makeTeam("northbridge", 10),
     away: makeTeam("redmere", 10),

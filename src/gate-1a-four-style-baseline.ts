@@ -99,7 +99,7 @@ function playSeed(seed: number, managed: TeamInput, opponent: TeamInput): { resu
   const managedHome = seed % 2 === 1;
   return {
     managedHome,
-    result: simulateMatch({
+    result: simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
       seed,
       home: managedHome ? managed : opponent,
       away: managedHome ? opponent : managed,

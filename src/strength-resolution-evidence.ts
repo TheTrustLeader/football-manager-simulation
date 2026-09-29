@@ -87,7 +87,7 @@ export function makeEvidenceTeams(teamCount: number): EvidenceTeam[] {
     const level = 7 + (6 * index / (teamCount - 1));
     return {
       level,
-      team: makeTeam(`sweep-${teamCount}-team-${String(index + 1).padStart(2, "0")}`, level),
+      team: (() => { const team = makeTeam(`sweep-${teamCount}-team-${String(index + 1).padStart(2, "0")}`, level); return { ...team, substitutes: team.substitutes.slice(0, 1) }; })(),
     };
   });
 }
@@ -135,7 +135,7 @@ export function runStrengthForSize(
     actualRating: actualSquadRating(entry.team),
     engineWeightedRating: engineWeightedSquadRating(entry.team, weights),
   }));
-  const teams = entries.map(({ team }) => team);
+  const teams = entries.map(({ team }) => ({ ...team, substitutes: team.substitutes.slice(0, 1) }));
   const results = seasonNumbers.map((seasonNumber) => compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
   return strengthRowFromSeasonResults(teamCount, seasonNumbers, weights, results, entries);
 }

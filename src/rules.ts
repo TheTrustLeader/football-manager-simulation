@@ -13,6 +13,8 @@ export interface SeasonRules {
   tableTieBreak: TableTieBreak;
   firstDivisionTeams: number;
   leagueShape: LeagueShape;
+  substitutesNamed: number;
+  substitutesUsed: number;
 }
 
 export type SeasonRule = {
@@ -26,6 +28,14 @@ export type SeasonRule = {
 }[keyof SeasonRules];
 
 export const SEASON_RULES: readonly SeasonRule[] = [
+  {
+    rule: "substitutesNamed", value: 1, firstSeason: 1981,
+    source: "Football League regulations for 1981/82 allowed one named substitute.",
+  },
+  {
+    rule: "substitutesUsed", value: 1, firstSeason: 1981,
+    source: "Football League regulations for 1981/82 allowed one substitute to be used.",
+  },
   {
     rule: "leagueShape",
     value: {
@@ -58,7 +68,7 @@ export const SEASON_RULES: readonly SeasonRule[] = [
   },
 ];
 
-const RULE_NAMES: readonly (keyof SeasonRules)[] = ["pointsForAWin", "tableTieBreak", "firstDivisionTeams", "leagueShape"];
+const RULE_NAMES: readonly (keyof SeasonRules)[] = ["pointsForAWin", "tableTieBreak", "firstDivisionTeams", "leagueShape", "substitutesNamed", "substitutesUsed"];
 
 /** Resolve every rule in force for a season identified by its starting year. */
 export function rulesForSeason(
@@ -83,8 +93,12 @@ export function rulesForSeason(
       resolved.tableTieBreak = matches[0]!.value as TableTieBreak;
     } else if (rule === "firstDivisionTeams") {
       resolved.firstDivisionTeams = matches[0]!.value as number;
-    } else {
+    } else if (rule === "leagueShape") {
       resolved.leagueShape = matches[0]!.value as LeagueShape;
+    } else if (rule === "substitutesNamed") {
+      resolved.substitutesNamed = matches[0]!.value as number;
+    } else {
+      resolved.substitutesUsed = matches[0]!.value as number;
     }
   }
   return resolved;

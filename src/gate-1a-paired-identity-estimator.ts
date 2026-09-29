@@ -106,7 +106,7 @@ function countMatchSeeds(
 
   for (const matchSeed of matchSeeds) {
     const firstHome = matchSeed % 2 === 1;
-    const match = simulateMatch({
+    const match = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
       seed: matchSeed,
       captureMinuteSnapshots: false,
       home: firstHome ? first : second,

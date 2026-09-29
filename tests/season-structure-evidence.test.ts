@@ -23,11 +23,11 @@ describe("season structure evidence", () => {
   it("uses an injected match-seed function instead of the legacy sequence", () => {
     const seen: number[] = [];
     const injected = () => 0xdecafbad;
-    runSeason([makeTeam("alpha", 10), makeTeam("bravo", 10)], 12_001, SEASON, {
+    runSeason([makeTeam("alpha", 10), makeTeam("bravo", 10)].map((team) => ({ ...team, substitutes: team.substitutes.slice(0, 1) })), 12_001, SEASON, {
       matchSeed: injected,
       onMatchDrawCount: (_fixture, seed) => seen.push(seed),
     });
     expect(seen).toEqual([0xdecafbad, 0xdecafbad]);
-    expect(mixedMatchSeed(12_001, { round: 1, homeId: "alpha", awayId: "bravo" }, 0)).not.toBe(12_001);
+    expect(mixedMatchSeed(12_001, { daysSincePreviousRound: 7, round: 1, homeId: "alpha", awayId: "bravo" }, 0)).not.toBe(12_001);
   });
 });

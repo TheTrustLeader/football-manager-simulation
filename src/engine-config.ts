@@ -72,7 +72,6 @@ export const ENGINE_CONFIG = {
   version: "match-engine-config-0.11.3",
   matchMinutes: 90,
   // Substitution windows are deliberately not modelled.
-  substitutions: { maximum: 5 },
   possessionBase: 0.5,
   possessionMin: 0.38,
   possessionMax: 0.62,
