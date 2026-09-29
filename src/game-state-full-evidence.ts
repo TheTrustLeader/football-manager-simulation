@@ -40,7 +40,7 @@ const state = {
 
 const started = performance.now();
 for (const seed of seeds) {
-  const result = simulateMatch({ seed, home: makeTeam("game-state-home", 10), away: makeTeam("game-state-away", 10) });
+  const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, home: makeTeam("game-state-home", 10), away: makeTeam("game-state-away", 10) });
   homeGoals += result.home.goals;
   awayGoals += result.away.goals;
   if (result.home.goals > result.away.goals) homeWins += 1;

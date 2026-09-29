@@ -14,7 +14,7 @@ describe("season scale evidence", () => {
       seed: 1,
       season: 1981,
       teamIds: ["strong", "middle", "bottom"],
-      fixtures: [{ round: 1, homeId: "strong", awayId: "middle" }, { round: 2, homeId: "bottom", awayId: "strong" }],
+      fixtures: [{ daysSincePreviousRound: 7, round: 1, homeId: "strong", awayId: "middle" }, { daysSincePreviousRound: 7, round: 2, homeId: "bottom", awayId: "strong" }],
       matches,
       table: [
         { teamId: "strong", played: 2, won: 1, drawn: 1, lost: 0, goalsFor: 3, goalsAgainst: 1, goalDifference: 2, points: 4 },

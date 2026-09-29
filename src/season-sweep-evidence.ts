@@ -70,7 +70,8 @@ export function deriveSeasonSeed(teamCount: number, seasonNumber: number): numbe
 function makeEvidenceTeams(teamCount: number) {
   return Array.from({ length: teamCount }, (_, index) => {
     const level = 7 + (6 * index / (teamCount - 1));
-    return makeTeam(`sweep-${teamCount}-team-${String(index + 1).padStart(2, "0")}`, level);
+    const team = makeTeam(`sweep-${teamCount}-team-${String(index + 1).padStart(2, "0")}`, level);
+    return { ...team, substitutes: team.substitutes.slice(0, 1) };
   });
 }
 

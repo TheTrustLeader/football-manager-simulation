@@ -27,7 +27,10 @@ const seasonSweepSeeds = [0, 1, 7, 42, 424242];
 const sweepSizes = [2, 3, 4, 5, 6, 7, 8];
 
 function sweptTeams(size: number) {
-  return Array.from({ length: size }, (_, i) => makeTeam(`sweep-${size}-${i + 1}`, 8 + (i % 5)));
+  return Array.from({ length: size }, (_, i) => {
+    const team = makeTeam(`sweep-${size}-${i + 1}`, 8 + (i % 5));
+    return { ...team, substitutes: team.substitutes.slice(0, 1) };
+  });
 }
 
 function contributions(...players: Array<[string, number, number, number]>): MatchOutput {
@@ -129,12 +132,8 @@ describe("league table", () => {
 });
 
 describe("season", () => {
-  const teams = () => [
-    makeTeam("northbridge", 12),
-    makeTeam("redmere", 10),
-    makeTeam("kingsford", 10),
-    makeTeam("ashvale", 8),
-  ];
+  const teams = () => [makeTeam("northbridge", 12), makeTeam("redmere", 10), makeTeam("kingsford", 10), makeTeam("ashvale", 8)]
+    .map((team) => ({ ...team, substitutes: team.substitutes.slice(0, 1) }));
 
   it("replays byte-identically from the same seed, and differently from another", () => {
     const first = runSeason(teams(), 424242, 1981);
@@ -219,6 +218,11 @@ describe("season", () => {
   it("refuses duplicate teams", () => {
     const duplicated = [makeTeam("same", 10), makeTeam("same", 10)];
     expect(() => runSeason(duplicated, 1, 1981)).toThrow(/unique/);
+  });
+
+  it("refuses rather than truncating a bench larger than the season permits", () => {
+    expect(() => runSeason([makeTeam("alpha", 10), makeTeam("bravo", 10)], 1, 1981))
+      .toThrow("cannot name more than 1 substitutes");
   });
 });
 

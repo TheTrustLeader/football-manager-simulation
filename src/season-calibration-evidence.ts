@@ -44,7 +44,8 @@ export interface ManyLeagueCalibrationRow extends CalibrationRow {
 export function makeCalibrationTeams(teamCount: number, seasonNumber: number) {
   return Array.from({ length: teamCount }, (_, index) => {
     const level = 7 + (6 * index / (teamCount - 1));
-    return { level, team: makeTeam(`league-${seasonNumber}-team-${index + 1}`, level) };
+    const team = makeTeam(`league-${seasonNumber}-team-${index + 1}`, level);
+    return { level, team: { ...team, substitutes: team.substitutes.slice(0, 1) } };
   });
 }
 

@@ -23,7 +23,7 @@ const REBASELINE = "npm run --silent golden:print > tests/golden-output.json "
 const versionMatches = ENGINE_CONFIG.version === golden.engineConfigVersion;
 const configMatches = ENGINE_CONFIG_HASH === golden.engineConfigHash;
 
-const output = simulateMatch({
+const output = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
   seed: golden.seed,
   neutralVenue: true,
   home: makeTeam("golden-home", 10),

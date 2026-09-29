@@ -9,7 +9,7 @@ describe("season saves", () => {
     makeTeam("redmere", 10),
     makeTeam("kingsford", 10),
     makeTeam("ashvale", 8),
-  ], 424242, season);
+  ].map((team) => ({ ...team, substitutes: team.substitutes.slice(0, 1) })), 424242, season);
 
   it("round-trips a real engine season byte-identically", () => {
     const season = savedSeason();

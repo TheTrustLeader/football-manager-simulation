@@ -248,8 +248,8 @@ describe("goalkeeper profile isolation", () => {
     changed.starters.find((player): player is GoalkeeperPlayer => player.primaryPosition === "GK")!.attributes.kicking = 20;
     const opponent = makeTeam("keeper-isolation-opponent", 10, {}, { seed: 9128, identity: "balanced" });
 
-    const first = simulateMatch({ seed: 112233, neutralVenue: true, home: normal, away: opponent });
-    const second = simulateMatch({ seed: 112233, neutralVenue: true, home: changed, away: opponent });
+    const first = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed: 112233, neutralVenue: true, home: normal, away: opponent });
+    const second = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed: 112233, neutralVenue: true, home: changed, away: opponent });
     expect(second).toEqual(first);
   });
 
@@ -263,8 +263,8 @@ describe("goalkeeper profile isolation", () => {
     let goalsAgainstHigh = 0;
 
     for (let seed = 1; seed <= 3000; seed += 1) {
-      goalsAgainstLow += simulateMatch({ seed, neutralVenue: true, home: low, away: opponent }).away.goals;
-      goalsAgainstHigh += simulateMatch({ seed, neutralVenue: true, home: high, away: opponent }).away.goals;
+      goalsAgainstLow += simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home: low, away: opponent }).away.goals;
+      goalsAgainstHigh += simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home: high, away: opponent }).away.goals;
     }
 
     expect(goalsAgainstHigh).toBeLessThan(goalsAgainstLow);
@@ -286,8 +286,8 @@ describe("goalkeeper profile isolation", () => {
     let chancesAgainstHigh = 0;
 
     for (let seed = 1; seed <= 3000; seed += 1) {
-      chancesAgainstLow += simulateMatch({ seed, neutralVenue: true, home: low, away: opponent }).away.chances;
-      chancesAgainstHigh += simulateMatch({ seed, neutralVenue: true, home: high, away: opponent }).away.chances;
+      chancesAgainstLow += simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home: low, away: opponent }).away.chances;
+      chancesAgainstHigh += simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home: high, away: opponent }).away.chances;
     }
 
     expect(chancesAgainstHigh).toBeLessThan(chancesAgainstLow);

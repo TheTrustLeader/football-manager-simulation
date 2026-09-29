@@ -117,7 +117,7 @@ describe("playable season", () => {
   });
 
   it("plainly refuses another save version", () => {
-    const json = serializePlayableSeason(newPlayableSeason(1981, 1, "club-1")).replace(`"version":2`, `"version":1`);
+    const json = serializePlayableSeason(newPlayableSeason(1981, 1, "club-1")).replace(`"version":3`, `"version":1`);
     expect(() => loadPlayableSeason(json)).toThrow("different version");
   });
 });

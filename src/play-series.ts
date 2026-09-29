@@ -210,7 +210,7 @@ async function main(): Promise<void> {
       console.log(`Seed: ${seed}`);
       console.log(line("="));
 
-      const result = simulateMatch({ seed, home, away });
+      const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, home, away });
       const managedStats = managedHome ? result.home : result.away;
       const opponentStats = managedHome ? result.away : result.home;
       const managedGoals = managedStats.goals;

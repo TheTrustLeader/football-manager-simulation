@@ -14,7 +14,7 @@ const provenance = readGitProvenance();
 // wrong number gets blessed as correct.
 console.error(`${formatRunProvenance("MATCH LAB GOLDEN OUTPUT", provenance)}\n`);
 
-const output = simulateMatch({
+const output = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
   seed,
   neutralVenue: true,
   home: makeTeam("golden-home", 10),

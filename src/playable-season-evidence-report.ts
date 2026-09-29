@@ -1,7 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { simulateMatch } from "./engine.js";
-import { DEFAULT_TACTICS, newPlayableSeason, seasonTable, teamsForPlayableSeason } from "./playable-season.js";
+import { DEFAULT_TACTICS, newPlayableSeason, playMatchday, seasonTable } from "./playable-season.js";
 
 export const PLAYABLE_EVIDENCE_SEASON = 1981;
 export const PLAYABLE_EVIDENCE_FIRST_SEED = 900001;
@@ -45,16 +44,7 @@ export function generatePlayableSeasonEvidenceRange(firstSeed: number, lastSeed:
     const shownFavouriteId = shownOrder[0]!.id;
     const shownTopFiveIds = new Set(shownOrder.slice(0, 5).map((club) => club.id));
     state = { ...state, tactics: { ...state.tactics, ...DEFAULT_TACTICS } };
-    const byId = new Map(teamsForPlayableSeason(state).map((team) => [team.id, team]));
-    state = {
-      ...state,
-      matches: state.fixtures.map((fixture, index) => simulateMatch({
-        seed: (state.seed + index * 7919) >>> 0,
-        home: byId.get(fixture.homeId)!,
-        away: byId.get(fixture.awayId)!,
-      })),
-      nextRound: state.clubs.length * 2 - 1,
-    };
+    while (state.nextRound <= state.clubs.length * 2 - 2) state = playMatchday(state, DEFAULT_TACTICS);
     for (const match of state.matches) {
       matches += 1;
       goals += match.home.goals + match.away.goals;
@@ -71,7 +61,8 @@ export function generatePlayableSeasonEvidenceRange(firstSeed: number, lastSeed:
 
 export async function generatePlayableSeasonEvidence(): Promise<PlayableSeasonEvidenceReport> {
   const execFileAsync = promisify(execFile);
-  const ranges = [[900001, 900250], [900251, 900500], [900501, 900750], [900751, 901000]] as const;
+  // Match the three available CI workers; a fourth process only adds contention.
+  const ranges = [[900001, 900334], [900335, 900667], [900668, 901000]] as const;
   const partials = await Promise.all(ranges.map(async ([firstSeed, lastSeed]) => {
     const { stdout } = await execFileAsync("node_modules/.bin/tsx", ["src/playable-season-evidence-worker.ts", String(firstSeed), String(lastSeed)], { maxBuffer: 1024 * 1024 });
     return JSON.parse(stdout) as PlayableSeasonEvidenceTotals;

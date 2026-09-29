@@ -18,6 +18,8 @@ import type { MatchOutput, TeamInput } from "./types.js";
 
 export interface Fixture {
   round: number;
+  /** REASONED/TO SOURCE: days since the previous league round. */
+  daysSincePreviousRound: number;
   homeId: string;
   awayId: string;
 }
@@ -60,6 +62,11 @@ export interface SeasonRunOptions {
 const POINTS_FOR_A_DRAW = 1;
 const BYE = " bye";
 
+/** Explicitly choose the default dated bench for non-interactive season/evidence callers. */
+export function defaultMatchdayTeam(team: TeamInput, season: SeasonId): TeamInput {
+  return { ...team, substitutes: team.substitutes.slice(0, rulesForSeason(season).substitutesNamed) };
+}
+
 /** Fisher-Yates driven by the repo's own seeded generator, so a seed fixes the order. */
 function seededShuffle<T>(values: readonly T[], random: SeededRandom): T[] {
   const out = [...values];
@@ -100,8 +107,9 @@ export function generateFixtures(teamIds: readonly string[], seed: number): Fixt
       const a = arrangement[i]!;
       const b = arrangement[arrangement.length - 1 - i]!;
       if (a === BYE || b === BYE) continue;
-      fixtures.push({ round: round + 1, homeId: a, awayId: b });
-      fixtures.push({ round: round + 1 + roundsPerHalf, homeId: b, awayId: a });
+      // REASONED/TO SOURCE: use a weekly 1981/82 league schedule until the real calendar is sourced.
+      fixtures.push({ round: round + 1, daysSincePreviousRound: 7, homeId: a, awayId: b });
+      fixtures.push({ round: round + 1 + roundsPerHalf, daysSincePreviousRound: 7, homeId: b, awayId: a });
     }
     rotation = [rotation[rotation.length - 1]!, ...rotation.slice(0, -1)];
   }
@@ -249,6 +257,7 @@ export function runSeason(teams: readonly TeamInput[], seed: number, season: Sea
       seed: matchSeed,
       home: byId.get(fixture.homeId)!,
       away: byId.get(fixture.awayId)!,
+      seasonRules: rules,
     });
     const match = options.onMatchDrawCount
       ? SeededRandom.withDrawObserver(() => { draws += 1; }, simulate)

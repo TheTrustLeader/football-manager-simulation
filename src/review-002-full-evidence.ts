@@ -182,7 +182,7 @@ let awayFinalConditionMin = Number.POSITIVE_INFINITY;
 let awayFinalConditionMax = Number.NEGATIVE_INFINITY;
 
 for (const seed of seeds) {
-  const result = simulateMatch({ seed, home: baselineHome, away: baselineAway });
+  const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, home: baselineHome, away: baselineAway });
   addAggregate(baseline, result);
   for (const event of result.events) {
     if (event.type !== "goal" || event.minute < 1) continue;
@@ -234,7 +234,7 @@ for (const homeFormation of formations) {
     const home = teamForMatrix(`formation-${homeFormation}-home`, homeFormation);
     const away = teamForMatrix(`formation-${awayFormation}-away`, awayFormation);
     for (const seed of formationSeeds) {
-      const result = simulateMatch({ seed, neutralVenue: true, home, away });
+      const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home, away });
       addMatrixCell(cell, result);
     }
     const final = finaliseMatrixCell(cell);
@@ -261,7 +261,7 @@ for (const homeStyle of styles) {
     const home = makeTeam(`style-${homeStyle}-home`, 10, { style: homeStyle });
     const away = makeTeam(`style-${awayStyle}-away`, 10, { style: awayStyle });
     for (const seed of styleSeeds) {
-      const result = simulateMatch({ seed, neutralVenue: true, home, away });
+      const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home, away });
       addMatrixCell(cell, result);
     }
     const final = finaliseMatrixCell(cell);
@@ -281,7 +281,7 @@ const styleSummary = Object.fromEntries(styles.map((style) => [style, {
 const ability = emptyAggregate();
 const strong = makeTeam("ability-strong", 14);
 const weak = makeTeam("ability-weak", 8);
-for (const seed of seeds) addAggregate(ability, simulateMatch({ seed, neutralVenue: true, home: strong, away: weak }));
+for (const seed of seeds) addAggregate(ability, simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home: strong, away: weak }));
 const abilityRates = aggregateRates(ability);
 
 // 5. REVIEW-002 N4/N5 focused evidence without opening validation seeds.
@@ -296,7 +296,7 @@ let dismissedSidePostRedGoals = 0;
 const hardHome = makeTeam("red-home", 10, { tackling: "hard" });
 const hardAway = makeTeam("red-away", 10, { tackling: "hard" });
 for (const seed of focusedSeeds) {
-  const result = simulateMatch({ seed, neutralVenue: true, home: hardHome, away: hardAway });
+  const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home: hardHome, away: hardAway });
   const redEvents = result.events.filter((event) => event.type === "red-card" && event.playerId && event.teamId);
   redCards += redEvents.length;
   duplicateRedContributions += result.contributions.filter((contribution) => contribution.redCards > 1).length;
@@ -323,7 +323,7 @@ defenders[1]!.attributes.defending = 2;
 let strongDefensiveActions = 0;
 let weakDefensiveActions = 0;
 for (const seed of focusedSeeds) {
-  const result = simulateMatch({ seed, neutralVenue: true, home: defenceHome, away: defenceAway });
+  const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home: defenceHome, away: defenceAway });
   strongDefensiveActions += result.contributions.find((entry) => entry.playerId === defenders[0]!.id)!.defensiveActions;
   weakDefensiveActions += result.contributions.find((entry) => entry.playerId === defenders[1]!.id)!.defensiveActions;
 }
