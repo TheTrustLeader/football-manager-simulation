@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-fm-style-1-the-right-style-depends-on-the-o
+head=d43f586d4cf04c2986863e10a24d11ee3b7b83d2
+tree=5158e2a07bcfd33dfde4529d62e072e131924e90
+base=f21ffe3b2c93ba17b3f5dae56cd577482beb68da
+item=FM-codex-github-mention-fm-style-1-the-right-style-
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-29 23:14 BST

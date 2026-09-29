@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-70-r1-end-season-screen
+head=019157c41c4f22e0e7d4c59d923725809a849119
+tree=29331b6bbc293dd98973988d15374b8668b0525b
+base=f21ffe3b2c93ba17b3f5dae56cd577482beb68da
+item=FM-codex-issue-70-r1-end-season-screen
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-29 23:14 BST
