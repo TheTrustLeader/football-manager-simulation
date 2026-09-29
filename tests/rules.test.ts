@@ -40,7 +40,7 @@ const MATCHES = [
 ];
 
 function rules(tableTieBreak: SeasonRules["tableTieBreak"]): SeasonRules {
-  return { pointsForAWin: 3, tableTieBreak, firstDivisionTeams: 22, substitutesNamed: 1, substitutesUsed: 1, leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 } };
+  return { ...rulesForSeason(1981), tableTieBreak };
 }
 
 describe("season rules", () => {
@@ -130,12 +130,12 @@ describe("season rules", () => {
 
   it("rejects an unknown tie-break and names its value", () => {
     expect(() => buildLeagueTable(MATCHES, {
+      ...rulesForSeason(1981),
       pointsForAWin: 3,
       tableTieBreak: "headToHead" as SeasonRules["tableTieBreak"],
       firstDivisionTeams: 22,
       substitutesNamed: 1,
       substitutesUsed: 1,
-      leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
     })).toThrow("Unknown table tie-break: headToHead");
   });
 });

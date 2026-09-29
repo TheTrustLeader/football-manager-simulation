@@ -69,7 +69,7 @@ const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
 } as const;
 
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.11.3",
+  version: "match-engine-config-0.12.0",
   matchMinutes: 90,
   // Substitution windows are deliberately not modelled.
   possessionBase: 0.5,
@@ -110,6 +110,7 @@ export const ENGINE_CONFIG = {
     attributeDivisor: 200,
     attributeMin: -0.03,
     attributeMax: 0.05,
+    fit: { attributeBaseline: 10, divisor: 2.5, minimum: 0.5, maximum: 1.6 },
   },
   approach: {
     cautious: { attack: 0.92, defence: 1.05, territorialProgressionAdd: -0.02, spaceBehindProgressionAdd: -0.015 },

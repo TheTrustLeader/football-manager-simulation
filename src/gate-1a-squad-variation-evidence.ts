@@ -12,6 +12,7 @@ import { readParityCompensationState } from "./gate-1a-compensation-state.js";
 import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
 import type { Approach, GoalkeeperAttribute, MatchOutput, OutfieldAttribute, Player, Position, Style, TeamInput } from "./types.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 interface Aggregate {
   matches: number;
@@ -135,7 +136,7 @@ function playSeed(seed: number, managed: TeamInput, opponent: TeamInput): { resu
   const managedHome = seed % 2 === 1;
   return {
     managedHome,
-    result: simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+    result: simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
       seed,
       home: managedHome ? managed : opponent,
       away: managedHome ? opponent : managed,

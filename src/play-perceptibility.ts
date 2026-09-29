@@ -15,6 +15,7 @@ import {
 import { SeededRandom } from "./random.js";
 import { TUNING_SEED_POOL } from "./seed-pools.js";
 import type { MatchOutput, Tactics } from "./types.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 export const PAIR_COUNT = 18;
 export const PASS_THRESHOLD = 13;
@@ -122,7 +123,7 @@ export function simulatePerceptibilityPair(seed: number, managedHome: boolean): 
   function run(tactics: Partial<Tactics>): DisplayStats {
     const northbridge = makeTeam("northbridge", 10, tactics);
     const redmere = makeTeam("redmere", 10);
-    const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+    const result = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
       seed,
       home: managedHome ? northbridge : redmere,
       away: managedHome ? redmere : northbridge,

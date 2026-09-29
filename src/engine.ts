@@ -210,6 +210,24 @@ function teamProfile(team: TeamInput, runtime: TeamRuntime) {
   if (team.tactics.style === "direct") progression *= 1 + clamp((aerial - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
   if (team.tactics.style === "counter") attack *= 1 + clamp((pace - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
 
+  // Fit is deliberately derived only from the visible attributes of the eleven
+  // currently on the pitch. There is no squad identity or hidden-trait input.
+  const visibleAttributeMean = (passing + creativity + pace + aerial + finishing + defending) / 6;
+  const styleFitScore = team.tactics.style === "passing"
+    ? c.style.fit.attributeBaseline + (passing + creativity) / 2 - visibleAttributeMean
+    : team.tactics.style === "direct"
+      ? c.style.fit.attributeBaseline + (pace + aerial + finishing) / 3 - visibleAttributeMean
+      : team.tactics.style === "counter"
+        ? c.style.fit.attributeBaseline + ((defending + aerial) / 2 - visibleAttributeMean) * 10
+        : c.style.fit.attributeBaseline;
+  const styleFitMultiplier = clamp(
+    1 + (styleFitScore - c.style.fit.attributeBaseline) / c.style.fit.divisor,
+    c.style.fit.minimum,
+    c.style.fit.maximum,
+  );
+  progression *= Math.sqrt(styleFitMultiplier);
+  attack *= styleFitMultiplier;
+
   const approach = c.approach[team.tactics.approach];
   const manpower = Math.pow(runtime.activePlayers.length / c.dismissal.baselinePlayers, c.dismissal.profileExponent);
   return {
@@ -218,6 +236,7 @@ function teamProfile(team: TeamInput, runtime: TeamRuntime) {
     attack: attack * approach.attack * manpower,
     defence: defence * approach.defence * manpower,
     goalkeeper: shotStopping,
+    styleFitMultiplier,
   };
 }
 
@@ -512,7 +531,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       events.push({ minute, type: "attack", teamId: defendingTeam.id, playerId: errorDefender.id, detail: `${errorDefender.name} makes a major error` });
     }
 
-    const chanceProbability = clamp((c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor) * style.chanceRate, c.chance.min, c.chance.max);
+    const matchup = input.seasonRules.styleMatchups[attackingTeam.tactics.style][defendingTeam.tactics.style];
+    const chanceProbability = clamp((c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor) * style.chanceRate * matchup, c.chance.min, c.chance.max);
     if (!majorError && !random.chance(chanceProbability)) {
       creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
       finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots, input.captureMinuteSnapshots !== false);
@@ -616,6 +636,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
 export function validateMatchInput(input: MatchInput): void {
   if (!input.seasonRules) throw new Error("Match input must include season rules");
+  if (!input.seasonRules.styleMatchups) throw new Error("Match input must include dated style match-up rules");
   for (const team of [input.home, input.away]) {
     if (team.starters.length !== 11) throw new Error(`${team.name} must have exactly 11 starters`);
     if (team.starters.filter((p) => p.primaryPosition === "GK").length !== 1) throw new Error(`${team.name} must have exactly one starting goalkeeper`);

@@ -6,6 +6,7 @@ import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
 import type { ScoreState } from "./types.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 function poissonProbability(lambda: number, goals: number): number {
   let factorial = 1;
@@ -40,7 +41,7 @@ const state = {
 
 const started = performance.now();
 for (const seed of seeds) {
-  const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, home: makeTeam("game-state-home", 10), away: makeTeam("game-state-away", 10) });
+  const result = simulateMatch({ seasonRules: EXHIBITION_RULES_1981, seed, home: makeTeam("game-state-home", 10), away: makeTeam("game-state-away", 10) });
   homeGoals += result.home.goals;
   awayGoals += result.away.goals;
   if (result.home.goals > result.away.goals) homeWins += 1;

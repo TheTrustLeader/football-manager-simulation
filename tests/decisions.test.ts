@@ -4,9 +4,10 @@ import { buildSeasonPlayerStats } from "../src/competition.js";
 import { simulateMatch } from "../src/engine.js";
 import { makeTeam } from "../src/fixtures.js";
 import type { MatchDecision, MatchInput, Player } from "../src/types.js";
+import { EXHIBITION_RULES_1981 } from "../src/rules.js";
 
 function input(seed = 12345): MatchInput {
-  return { seed, seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, neutralVenue: true, home: makeTeam("decision-home"), away: makeTeam("decision-away") };
+  return { seed, seasonRules: EXHIBITION_RULES_1981, neutralVenue: true, home: makeTeam("decision-home"), away: makeTeam("decision-away") };
 }
 
 function decision(match: MatchInput, minute: number, off: Player, on: Player): MatchDecision {
@@ -171,7 +172,7 @@ describe("substitution decisions", () => {
     const excessive = input();
     excessive.decisions = Array.from({ length: 6 }, (_, index) =>
       decision(excessive, 20 + index, excessive.home.starters[index + 1]!, excessive.home.substitutes[index + 1]!));
-    excessive.seasonRules = { substitutesNamed: 11, substitutesUsed: 5 };
+    excessive.seasonRules = { ...EXHIBITION_RULES_1981, substitutesNamed: 11, substitutesUsed: 5 };
     expect(() => simulateMatch(excessive)).toThrow(/cannot make more than 5 substitutions/);
   });
 

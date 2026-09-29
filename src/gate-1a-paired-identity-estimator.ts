@@ -1,6 +1,7 @@
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import type { PlayingIdentity } from "./fixtures.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 export const PAIRED_ESTIMATOR_IDENTITIES = ["passing", "direct", "defensive", "balanced"] as const;
 
@@ -106,7 +107,7 @@ function countMatchSeeds(
 
   for (const matchSeed of matchSeeds) {
     const firstHome = matchSeed % 2 === 1;
-    const match = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+    const match = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
       seed: matchSeed,
       captureMinuteSnapshots: false,
       home: firstHome ? first : second,

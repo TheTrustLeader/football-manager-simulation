@@ -2,6 +2,7 @@ import { matchResultHash } from "./match-result.js";
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { formatRunProvenance, readGitProvenance } from "./provenance.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 const seed = 424242;
 const provenance = readGitProvenance();
@@ -14,7 +15,7 @@ const provenance = readGitProvenance();
 // wrong number gets blessed as correct.
 console.error(`${formatRunProvenance("MATCH LAB GOLDEN OUTPUT", provenance)}\n`);
 
-const output = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+const output = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
   seed,
   neutralVenue: true,
   home: makeTeam("golden-home", 10),

@@ -5,6 +5,7 @@ import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readGitProvenance, type GitProvenance } from "./provenance.js";
 import type { Approach, Formation, MatchEvent, MatchOutput, Player, Style, Tackling, TeamInput } from "./types.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 const rl = createInterface({ input, output });
 
@@ -446,7 +447,7 @@ async function playOne(provenance: GitProvenance): Promise<void> {
   console.log(`Seed:      ${seed}`);
   await rl.question("\nPress Enter to kick off...");
 
-  const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, home: northbridge, away: redmere });
+  const result = simulateMatch({ seasonRules: EXHIBITION_RULES_1981, seed, home: northbridge, away: redmere });
   await playMatchCommentary(result, northbridge, redmere, pace);
 
   console.log(`\n${line("=")}`);
