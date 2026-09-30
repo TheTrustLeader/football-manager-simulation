@@ -6,6 +6,7 @@ import { makeTeam, resolveSquadGeneration, SQUAD_GENERATION_HASH, SQUAD_GENERATI
 import { printRunProvenance, readEvidenceProvenance } from "./provenance.js";
 import { seedRange } from "./seed-pools.js";
 import type { Approach, MatchOutput, Style, TeamInput } from "./types.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 type ManagedClub = "northbridge" | "redmere";
 
@@ -99,7 +100,7 @@ function playSeed(seed: number, managed: TeamInput, opponent: TeamInput): { resu
   const managedHome = seed % 2 === 1;
   return {
     managedHome,
-    result: simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+    result: simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
       seed,
       home: managedHome ? managed : opponent,
       away: managedHome ? opponent : managed,

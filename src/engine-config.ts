@@ -69,7 +69,7 @@ const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
 } as const;
 
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.11.3",
+  version: "match-engine-config-0.13.0",
   matchMinutes: 90,
   // Substitution windows are deliberately not modelled.
   possessionBase: 0.5,
@@ -110,6 +110,13 @@ export const ENGINE_CONFIG = {
     attributeDivisor: 200,
     attributeMin: -0.03,
     attributeMax: 0.05,
+    fit: {
+      attributeBaseline: 10, divisor: 6.5, deadzone: 2, minimum: 0.65, maximum: 1.35,
+      // Positional roster construction gives these profiles different natural
+      // means. Subtracting them lets "best fit" describe the players rather
+      // than merely rediscovering the 4-4-2 position mix.
+      profileOffset: { passing: 0.5, direct: 0, counter: -0.2, balanced: 1.2 },
+    },
   },
   approach: {
     cautious: { attack: 0.92, defence: 1.05, territorialProgressionAdd: -0.02, spaceBehindProgressionAdd: -0.015 },

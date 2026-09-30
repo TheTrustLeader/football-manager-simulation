@@ -1,6 +1,7 @@
 import { simulateMatch } from "./engine.js";
 import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readGitProvenance } from "./provenance.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 const requested = Number.parseInt(process.argv[2] ?? "1000", 10);
 const count = Number.isFinite(requested) && requested > 0 ? requested : 1000;
@@ -16,7 +17,7 @@ let awayGoals = 0;
 const started = performance.now();
 
 for (let seed = 1; seed <= count; seed += 1) {
-  const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+  const result = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
     seed,
     home: makeTeam("northbridge", 10),
     away: makeTeam("redmere", 10),

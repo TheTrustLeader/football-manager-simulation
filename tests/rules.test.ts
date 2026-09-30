@@ -6,6 +6,8 @@ import type { SeasonRule, SeasonRules } from "../src/rules.js";
 import type { MatchOutput } from "../src/types.js";
 
 const CHANGING_RULES: readonly SeasonRule[] = [
+  { rule: "computerStyleAdaptRate", value: 0.25, firstSeason: 1981, source: "Test computer adaptation row." },
+  { rule: "styleMatchups", value: rulesForSeason(1981).styleMatchups, firstSeason: 1981, source: "Test style match-up row." },
   { rule: "substitutesNamed", value: 1, firstSeason: 1981, source: "Test named substitutes row." },
   { rule: "substitutesUsed", value: 1, firstSeason: 1981, source: "Test used substitutes row." },
   {
@@ -40,7 +42,7 @@ const MATCHES = [
 ];
 
 function rules(tableTieBreak: SeasonRules["tableTieBreak"]): SeasonRules {
-  return { pointsForAWin: 3, tableTieBreak, firstDivisionTeams: 22, substitutesNamed: 1, substitutesUsed: 1, leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 } };
+  return { ...rulesForSeason(1981), tableTieBreak };
 }
 
 describe("season rules", () => {
@@ -65,6 +67,13 @@ describe("season rules", () => {
       substitutesNamed: 1,
       substitutesUsed: 1,
       leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
+      styleMatchups: {
+        passing: { passing: 1, direct: 1.124, counter: 0.876, balanced: 1.124 },
+        direct: { passing: 0.876, direct: 1, counter: 1.124, balanced: 0.876 },
+        counter: { passing: 1.124, direct: 0.876, counter: 1, balanced: 1 },
+        balanced: { passing: 0.876, direct: 1.124, counter: 1, balanced: 1 },
+      },
+      computerStyleAdaptRate: 0.25,
     });
   });
 
@@ -130,12 +139,12 @@ describe("season rules", () => {
 
   it("rejects an unknown tie-break and names its value", () => {
     expect(() => buildLeagueTable(MATCHES, {
+      ...rulesForSeason(1981),
       pointsForAWin: 3,
       tableTieBreak: "headToHead" as SeasonRules["tableTieBreak"],
       firstDivisionTeams: 22,
       substitutesNamed: 1,
       substitutesUsed: 1,
-      leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
     })).toThrow("Unknown table tie-break: headToHead");
   });
 });

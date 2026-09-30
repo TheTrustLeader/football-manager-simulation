@@ -2,12 +2,45 @@
   "season": 1981,
   "firstSeed": 900001,
   "lastSeed": 901000,
-  "userClubId": "club-1",
+  "userClubId": "weakest-shown-strength-per-seed",
   "games": 1000,
   "matches": 462000,
-  "goalsPerMatch": 2.6907727272727273,
-  "homeWinRate": 0.47284848484848485,
-  "drawRate": 0.24698051948051947,
-  "shownFavouriteTitles": 308,
-  "shownTopFiveTitles": 961
+  "goalsPerMatch": 2.7816082251082253,
+  "homeWinRate": 0.4753614718614719,
+  "drawRate": 0.2404069264069264,
+  "shownFavouriteTitles": 294,
+  "shownTopFiveTitles": 951,
+  "computerStyleUses": {
+    "passing": 431914,
+    "direct": 146384,
+    "counter": 210519,
+    "balanced": 93183
+  },
+  "weakestClubStrategies": {
+    "balanced": {
+      "meanPosition": 19.822,
+      "standardError": 0.08285638889778611,
+      "topFiveFinishes": 0
+    },
+    "passing": {
+      "meanPosition": 18.084,
+      "standardError": 0.11518772596163253,
+      "topFiveFinishes": 3
+    },
+    "direct": {
+      "meanPosition": 19.178,
+      "standardError": 0.10068989251386885,
+      "topFiveFinishes": 1
+    },
+    "counter": {
+      "meanPosition": 18.604,
+      "standardError": 0.10707309955655858,
+      "topFiveFinishes": 1
+    },
+    "reading": {
+      "meanPosition": 16.636,
+      "standardError": 0.13232919184750958,
+      "topFiveFinishes": 6
+    }
+  }
 }

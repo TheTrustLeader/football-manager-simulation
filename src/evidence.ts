@@ -8,6 +8,7 @@ import { seedRange, type SeedPoolName } from "./seed-pools.js";
 import { eraBandsForSeason } from "./era-bands.js";
 import { runManyLeagueCalibration } from "./season-calibration-evidence.js";
 import type { Formation, ScoreState, Style } from "./types.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 interface Aggregate {
   matches: number;
@@ -115,13 +116,13 @@ const started = performance.now();
 const controlSeeds = ENGINE_CONFIG.squadGeneration.testControlSeeds;
 
 for (const seed of seeds) {
-  const baselineResult = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+  const baselineResult = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
     seed,
     home: makeTeam("home", 10, {}, { seed: controlSeeds.baseline, identity: "balanced" }),
     away: makeTeam("away", 10, {}, { seed: controlSeeds.baseline, identity: "balanced" }),
   });
   addResult(baseline, baselineResult);
-  const neutralResult = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+  const neutralResult = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
     seed,
     neutralVenue: true,
     home: makeTeam("mirror-home", 10, {}, { seed: controlSeeds.mirror, identity: "balanced" }),
@@ -136,7 +137,7 @@ for (const seed of seeds) {
   scoreStateMinutes.homeLeading += neutralResult.diagnostics.gameState.scoreStateMinutes.homeLeading;
   scoreStateMinutes.awayLeading += neutralResult.diagnostics.gameState.scoreStateMinutes.awayLeading;
 
-  const abilityResult = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+  const abilityResult = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
     seed,
     neutralVenue: true,
     home: makeTeam("strong", 14, {}, { seed: controlSeeds.ability, identity: "balanced" }),
@@ -144,7 +145,7 @@ for (const seed of seeds) {
   });
   addResult(ability, abilityResult);
 
-  const formationBaselineResult = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+  const formationBaselineResult = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
     seed,
     neutralVenue: true,
     home: makeTeam("formation-home", 10, { formation: "4-4-2" }, { seed: controlSeeds.formation, identity: "balanced" }),
@@ -152,7 +153,7 @@ for (const seed of seeds) {
   });
   addResult(formationBaseline, formationBaselineResult);
   for (const formation of ["4-3-3", "4-5-1", "3-5-2", "5-3-2"] as const) {
-    addResult(formationCandidates[formation], simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+    addResult(formationCandidates[formation], simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
       seed,
       neutralVenue: true,
       home: makeTeam("formation-home", 10, { formation }, { seed: controlSeeds.formation, identity: "balanced" }),
@@ -160,7 +161,7 @@ for (const seed of seeds) {
     }));
   }
 
-  const styleBaselineResult = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+  const styleBaselineResult = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
     seed,
     neutralVenue: true,
     home: makeTeam("style-home", 10, { style: "balanced" }, { seed: controlSeeds.style, identity: "balanced" }),
@@ -168,7 +169,7 @@ for (const seed of seeds) {
   });
   addResult(styleBaseline, styleBaselineResult);
   for (const style of ["passing", "direct", "counter"] as const) {
-    addResult(styleCandidates[style], simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+    addResult(styleCandidates[style], simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
       seed,
       neutralVenue: true,
       home: makeTeam("style-home", 10, { style }, { seed: controlSeeds.style, identity: "balanced" }),

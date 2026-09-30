@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { clubsForSeason, loadPlayableSeason, newPlayableSeason, playMatchday, prepareNewPlayableSeason, ruleDescriptions, seasonTable, serializePlayableSeason, teamsForPlayableSeason } from "../src/playable-season.js";
-import { SEASON_RULES } from "../src/rules.js";
+import { clubsForSeason, loadPlayableSeason, newPlayableSeason, playMatchday, prepareNewPlayableSeason, ruleDescriptions, seasonTable, serializePlayableSeason, teamsForPlayableSeason, usualStyle } from "../src/playable-season.js";
+import { rulesForSeason, SEASON_RULES } from "../src/rules.js";
 import { actualSquadRating, makeTeam } from "../src/fixtures.js";
 import type { PlayableSeason } from "../src/playable-season.js";
 import type { SeasonRule } from "../src/rules.js";
@@ -108,6 +108,23 @@ describe("playable season", () => {
     const winner = seasonTable(state, custom).find((row) => row.won === 1);
     expect(winner?.points).toBe(2);
     expect(ruleDescriptions(1981, custom)).toContain("2 points for a win");
+  });
+
+  it("dates and describes the computer-club adaptation rate", () => {
+    expect(rulesForSeason(1981).computerStyleAdaptRate).toBe(0.25);
+    expect(ruleDescriptions(1981)).toContain("Computer clubs adapt in 25% of matches");
+  });
+
+  it("derives a computer club's usual style from its eleven's visible attributes", () => {
+    const team = makeTeam("usual-style", 10);
+    const passingTeam = structuredClone(team);
+    for (const player of passingTeam.starters) if (player.primaryPosition !== "GK") {
+      player.attributes.passing = 20;
+      player.attributes.creativity = 20;
+    }
+    expect(usualStyle(passingTeam)).toBe("passing");
+    for (const player of passingTeam.starters) player.hidden.adaptability *= -1;
+    expect(usualStyle(passingTeam)).toBe("passing");
   });
 
   it("builds league size from rules data", () => {

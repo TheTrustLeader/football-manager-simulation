@@ -34,6 +34,8 @@ export interface MatchResult {
   seed: number;
   homeTeamId: string;
   awayTeamId: string;
+  homeStyle: MatchOutput["homeStyle"];
+  awayStyle: MatchOutput["awayStyle"];
   home: MatchOutput["home"];
   away: MatchOutput["away"];
   events: MatchOutput["events"];
@@ -47,6 +49,8 @@ export const MATCH_RESULT_FIELDS = [
   "seed",
   "homeTeamId",
   "awayTeamId",
+  "homeStyle",
+  "awayStyle",
   "home",
   "away",
   "events",
@@ -69,6 +73,8 @@ export function matchResult(output: MatchOutput): MatchResult {
     seed: output.seed,
     homeTeamId: output.homeTeamId,
     awayTeamId: output.awayTeamId,
+    homeStyle: output.homeStyle,
+    awayStyle: output.awayStyle,
     home: output.home,
     away: output.away,
     events: output.events,

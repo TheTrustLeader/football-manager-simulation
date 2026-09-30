@@ -3,11 +3,12 @@ import { describe, expect, it } from "vitest";
 import { ENGINE_CONFIG } from "../src/engine-config.js";
 import { simulateMatch, validateMatchInput } from "../src/engine.js";
 import { makeTeam } from "../src/fixtures.js";
+import { EXHIBITION_RULES_1981 } from "../src/rules.js";
 
 function input(seed = 12345) {
   return {
     seed,
-    seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+    seasonRules: EXHIBITION_RULES_1981,
     neutralVenue: true,
     home: makeTeam("home"),
     away: makeTeam("away"),
@@ -88,7 +89,7 @@ describe("Match Engine", () => {
     let weakPoints = 0;
 
     for (let seed = 1; seed <= 2000; seed += 1) {
-      const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+      const result = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
         seed,
         neutralVenue: true,
         home: makeTeam("strong", 14),
@@ -116,8 +117,8 @@ describe("Match Engine", () => {
     const matches = 5000;
 
     for (let seed = 1; seed <= matches; seed += 1) {
-      const attackingResult = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home: attacking, away: opponent });
-      const cautiousResult = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, neutralVenue: true, home: cautious, away: opponent });
+      const attackingResult = simulateMatch({ seasonRules: EXHIBITION_RULES_1981, seed, neutralVenue: true, home: attacking, away: opponent });
+      const cautiousResult = simulateMatch({ seasonRules: EXHIBITION_RULES_1981, seed, neutralVenue: true, home: cautious, away: opponent });
       attackingGoalsFor += attackingResult.home.goals;
       attackingGoalsAgainst += attackingResult.away.goals;
       cautiousGoalsFor += cautiousResult.home.goals;

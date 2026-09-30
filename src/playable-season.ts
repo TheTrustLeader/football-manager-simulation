@@ -1,11 +1,12 @@
 import { buildLeagueTable, buildSeasonPlayerStats, generateFixtures } from "./competition.js";
 import { simulateMatch } from "./engine.js";
+import { ENGINE_CONFIG } from "./engine-config.js";
 import { actualSquadRating, makeTeam } from "./fixtures.js";
 import { SeededRandom } from "./random.js";
 import { rulesForSeason, SEASON_RULES } from "./rules.js";
 import type { Fixture, LeagueTableRow, SeasonPlayerStats } from "./competition.js";
 import type { SeasonId, SeasonRule } from "./rules.js";
-import type { MatchDecision, MatchOutput, Player, Tactics, TeamInput } from "./types.js";
+import type { MatchDecision, MatchOutput, Player, Style, Tactics, TeamInput } from "./types.js";
 
 export const PLAYABLE_SAVE_VERSION = 3;
 
@@ -48,6 +49,37 @@ export const DEFAULT_TACTICS: Omit<Tactics, "captainId" | "creatorId" | "targetF
   formation: "4-4-2", style: "balanced", approach: "balanced", tackling: "normal",
 };
 
+const STYLES: readonly Style[] = ["passing", "direct", "counter", "balanced"];
+
+/** The usual style is wholly derived from the visible attributes of the current eleven. */
+export function usualStyle(team: TeamInput): Style {
+  const players = team.starters.filter((player) => player.primaryPosition !== "GK");
+  const average = (attribute: "passing" | "creativity" | "pace" | "aerial" | "finishing" | "defending" | "stamina" | "leadership") =>
+    players.reduce((sum, player) => sum + player.attributes[attribute], 0) / players.length;
+  const overall = (["passing", "creativity", "pace", "aerial", "finishing", "defending"] as const)
+    .reduce((sum, attribute) => sum + average(attribute), 0) / 6;
+  const scores: Record<Style, number> = {
+    passing: (average("passing") + average("creativity")) / 2 - overall - ENGINE_CONFIG.style.fit.profileOffset.passing,
+    direct: (average("pace") + average("aerial") + average("finishing")) / 3 - overall - ENGINE_CONFIG.style.fit.profileOffset.direct,
+    counter: (average("defending") + average("aerial")) / 2 - overall - ENGINE_CONFIG.style.fit.profileOffset.counter,
+    balanced: (average("stamina") + average("leadership")) / 2 - overall - ENGINE_CONFIG.style.fit.profileOffset.balanced,
+  };
+  return STYLES.reduce((best, style) => scores[style] > scores[best] ? style : best);
+}
+
+export function styleThatBeats(opponentStyle: Style, matchups: ReturnType<typeof rulesForSeason>["styleMatchups"]): Style {
+  const best = STYLES.reduce((winner, style) => matchups[style][opponentStyle] > matchups[winner][opponentStyle] ? style : winner);
+  return matchups[best][opponentStyle] > 1 ? best : "balanced";
+}
+
+function computerStyle(team: TeamInput, opponent: TeamInput, seed: number, adaptRate: number, matchups: ReturnType<typeof rulesForSeason>["styleMatchups"]): Style {
+  const usual = usualStyle(team);
+  const roll = new SeededRandom((seed ^ [...team.id].reduce((hash, character) => Math.imul(hash, 31) + character.charCodeAt(0), 0)) >>> 0).next();
+  if (roll >= adaptRate) return usual;
+  const opponentUsual = usualStyle(opponent);
+  return styleThatBeats(opponentUsual, matchups);
+}
+
 let cachedSquadKey = "";
 let cachedTeams: TeamInput[] = [];
 
@@ -61,9 +93,13 @@ export function ruleDescriptions(season: SeasonId, table: readonly SeasonRule[] 
         ? `${rules.firstDivisionTeams} clubs in the First Division`
         : row.rule === "leagueShape"
           ? `${rules.leagueShape.strongClubCount} strong clubs`
-          : row.rule === "substitutesNamed"
+        : row.rule === "substitutesNamed"
             ? `${rules.substitutesNamed} substitute named`
-            : `${rules.substitutesUsed} substitute used`);
+            : row.rule === "substitutesUsed"
+              ? `${rules.substitutesUsed} substitute used`
+              : row.rule === "computerStyleAdaptRate"
+                ? `Computer clubs adapt in ${Math.round(rules.computerStyleAdaptRate * 100)}% of matches`
+                : "Dated tactical match-ups" );
 }
 
 function evenlySpread(count: number, minimum: number, maximum: number): number[] {
@@ -166,7 +202,7 @@ export function prepareNewPlayableSeason(season: SeasonId, seed: number, table: 
   };
 }
 
-export function playMatchday(state: PlayableSeason, choices: MatchdayChoices, table: readonly SeasonRule[] = SEASON_RULES): PlayableSeason {
+export function playMatchday(state: PlayableSeason, choices: MatchdayChoices, table: readonly SeasonRule[] = SEASON_RULES, reusableComputerMatches?: ReadonlyMap<number, MatchOutput>): PlayableSeason {
   if (state.nextRound > state.clubs.length * 2 - 2) throw new Error("The season is already complete");
   const tactics = { ...state.tactics, ...choices };
   const rules = rulesForSeason(state.season, table);
@@ -187,14 +223,19 @@ export function playMatchday(state: PlayableSeason, choices: MatchdayChoices, ta
   byId.set(state.userClubId, selectedTeam(byId.get(state.userClubId)!, selection, tactics.formation));
   const additions = roundFixtures.map((fixture) => {
     const index = state.fixtures.findIndex((candidate) => candidate.round === fixture.round && candidate.homeId === fixture.homeId && candidate.awayId === fixture.awayId);
+    const reusable = fixture.homeId !== state.userClubId && fixture.awayId !== state.userClubId ? reusableComputerMatches?.get(index) : undefined;
+    if (reusable) return reusable;
     const home = byId.get(fixture.homeId)!;
     const away = byId.get(fixture.awayId)!;
-    const matchHome = { ...home, substitutes: home.substitutes.slice(0, rules.substitutesNamed) };
-    const matchAway = { ...away, substitutes: away.substitutes.slice(0, rules.substitutesNamed) };
+    const matchSeed = (state.seed + index * 7919) >>> 0;
+    let matchHome = { ...home, substitutes: home.substitutes.slice(0, rules.substitutesNamed) };
+    let matchAway = { ...away, substitutes: away.substitutes.slice(0, rules.substitutesNamed) };
+    if (home.id !== state.userClubId) matchHome = { ...matchHome, tactics: { ...matchHome.tactics, style: computerStyle(home, away, matchSeed, rules.computerStyleAdaptRate, rules.styleMatchups) } };
+    if (away.id !== state.userClubId) matchAway = { ...matchAway, tactics: { ...matchAway.tactics, style: computerStyle(away, home, matchSeed, rules.computerStyleAdaptRate, rules.styleMatchups) } };
     const user = fixture.homeId === state.userClubId ? matchHome : fixture.awayId === state.userClubId ? matchAway : undefined;
     const plan = selection.substitutePlan;
     const decisions: MatchDecision[] | undefined = user && plan ? [{ ...plan, teamId: user.id, type: "substitution" }] : undefined;
-    return simulateMatch({ seed: (state.seed + index * 7919) >>> 0, home: matchHome, away: matchAway, captureMinuteSnapshots: false, ...(decisions ? { decisions } : {}), seasonRules: rules });
+    return simulateMatch({ seed: matchSeed, home: matchHome, away: matchAway, captureMinuteSnapshots: false, ...(decisions ? { decisions } : {}), seasonRules: rules });
   });
   // Resolve rules now as well as when presenting the table, so invalid/custom data cannot be ignored.
   const playerConditions = Object.assign({}, recoveredConditions, ...additions.map((match) => match.finalCondition));

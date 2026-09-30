@@ -7,6 +7,7 @@ import { makeTeam } from "./fixtures.js";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { printRunProvenance, readEvidenceProvenance, type GitProvenance } from "./provenance.js";
 import type { Approach, Formation, Style, Tackling, TeamInput } from "./types.js";
+import { EXHIBITION_RULES_1981 } from "./rules.js";
 
 const rl = createInterface({ input, output });
 const formations: Formation[] = ["4-4-2", "4-3-3", "4-5-1", "3-5-2", "5-3-2"];
@@ -210,7 +211,7 @@ async function main(): Promise<void> {
       console.log(`Seed: ${seed}`);
       console.log(line("="));
 
-      const result = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY }, seed, home, away });
+      const result = simulateMatch({ seasonRules: EXHIBITION_RULES_1981, seed, home, away });
       const managedStats = managedHome ? result.home : result.away;
       const opponentStats = managedHome ? result.away : result.home;
       const managedGoals = managedStats.goals;
