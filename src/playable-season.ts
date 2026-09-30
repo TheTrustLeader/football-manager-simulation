@@ -85,8 +85,10 @@ let cachedTeams: TeamInput[] = [];
 
 export function ruleDescriptions(season: SeasonId, table: readonly SeasonRule[] = SEASON_RULES): string[] {
   const rules = rulesForSeason(season, table);
-  return table.filter((row) => season >= row.firstSeason && (row.lastSeason === undefined || season <= row.lastSeason)).map((row) => row.rule === "pointsForAWin"
-    ? `${rules.pointsForAWin} points for a win`
+  return table.filter((row) => season >= row.firstSeason && (row.lastSeason === undefined || season <= row.lastSeason)).map((row) => row.rule === "leagueRoundGapDays"
+    ? `League round gaps repeat every ${rules.leagueRoundGapDays.join(", ")} days`
+    : row.rule === "pointsForAWin"
+      ? `${rules.pointsForAWin} points for a win`
     : row.rule === "tableTieBreak"
       ? rules.tableTieBreak === "goalDifference" ? "Goal difference" : "Goal average"
       : row.rule === "firstDivisionTeams"
@@ -187,7 +189,7 @@ export function newPlayableSeason(season: SeasonId, seed: number, userClubId: st
   const rules = rulesForSeason(season, table);
   const selection = { starterIds: selectedUser.starters.map((player) => player.id), substituteIds: selectedUser.substitutes.slice(0, rules.substitutesNamed).map((player) => player.id) };
   const playerConditions = Object.fromEntries(teams.flatMap((team) => [...team.starters, ...team.substitutes]).map((player) => [player.id, player.state.condition]));
-  return { version: PLAYABLE_SAVE_VERSION, seed, season, userClubId, clubs, fixtures: generateFixtures(clubs.map((club) => club.id), seed), matches: [], nextRound: 1, tactics, selection, playerConditions };
+  return { version: PLAYABLE_SAVE_VERSION, seed, season, userClubId, clubs, fixtures: generateFixtures(clubs.map((club) => club.id), seed, season, table), matches: [], nextRound: 1, tactics, selection, playerConditions };
 }
 
 /** One seeded league shared by club selection and the season that selection starts. */

@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import { runSeason } from "./competition.js";
+import { SEASON_RULES } from "./rules.js";
 import { actualSquadRating, engineWeightedSquadRating, makeTeam } from "./fixtures.js";
 import type { AttributeName, TeamInput } from "./types.js";
 import {
@@ -136,7 +137,7 @@ export function runStrengthForSize(
     engineWeightedRating: engineWeightedSquadRating(entry.team, weights),
   }));
   const teams = entries.map(({ team }) => ({ ...team, substitutes: team.substitutes.slice(0, 1) }));
-  const results = seasonNumbers.map((seasonNumber) => compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
+  const results = seasonNumbers.map((seasonNumber) => compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season, SEASON_RULES)));
   return strengthRowFromSeasonResults(teamCount, seasonNumbers, weights, results, entries);
 }
 

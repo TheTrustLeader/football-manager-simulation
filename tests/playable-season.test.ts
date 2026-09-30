@@ -110,6 +110,31 @@ describe("playable season", () => {
     expect(ruleDescriptions(1981, custom)).toContain("2 points for a win");
   });
 
+  it("uses the dated round-gap pattern for fixtures and player recovery", () => {
+    const sixTeamRules = SEASON_RULES.map((rule) => {
+      if (rule.rule === "firstDivisionTeams") return { ...rule, value: 6 };
+      return rule;
+    }) as SeasonRule[];
+    const shortGapRules = sixTeamRules.map((rule) => rule.rule === "leagueRoundGapDays"
+      ? { ...rule, value: [7, 3], source: "Test calendar alternating weekly and midweek rounds." }
+      : rule) as SeasonRule[];
+    const playWith = (table: readonly SeasonRule[]) => {
+      let state = newPlayableSeason(1981, 13579, "club-1", table);
+      while (state.nextRound <= state.clubs.length * 2 - 2) state = playMatchday(state, choices, table);
+      return state;
+    };
+
+    const weekly = playWith(sixTeamRules);
+    const midweek = playWith(shortGapRules);
+    const averageCondition = (state: PlayableSeason) => Object.values(state.playerConditions)
+      .reduce((total, condition) => total + condition, 0) / Object.keys(state.playerConditions).length;
+
+    expect(midweek.fixtures.map((fixture) => fixture.daysSincePreviousRound))
+      .not.toEqual(weekly.fixtures.map((fixture) => fixture.daysSincePreviousRound));
+    expect(new Set(midweek.fixtures.map((fixture) => fixture.daysSincePreviousRound))).toEqual(new Set([3, 7]));
+    expect(averageCondition(midweek)).toBeLessThan(averageCondition(weekly));
+  }, 60_000);
+
   it("dates and describes the computer-club adaptation rate", () => {
     expect(rulesForSeason(1981).computerStyleAdaptRate).toBe(0.25);
     expect(ruleDescriptions(1981)).toContain("Computer clubs adapt in 25% of matches");

@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import { runSeason } from "./competition.js";
+import { SEASON_RULES } from "./rules.js";
 import { makeTeam } from "./fixtures.js";
 
 // These acceptance bands were fixed before any 50-seed sweep existed.
@@ -115,7 +116,7 @@ export function runSweepForSize(teamCount: number, seasonNumbers: readonly numbe
   let strongestTeamFinishedTop = 0;
 
   for (const seasonNumber of seasonNumbers) {
-    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season);
+    const result = runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season, SEASON_RULES);
     const totalGoals = result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0);
     const homeWins = result.matches.filter((match) => match.home.goals > match.away.goals).length;
     const draws = result.matches.filter((match) => match.home.goals === match.away.goals).length;

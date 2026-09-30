@@ -1,7 +1,7 @@
 import { simulateMatch } from "./engine.js";
 import { SeededRandom } from "./random.js";
 import { rulesForSeason } from "./rules.js";
-import type { SeasonId, SeasonRules } from "./rules.js";
+import type { SeasonId, SeasonRule, SeasonRules } from "./rules.js";
 import type { MatchOutput, TeamInput } from "./types.js";
 
 /**
@@ -89,7 +89,7 @@ function seededShuffle<T>(values: readonly T[], random: SeededRandom): T[] {
  * half repeats the first with home and away swapped, which is also what balances
  * home and away counts across the season.
  */
-export function generateFixtures(teamIds: readonly string[], seed: number): Fixture[] {
+export function generateFixtures(teamIds: readonly string[], seed: number, season: SeasonId, table: readonly SeasonRule[]): Fixture[] {
   if (teamIds.length < 2) throw new Error("A competition needs at least two teams");
   if (new Set(teamIds).size !== teamIds.length) throw new Error("Team ids must be unique");
 
@@ -97,6 +97,10 @@ export function generateFixtures(teamIds: readonly string[], seed: number): Fixt
   const entries = order.length % 2 === 0 ? order : [...order, BYE];
   const half = entries.length / 2;
   const roundsPerHalf = entries.length - 1;
+  const gapPattern = rulesForSeason(season, table).leagueRoundGapDays;
+  if (gapPattern.length === 0 || gapPattern.some((days) => !Number.isInteger(days) || days < 1)) {
+    throw new Error("League round gap days must be a non-empty list of positive integers");
+  }
 
   const fixtures: Fixture[] = [];
   let rotation = entries.slice(1);
@@ -107,9 +111,9 @@ export function generateFixtures(teamIds: readonly string[], seed: number): Fixt
       const a = arrangement[i]!;
       const b = arrangement[arrangement.length - 1 - i]!;
       if (a === BYE || b === BYE) continue;
-      // REASONED/TO SOURCE: use a weekly 1981/82 league schedule until the real calendar is sourced.
-      fixtures.push({ round: round + 1, daysSincePreviousRound: 7, homeId: a, awayId: b });
-      fixtures.push({ round: round + 1 + roundsPerHalf, daysSincePreviousRound: 7, homeId: b, awayId: a });
+      fixtures.push({ round: round + 1, daysSincePreviousRound: gapPattern[round % gapPattern.length]!, homeId: a, awayId: b });
+      const returnRound = round + roundsPerHalf;
+      fixtures.push({ round: returnRound + 1, daysSincePreviousRound: gapPattern[returnRound % gapPattern.length]!, homeId: b, awayId: a });
     }
     rotation = [rotation[rotation.length - 1]!, ...rotation.slice(0, -1)];
   }
@@ -240,13 +244,13 @@ export function buildSeasonPlayerStats(matches: readonly MatchOutput[]): SeasonP
  * the same season seed with the same teams reproduces the season exactly, and a
  * different seed does not.
  */
-export function runSeason(teams: readonly TeamInput[], seed: number, season: SeasonId, options: SeasonRunOptions = {}): SeasonResult {
-  const rules = rulesForSeason(season);
+export function runSeason(teams: readonly TeamInput[], seed: number, season: SeasonId, table: readonly SeasonRule[], options: SeasonRunOptions = {}): SeasonResult {
+  const rules = rulesForSeason(season, table);
   const byId = new Map(teams.map((team) => [team.id, team]));
   if (byId.size !== teams.length) throw new Error("Team ids must be unique");
 
   const teamIds = teams.map((team) => team.id);
-  const generatedFixtures = generateFixtures(teamIds, seed);
+  const generatedFixtures = generateFixtures(teamIds, seed, season, table);
   const fixtures = options.orderFixtures?.(generatedFixtures) ?? generatedFixtures;
   const defaultIndex = new Map(generatedFixtures.map((fixture, index) => [fixture, index]));
   const matches = fixtures.map((fixture) => {

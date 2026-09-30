@@ -11,6 +11,7 @@ export interface LeagueShape {
 import type { StyleMatchups } from "./types.js";
 
 export interface SeasonRules {
+  leagueRoundGapDays: readonly number[];
   pointsForAWin: number;
   tableTieBreak: TableTieBreak;
   firstDivisionTeams: number;
@@ -32,6 +33,12 @@ export type SeasonRule = {
 }[keyof SeasonRules];
 
 export const SEASON_RULES: readonly SeasonRule[] = [
+  {
+    rule: "leagueRoundGapDays",
+    value: [7],
+    firstSeason: 1981,
+    source: "TO SOURCE: the real 1981/82 league calendar; 7 days is a placeholder weekly pattern until that calendar is sourced.",
+  },
   {
     rule: "computerStyleAdaptRate",
     value: 0.25,
@@ -89,7 +96,7 @@ export const SEASON_RULES: readonly SeasonRule[] = [
   },
 ];
 
-const RULE_NAMES: readonly (keyof SeasonRules)[] = ["pointsForAWin", "tableTieBreak", "firstDivisionTeams", "leagueShape", "substitutesNamed", "substitutesUsed", "styleMatchups", "computerStyleAdaptRate"];
+const RULE_NAMES: readonly (keyof SeasonRules)[] = ["leagueRoundGapDays", "pointsForAWin", "tableTieBreak", "firstDivisionTeams", "leagueShape", "substitutesNamed", "substitutesUsed", "styleMatchups", "computerStyleAdaptRate"];
 
 /** Resolve every rule in force for a season identified by its starting year. */
 export function rulesForSeason(
@@ -108,7 +115,9 @@ export function rulesForSeason(
       const problem = matches.length === 0 ? "no matching row" : "overlapping rows";
       throw new Error(`${String(rule)} for season ${season}: ${problem}`);
     }
-    if (rule === "pointsForAWin") {
+    if (rule === "leagueRoundGapDays") {
+      resolved.leagueRoundGapDays = matches[0]!.value as readonly number[];
+    } else if (rule === "pointsForAWin") {
       resolved.pointsForAWin = matches[0]!.value as number;
     } else if (rule === "tableTieBreak") {
       resolved.tableTieBreak = matches[0]!.value as TableTieBreak;

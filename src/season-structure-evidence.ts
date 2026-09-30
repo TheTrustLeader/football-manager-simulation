@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { generateFixtures, runSeason, type Fixture } from "./competition.js";
 import { engineWeightedSquadRating } from "./fixtures.js";
 import { deriveSeasonSeed } from "./season-sweep-evidence.js";
+import { SEASON_RULES } from "./rules.js";
 import { LEAGUE_SIZES, makeEvidenceTeams, readCommittedWeights } from "./strength-resolution-evidence.js";
 
 export const OUTPUT_PATH = "evidence/season-structure-evidence.json";
@@ -30,7 +31,7 @@ export const mixedMatchSeed: MatchSeedFunction = (seed, fixture) =>
 
 export function fixtureBalance(teamCount: number) {
   const ids = makeEvidenceTeams(teamCount).map(({ team }) => team.id);
-  const fixtures = generateFixtures(ids, deriveSeasonSeed(teamCount, 1));
+  const fixtures = generateFixtures(ids, deriveSeasonSeed(teamCount, 1), SEASON, SEASON_RULES);
   const teams = ids.map((id) => ({
     teamId: id,
     matches: fixtures.filter((fixture) => fixture.homeId === id || fixture.awayId === id).length,
@@ -86,13 +87,13 @@ export function runStructureEvidence(seedFunction: MatchSeedFunction) {
     for (const seasonNumber of SEASONS) {
       const seasonSeed = deriveSeasonSeed(teamCount, seasonNumber);
       const records: Array<{ seed: number; strongest: boolean }> = [];
-      const legacy = runSeason(teams, seasonSeed, SEASON, {
+      const legacy = runSeason(teams, seasonSeed, SEASON, SEASON_RULES, {
         onMatchDrawCount: (fixture, seed, draws) => {
           records.push({ seed, strongest: fixture.homeId === strongest || fixture.awayId === strongest });
           maximumDraws = Math.max(maximumDraws, draws);
         },
       });
-      const mixed = runSeason(teams, seasonSeed, SEASON, { matchSeed: seedFunction });
+      const mixed = runSeason(teams, seasonSeed, SEASON, SEASON_RULES, { matchSeed: seedFunction });
       if (legacy.table[0]!.teamId === strongest) legacyTitles += 1;
       if (mixed.table[0]!.teamId === strongest) mixedTitles += 1;
       legacy.fixtures.forEach((fixture, index) => {
@@ -127,7 +128,7 @@ export function runStructureEvidence(seedFunction: MatchSeedFunction) {
   const strongest12 = rows.find((row) => row.teamCount === 12)!.strongestTeamId;
   let reversedTitles = 0;
   for (const seasonNumber of SEASONS) {
-    const reversed = runSeason(twelveTeams, deriveSeasonSeed(12, seasonNumber), SEASON, {
+    const reversed = runSeason(twelveTeams, deriveSeasonSeed(12, seasonNumber), SEASON, SEASON_RULES, {
       orderFixtures: (fixtures) => [...fixtures].sort((a, b) => b.round - a.round || a.homeId.localeCompare(b.homeId) || a.awayId.localeCompare(b.awayId)),
     });
     if (reversed.table[0]!.teamId === strongest12) reversedTitles += 1;
