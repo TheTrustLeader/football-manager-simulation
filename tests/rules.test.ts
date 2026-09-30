@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { buildLeagueTable, runSeason } from "../src/competition.js";
 import { makeTeam } from "../src/fixtures.js";
-import { rulesForSeason } from "../src/rules.js";
+import { rulesForSeason, SEASON_RULES } from "../src/rules.js";
 import type { SeasonRule, SeasonRules } from "../src/rules.js";
 import type { MatchOutput } from "../src/types.js";
 
 const CHANGING_RULES: readonly SeasonRule[] = [
+  { rule: "leagueRoundGapDays", value: [7], firstSeason: 1981, source: "Test weekly calendar." },
   { rule: "computerStyleAdaptRate", value: 0.25, firstSeason: 1981, source: "Test computer adaptation row." },
   { rule: "styleMatchups", value: rulesForSeason(1981).styleMatchups, firstSeason: 1981, source: "Test style match-up row." },
   { rule: "substitutesNamed", value: 1, firstSeason: 1981, source: "Test named substitutes row." },
@@ -61,6 +62,7 @@ describe("season rules", () => {
 
   it("has the English rules in force at the game start", () => {
     expect(rulesForSeason(1981)).toEqual({
+      leagueRoundGapDays: [7],
       pointsForAWin: 3,
       tableTieBreak: "goalDifference",
       firstDivisionTeams: 22,
@@ -79,7 +81,7 @@ describe("season rules", () => {
 
   it("rejects seasons before the game starts through lookup and season play", () => {
     expect(() => rulesForSeason(1980)).toThrow("before the game starts");
-    expect(() => runSeason([makeTeam("alpha", 10), makeTeam("bravo", 10)], 1, 1980))
+    expect(() => runSeason([makeTeam("alpha", 10), makeTeam("bravo", 10)], 1, 1980, SEASON_RULES))
       .toThrow("before the game starts");
   });
 

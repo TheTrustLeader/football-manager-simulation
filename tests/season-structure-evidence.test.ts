@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { runSeason } from "../src/competition.js";
 import { makeTeam } from "../src/fixtures.js";
+import { SEASON_RULES } from "../src/rules.js";
 import { fixtureBalance, mixedMatchSeed, SEASON } from "../src/season-structure-evidence.js";
 
 describe("season structure evidence", () => {
@@ -23,7 +24,7 @@ describe("season structure evidence", () => {
   it("uses an injected match-seed function instead of the legacy sequence", () => {
     const seen: number[] = [];
     const injected = () => 0xdecafbad;
-    runSeason([makeTeam("alpha", 10), makeTeam("bravo", 10)].map((team) => ({ ...team, substitutes: team.substitutes.slice(0, 1) })), 12_001, SEASON, {
+    runSeason([makeTeam("alpha", 10), makeTeam("bravo", 10)].map((team) => ({ ...team, substitutes: team.substitutes.slice(0, 1) })), 12_001, SEASON, SEASON_RULES, {
       matchSeed: injected,
       onMatchDrawCount: (_fixture, seed) => seen.push(seed),
     });

@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import { runSeason } from "./competition.js";
+import { SEASON_RULES } from "./rules.js";
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { makeTeam, SQUAD_GENERATION_HASH, SQUAD_GENERATION_VERSION } from "./fixtures.js";
 import { readEvidenceProvenance } from "./provenance.js";
@@ -92,7 +93,7 @@ function main(): void {
   const rows = TEAM_COUNTS.map((teamCount) => {
     const teams = makeEvidenceTeams(teamCount);
     const started = performance.now();
-    const season = runSeason(teams, SEASON_SEED + teamCount, 1981);
+    const season = runSeason(teams, SEASON_SEED + teamCount, 1981, SEASON_RULES);
     return summariseSeason(season, teams[teams.length - 1]!.id, performance.now() - started);
   });
   const evidence = {

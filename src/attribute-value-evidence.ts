@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { runSeason } from "./competition.js";
+import { SEASON_RULES } from "./rules.js";
 import { makeEvidenceTeams } from "./strength-resolution-evidence.js";
 import type { AttributeName, TeamInput } from "./types.js";
 import { deriveSeasonSeed } from "./season-sweep-evidence.js";
@@ -93,8 +94,8 @@ export function runTreatment(
   }
   const differences = seasonNumbers.map((seasonNumber) => {
     const seed = deriveSeasonSeed(12, seasonNumber);
-    const baseline = runSeason(baseTeams, seed, season).table.find((row) => row.teamId === treatedTeam.id)!.points;
-    const treated = runSeason(treatedTeams, seed, season).table.find((row) => row.teamId === treatedTeam.id)!.points;
+    const baseline = runSeason(baseTeams, seed, season, SEASON_RULES).table.find((row) => row.teamId === treatedTeam.id)!.points;
+    const treated = runSeason(treatedTeams, seed, season, SEASON_RULES).table.find((row) => row.teamId === treatedTeam.id)!.points;
     return treated - baseline;
   });
   return {

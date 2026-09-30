@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildLeagueTable, buildSeasonPlayerStats, generateFixtures, runSeason } from "../src/competition.js";
 import { makeTeam } from "../src/fixtures.js";
-import { rulesForSeason } from "../src/rules.js";
+import { rulesForSeason, SEASON_RULES } from "../src/rules.js";
 import type { MatchOutput } from "../src/types.js";
 
 // buildLeagueTable reads only the four fields below, so a table test does not
@@ -45,7 +45,7 @@ describe("fixture generation", () => {
   it("schedules every team home and away against every other, exactly once", () => {
     for (const size of [2, 3, 4, 5, 6]) {
       const ids = Array.from({ length: size }, (_, i) => `team-${i + 1}`);
-      const fixtures = generateFixtures(ids, 424242);
+      const fixtures = generateFixtures(ids, 424242, 1981, SEASON_RULES);
       const played = fixtures.map((f) => `${f.homeId} v ${f.awayId}`).sort();
 
       expect(played, `${size} teams: every ordered pairing exactly once`)
@@ -59,7 +59,7 @@ describe("fixture generation", () => {
   it("never asks a team to play twice in the same round", () => {
     const ids = Array.from({ length: 6 }, (_, i) => `team-${i + 1}`);
     const byRound = new Map<number, string[]>();
-    for (const fixture of generateFixtures(ids, 99)) {
+    for (const fixture of generateFixtures(ids, 99, 1981, SEASON_RULES)) {
       const teams = byRound.get(fixture.round) ?? [];
       teams.push(fixture.homeId, fixture.awayId);
       byRound.set(fixture.round, teams);
@@ -71,13 +71,13 @@ describe("fixture generation", () => {
 
   it("is fixed by the seed, and a different seed gives a different order", () => {
     const ids = ["a", "b", "c", "d", "e", "f"];
-    expect(generateFixtures(ids, 1)).toEqual(generateFixtures(ids, 1));
-    expect(generateFixtures(ids, 1)).not.toEqual(generateFixtures(ids, 2));
+    expect(generateFixtures(ids, 1, 1981, SEASON_RULES)).toEqual(generateFixtures(ids, 1, 1981, SEASON_RULES));
+    expect(generateFixtures(ids, 1, 1981, SEASON_RULES)).not.toEqual(generateFixtures(ids, 2, 1981, SEASON_RULES));
   });
 
   it("refuses a competition it cannot schedule", () => {
-    expect(() => generateFixtures(["only-one"], 1)).toThrow(/at least two teams/);
-    expect(() => generateFixtures(["a", "a"], 1)).toThrow(/unique/);
+    expect(() => generateFixtures(["only-one"], 1, 1981, SEASON_RULES)).toThrow(/at least two teams/);
+    expect(() => generateFixtures(["a", "a"], 1, 1981, SEASON_RULES)).toThrow(/unique/);
   });
 });
 
@@ -136,9 +136,9 @@ describe("season", () => {
     .map((team) => ({ ...team, substitutes: team.substitutes.slice(0, 1) }));
 
   it("replays byte-identically from the same seed, and differently from another", () => {
-    const first = runSeason(teams(), 424242, 1981);
-    const second = runSeason(teams(), 424242, 1981);
-    const other = runSeason(teams(), 424243, 1981);
+    const first = runSeason(teams(), 424242, 1981, SEASON_RULES);
+    const second = runSeason(teams(), 424242, 1981, SEASON_RULES);
+    const other = runSeason(teams(), 424243, 1981, SEASON_RULES);
 
     // The whole season, not just the table: fixtures, every match output and the
     // standings. A table can match by coincidence; the full object cannot.
@@ -147,7 +147,7 @@ describe("season", () => {
   });
 
   it("plays every fixture and gives every team the same number of games", () => {
-    const season = runSeason(teams(), 7, 1981);
+    const season = runSeason(teams(), 7, 1981, SEASON_RULES);
     expect(season.matches).toHaveLength(season.fixtures.length);
     expect(season.fixtures).toHaveLength(4 * 3); // every ordered pair of 4 teams
 
@@ -157,7 +157,7 @@ describe("season", () => {
   });
 
   it("produces a table whose points and goals agree with the matches played", () => {
-    const season = runSeason(teams(), 11, 1981);
+    const season = runSeason(teams(), 11, 1981, SEASON_RULES);
     const goalsFor = season.table.reduce((total, r) => total + r.goalsFor, 0);
     const goalsAgainst = season.table.reduce((total, r) => total + r.goalsAgainst, 0);
     const matchGoals = season.matches.reduce((t, m) => t + m.home.goals + m.away.goals, 0);
@@ -175,7 +175,7 @@ describe("season", () => {
   });
 
   it("reconciles player totals with the raw matches and league table", () => {
-    const season = runSeason(teams(), 11, 1981);
+    const season = runSeason(teams(), 11, 1981, SEASON_RULES);
     const playerGoals = season.playerStats.reduce((total, player) => total + player.goals, 0);
     const contributionGoals = season.matches.flatMap((match) => match.contributions)
       .reduce((total, player) => total + player.goals, 0);
@@ -210,18 +210,18 @@ describe("season", () => {
   });
 
   it("produces byte-identical player stats from the same season seed", () => {
-    const first = runSeason(teams(), 424242, 1981).playerStats;
-    const second = runSeason(teams(), 424242, 1981).playerStats;
+    const first = runSeason(teams(), 424242, 1981, SEASON_RULES).playerStats;
+    const second = runSeason(teams(), 424242, 1981, SEASON_RULES).playerStats;
     expect(JSON.stringify(second)).toBe(JSON.stringify(first));
   });
 
   it("refuses duplicate teams", () => {
     const duplicated = [makeTeam("same", 10), makeTeam("same", 10)];
-    expect(() => runSeason(duplicated, 1, 1981)).toThrow(/unique/);
+    expect(() => runSeason(duplicated, 1, 1981, SEASON_RULES)).toThrow(/unique/);
   });
 
   it("refuses rather than truncating a bench larger than the season permits", () => {
-    expect(() => runSeason([makeTeam("alpha", 10), makeTeam("bravo", 10)], 1, 1981))
+    expect(() => runSeason([makeTeam("alpha", 10), makeTeam("bravo", 10)], 1, 1981, SEASON_RULES))
       .toThrow("cannot name more than 1 substitutes");
   });
 });
@@ -234,7 +234,7 @@ describe("seed-swept competition invariants", () => {
 
       for (const seed of sweepSeeds) {
         const context = `${size} teams, seed ${seed}`;
-        const fixtures = generateFixtures(ids, seed);
+        const fixtures = generateFixtures(ids, seed, 1981, SEASON_RULES);
         const playedPairs = fixtures
           .map((fixture) => `${fixture.homeId} v ${fixture.awayId}`)
           .sort();
@@ -273,9 +273,9 @@ describe("seed-swept competition invariants", () => {
       for (const seed of seasonSweepSeeds) {
         const context = `${size} teams, seed ${seed}`;
         const teams = sweptTeams(size);
-        const season = runSeason(teams, seed, 1981);
-        const replay = runSeason(sweptTeams(size), seed, 1981);
-        const other = runSeason(sweptTeams(size), (seed + 1) >>> 0, 1981);
+        const season = runSeason(teams, seed, 1981, SEASON_RULES);
+        const replay = runSeason(sweptTeams(size), seed, 1981, SEASON_RULES);
+        const other = runSeason(sweptTeams(size), (seed + 1) >>> 0, 1981, SEASON_RULES);
 
         expect(JSON.stringify(replay), `${context}: identical seed replays byte-identically`)
           .toBe(JSON.stringify(season));

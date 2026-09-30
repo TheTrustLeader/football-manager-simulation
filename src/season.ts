@@ -1,6 +1,7 @@
 import { formatLeagueTable, formatTopScorers, runSeason } from "./competition.js";
 import { makeTeam } from "./fixtures.js";
 import { printRunProvenance, readGitProvenance } from "./provenance.js";
+import { SEASON_RULES } from "./rules.js";
 
 // A four-team example so the football can be eyeballed. Team ids and levels are
 // placeholders for a demonstration, not a league design: naming and league size
@@ -17,7 +18,7 @@ const seed = Number.isFinite(requested) ? requested : 424242;
 
 printRunProvenance("MATCH LAB SEASON", readGitProvenance());
 
-const season = runSeason(TEAMS, seed, 1981);
+const season = runSeason(TEAMS, seed, 1981, SEASON_RULES);
 
 console.log(`Season seed ${season.seed} — ${season.teamIds.length} teams, `
   + `${season.fixtures.length} fixtures, ${season.matches.length} matches played\n`);

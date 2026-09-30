@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { runSeason } from "../src/competition.js";
 import { makeTeam } from "../src/fixtures.js";
+import { SEASON_RULES } from "../src/rules.js";
 import { loadSeason, saveSeason } from "../src/season-save.js";
 
 describe("season saves", () => {
@@ -9,7 +10,7 @@ describe("season saves", () => {
     makeTeam("redmere", 10),
     makeTeam("kingsford", 10),
     makeTeam("ashvale", 8),
-  ].map((team) => ({ ...team, substitutes: team.substitutes.slice(0, 1) })), 424242, season);
+  ].map((team) => ({ ...team, substitutes: team.substitutes.slice(0, 1) })), 424242, season, SEASON_RULES);
 
   it("round-trips a real engine season byte-identically", () => {
     const season = savedSeason();

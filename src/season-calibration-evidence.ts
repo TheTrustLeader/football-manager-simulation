@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { runSeason } from "./competition.js";
+import { SEASON_RULES } from "./rules.js";
 import { eraBandsForSeason, type CalibrationBand, type CalibrationMeasure, type EraBandRow } from "./era-bands.js";
 import { deriveSeasonSeed, distribution, extendedDistribution, type Distribution, type ExtendedDistribution } from "./season-sweep-evidence.js";
 import { compactSeasonResult, LEAGUE_SIZES, makeEvidenceTeams, SEASON_NUMBERS, strengthRowFromSeasonResults, type EvidenceSeasonResult, type StrengthRow } from "./strength-resolution-evidence.js";
@@ -66,7 +67,7 @@ export function compareWithBand(measure: CalibrationMeasure, measured: number, b
 export function runCalibrationForSize(teamCount: number, seasonNumbers: readonly number[], season: number, era: EraBandRow): CalibrationRow {
   const evidenceTeams = makeEvidenceTeams(teamCount);
   const teams = evidenceTeams.map(({ team }) => team);
-  const results = seasonNumbers.map((seasonNumber) => compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
+  const results = seasonNumbers.map((seasonNumber) => compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season, SEASON_RULES)));
   return calibrationRowFromSeasonResults(teamCount, seasonNumbers, era, evidenceTeams, results);
 }
 
@@ -128,7 +129,7 @@ export async function runCalibrationForSizeYielding(teamCount: number, seasonNum
   const teams = evidenceTeams.map(({ team }) => team);
   const results: EvidenceSeasonResult[] = [];
   for (const seasonNumber of seasonNumbers) {
-    results.push(compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
+    results.push(compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season, SEASON_RULES)));
     await new Promise<void>((resolve) => { setImmediate(resolve); });
   }
   return calibrationRowFromSeasonResults(teamCount, seasonNumbers, era, evidenceTeams, results);
@@ -145,7 +146,7 @@ export async function runFixedLeagueEvidenceYielding(
   const teams = evidenceTeams.map(({ team }) => team);
   const results: EvidenceSeasonResult[] = [];
   for (const seasonNumber of seasonNumbers) {
-    results.push(compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season)));
+    results.push(compactSeasonResult(runSeason(teams, deriveSeasonSeed(teamCount, seasonNumber), season, SEASON_RULES)));
     await new Promise<void>((resolve) => { setImmediate(resolve); });
   }
   return {
@@ -166,7 +167,7 @@ export function runManyLeagueCalibration(teamCount: number, seasonNumbers: reado
   for (const seasonNumber of seasonNumbers) {
     const evidenceTeams = makeCalibrationTeams(teamCount, seasonNumber);
     const levels = new Map(evidenceTeams.map(({ team, level }) => [team.id, level]));
-    const result = runSeason(evidenceTeams.map(({ team }) => team), deriveSeasonSeed(teamCount, seasonNumber), season);
+    const result = runSeason(evidenceTeams.map(({ team }) => team), deriveSeasonSeed(teamCount, seasonNumber), season, SEASON_RULES);
     const matchCount = result.matches.length;
     totalMatchesSimulated += matchCount;
     goals.push(result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0) / matchCount);
@@ -218,7 +219,7 @@ export async function runManyLeagueCalibrationYielding(teamCount: number, season
   for (const seasonNumber of seasonNumbers) {
     const evidenceTeams = makeCalibrationTeams(teamCount, seasonNumber);
     const levels = new Map(evidenceTeams.map(({ team, level }) => [team.id, level]));
-    const result = runSeason(evidenceTeams.map(({ team }) => team), deriveSeasonSeed(teamCount, seasonNumber), season);
+    const result = runSeason(evidenceTeams.map(({ team }) => team), deriveSeasonSeed(teamCount, seasonNumber), season, SEASON_RULES);
     const matchCount = result.matches.length;
     totalMatchesSimulated += matchCount;
     goals.push(result.matches.reduce((sum, match) => sum + match.home.goals + match.away.goals, 0) / matchCount);
