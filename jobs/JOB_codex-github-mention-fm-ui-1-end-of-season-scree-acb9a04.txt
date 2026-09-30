@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-fm-ui-1-end-of-season-screen-21th/22th,-h
+head=acb9a044d75ba1719bfb9587287125e7abfaa425
+tree=29331b6bbc293dd98973988d15374b8668b0525b
+base=f21ffe3b2c93ba17b3f5dae56cd577482beb68da
+item=FM-codex-github-mention-fm-ui-1-end-of-season-scree
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-09-30 09:33 BST
