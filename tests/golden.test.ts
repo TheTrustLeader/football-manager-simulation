@@ -4,6 +4,7 @@ import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "../src/engine-config.js";
 import { simulateMatch } from "../src/engine.js";
 import { makeTeam } from "../src/fixtures.js";
 import { MATCH_RESULT_FIELDS, NOT_THE_FOOTBALL, matchResultHash } from "../src/match-result.js";
+import { EXHIBITION_RULES_1981 } from "../src/rules.js";
 
 interface GoldenOutput {
   seed: number;
@@ -23,7 +24,7 @@ const REBASELINE = "npm run --silent golden:print > tests/golden-output.json "
 const versionMatches = ENGINE_CONFIG.version === golden.engineConfigVersion;
 const configMatches = ENGINE_CONFIG_HASH === golden.engineConfigHash;
 
-const output = simulateMatch({ seasonRules: { substitutesNamed: Number.POSITIVE_INFINITY, substitutesUsed: Number.POSITIVE_INFINITY },
+const output = simulateMatch({ seasonRules: EXHIBITION_RULES_1981,
   seed: golden.seed,
   neutralVenue: true,
   home: makeTeam("golden-home", 10),

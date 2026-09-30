@@ -1,5 +1,6 @@
 export type Formation = "4-4-2" | "4-3-3" | "4-5-1" | "3-5-2" | "5-3-2";
 export type Style = "passing" | "direct" | "counter" | "balanced";
+export type StyleMatchups = Record<Style, Record<Style, number>>;
 export type Approach = "cautious" | "balanced" | "attacking";
 export type Tackling = "careful" | "normal" | "hard";
 export type GoalkeeperPosition = "GK";
@@ -93,7 +94,7 @@ export interface MatchInput {
   captureMinuteSnapshots?: boolean;
   decisions?: MatchDecision[];
   /** Dated competition rules. Every match must state which rules govern it. */
-  seasonRules: { substitutesNamed: number; substitutesUsed: number };
+  seasonRules: { substitutesNamed: number; substitutesUsed: number; styleMatchups: StyleMatchups; computerStyleAdaptRate: number };
 }
 
 export interface MatchDecision {
@@ -205,6 +206,8 @@ export interface MatchOutput {
   engineConfigHash: string;
   homeTeamId: string;
   awayTeamId: string;
+  homeStyle: Style;
+  awayStyle: Style;
   home: TeamStats;
   away: TeamStats;
   events: MatchEvent[];

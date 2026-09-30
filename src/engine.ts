@@ -40,6 +40,8 @@ interface ProfileCurves {
   aerial: AttributeCurve;
   finishing: AttributeCurve;
   defending: AttributeCurve;
+  stamina: AttributeCurve;
+  leadership: AttributeCurve;
   shotStopping: AttributeCurve;
   handling: AttributeCurve;
   goalkeeperAerial: AttributeCurve;
@@ -136,6 +138,8 @@ function buildProfileCurves(players: PlayerRuntime[]): ProfileCurves {
     aerial: createAttributeCurve(outfield, "aerial"),
     finishing: createAttributeCurve(finishers, "finishing"),
     defending: createAttributeCurve(outfield, "defending"),
+    stamina: createAttributeCurve(outfield, "stamina"),
+    leadership: createAttributeCurve(outfield, "leadership"),
     shotStopping: createAttributeCurve(keepers, "shotStopping"),
     handling: createAttributeCurve(keepers, "handling"),
     goalkeeperAerial: createAttributeCurve(keepers, "aerial"),
@@ -184,6 +188,8 @@ function teamProfile(team: TeamInput, runtime: TeamRuntime) {
   const aerial = curveAverage(runtime.curves.aerial, runtime.workload);
   const finishing = curveAverage(runtime.curves.finishing, runtime.workload);
   const defending = curveAverage(runtime.curves.defending, runtime.workload);
+  const stamina = curveAverage(runtime.curves.stamina, runtime.workload);
+  const leadership = curveAverage(runtime.curves.leadership, runtime.workload);
   const shotStopping = curveAverage(runtime.curves.shotStopping, runtime.workload);
   const handling = curveAverage(runtime.curves.handling, runtime.workload);
   const goalkeeperAerial = curveAverage(runtime.curves.goalkeeperAerial, runtime.workload);
@@ -210,6 +216,26 @@ function teamProfile(team: TeamInput, runtime: TeamRuntime) {
   if (team.tactics.style === "direct") progression *= 1 + clamp((aerial - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
   if (team.tactics.style === "counter") attack *= 1 + clamp((pace - c.style.attributeBaseline) / c.style.attributeDivisor, c.style.attributeMin, c.style.attributeMax);
 
+  // Fit is deliberately derived only from the visible attributes of the eleven
+  // currently on the pitch. There is no squad identity or hidden-trait input.
+  const visibleAttributeMean = (passing + creativity + pace + aerial + finishing + defending) / 6;
+  const styleFitScore = team.tactics.style === "passing"
+    ? c.style.fit.attributeBaseline + (passing + creativity) / 2 - visibleAttributeMean - c.style.fit.profileOffset.passing
+    : team.tactics.style === "direct"
+      ? c.style.fit.attributeBaseline + (pace + aerial + finishing) / 3 - visibleAttributeMean - c.style.fit.profileOffset.direct
+      : team.tactics.style === "counter"
+        ? c.style.fit.attributeBaseline + (defending + aerial) / 2 - visibleAttributeMean - c.style.fit.profileOffset.counter
+        : c.style.fit.attributeBaseline + (stamina + leadership) / 2 - visibleAttributeMean - c.style.fit.profileOffset.balanced;
+  const styleFitDeviation = styleFitScore - c.style.fit.attributeBaseline;
+  const styleFitOutsideDeadzone = Math.sign(styleFitDeviation) * Math.max(0, Math.abs(styleFitDeviation) - c.style.fit.deadzone);
+  const styleFitMultiplier = clamp(
+    1 + styleFitOutsideDeadzone / c.style.fit.divisor,
+    c.style.fit.minimum,
+    c.style.fit.maximum,
+  );
+  progression *= Math.sqrt(styleFitMultiplier);
+  attack *= styleFitMultiplier;
+
   const approach = c.approach[team.tactics.approach];
   const manpower = Math.pow(runtime.activePlayers.length / c.dismissal.baselinePlayers, c.dismissal.profileExponent);
   return {
@@ -218,6 +244,7 @@ function teamProfile(team: TeamInput, runtime: TeamRuntime) {
     attack: attack * approach.attack * manpower,
     defence: defence * approach.defence * manpower,
     goalkeeper: shotStopping,
+    styleFitMultiplier,
   };
 }
 
@@ -512,7 +539,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
       events.push({ minute, type: "attack", teamId: defendingTeam.id, playerId: errorDefender.id, detail: `${errorDefender.name} makes a major error` });
     }
 
-    const chanceProbability = clamp((c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor) * style.chanceRate, c.chance.min, c.chance.max);
+    const matchup = input.seasonRules.styleMatchups[attackingTeam.tactics.style][defendingTeam.tactics.style];
+    const chanceProbability = clamp((c.chance.base + (attackProfile.attack - defenceProfile.defence) / c.chance.differenceDivisor) * style.chanceRate * matchup, c.chance.min, c.chance.max);
     if (!majorError && !random.chance(chanceProbability)) {
       creditDefensiveStop(random, defendingTeam, defenceRuntime, contributions);
       finishMinute(minute, input.home, input.away, homeRuntime, awayRuntime, homeStats, awayStats, contributions, minuteSnapshots, input.captureMinuteSnapshots !== false);
@@ -595,6 +623,8 @@ export function simulateMatch(input: MatchInput): MatchOutput {
     engineConfigHash: ENGINE_CONFIG_HASH,
     homeTeamId: input.home.id,
     awayTeamId: input.away.id,
+    homeStyle: input.home.tactics.style,
+    awayStyle: input.away.tactics.style,
     home: homeStats,
     away: awayStats,
     events,
@@ -616,6 +646,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
 
 export function validateMatchInput(input: MatchInput): void {
   if (!input.seasonRules) throw new Error("Match input must include season rules");
+  if (!input.seasonRules.styleMatchups) throw new Error("Match input must include dated style match-up rules");
   for (const team of [input.home, input.away]) {
     if (team.starters.length !== 11) throw new Error(`${team.name} must have exactly 11 starters`);
     if (team.starters.filter((p) => p.primaryPosition === "GK").length !== 1) throw new Error(`${team.name} must have exactly one starting goalkeeper`);
