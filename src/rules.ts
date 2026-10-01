@@ -35,9 +35,9 @@ export type SeasonRule = {
 export const SEASON_RULES: readonly SeasonRule[] = [
   {
     rule: "leagueRoundGapDays",
-    value: [7],
+    value: [7, 4, 3, 7, 7, 3, 4, 7, 7, 7, 7, 7, 7, 7, 7, 3, 4, 7, 7, 7, 7, 2, 12, 7, 14, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 5, 7, 7, 3, 4, 7],
     firstSeason: 1981,
-    source: "TO SOURCE: the real 1981/82 league calendar; 7 days is a placeholder weekly pattern until that calendar is sourced.",
+    source: "worldfootball.net, all matches 1981/82 (https://www.worldfootball.net/all_matches/eng-premier-league-1981-1982/), grouped by fixture round. R14, R16, R19-R24, R27, R28, R31, R34, R36 and R40 are REASONED from the calendar slots between neighbouring rounds. As played, the December 1981 freeze wiped out most of R19-R24 (evidence recorded on #69).",
   },
   {
     rule: "computerStyleAdaptRate",
