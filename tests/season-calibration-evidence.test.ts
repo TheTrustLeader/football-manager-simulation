@@ -56,7 +56,7 @@ describe("season calibration evidence", () => {
   });
 
   it("pins the calibrated finishing multiplier", () => {
-    expect(ENGINE_CONFIG.goal.probabilityMultiplier).toBe(0.825);
+    expect(ENGINE_CONFIG.goal.probabilityMultiplier).toBe(0.807);
   });
 
   it("builds a different 22-squad league for every calibration season", () => {

@@ -247,7 +247,8 @@ const calibrationChecks = {
   goalsStandardError: { maximum: 0.03, actual: seasonGoalsStandardError, pass: seasonGoalsStandardError <= 0.03 },
 };
 
-const matchLabGoalsRegressionPin = { expected: 2.4722, tolerance: 0.04 };
+// Regression pin rebaselined with the #76 dated long-run scoring calibration.
+const matchLabGoalsRegressionPin = { expected: 2.4205, tolerance: 0.04 };
 
 const ciChecks = {
   matchLabGoalsRegressionPin: {
