@@ -5,11 +5,11 @@
   "userClubId": "weakest-shown-strength-per-seed",
   "games": 1000,
   "matches": 462000,
-  "goalsPerMatch": 2.7816082251082253,
-  "homeWinRate": 0.4753614718614719,
-  "drawRate": 0.2404069264069264,
-  "shownFavouriteTitles": 294,
-  "shownTopFiveTitles": 951,
+  "goalsPerMatch": 2.7731060606060605,
+  "homeWinRate": 0.475521645021645,
+  "drawRate": 0.24081818181818182,
+  "shownFavouriteTitles": 293,
+  "shownTopFiveTitles": 948,
   "computerStyleUses": {
     "passing": 431914,
     "direct": 146384,
@@ -18,29 +18,29 @@
   },
   "weakestClubStrategies": {
     "balanced": {
-      "meanPosition": 19.822,
-      "standardError": 0.08285638889778611,
+      "meanPosition": 19.799,
+      "standardError": 0.08347195077729193,
       "topFiveFinishes": 0
     },
     "passing": {
-      "meanPosition": 18.084,
-      "standardError": 0.11518772596163253,
-      "topFiveFinishes": 3
+      "meanPosition": 18.059,
+      "standardError": 0.11544195877516063,
+      "topFiveFinishes": 1
     },
     "direct": {
-      "meanPosition": 19.178,
-      "standardError": 0.10068989251386885,
+      "meanPosition": 19.16,
+      "standardError": 0.09956059618298924,
       "topFiveFinishes": 1
     },
     "counter": {
-      "meanPosition": 18.604,
-      "standardError": 0.10707309955655858,
+      "meanPosition": 18.582,
+      "standardError": 0.10754925775124129,
       "topFiveFinishes": 1
     },
     "reading": {
-      "meanPosition": 16.636,
-      "standardError": 0.13232919184750958,
-      "topFiveFinishes": 6
+      "meanPosition": 16.624,
+      "standardError": 0.13194708800892133,
+      "topFiveFinishes": 8
     }
   }
 }

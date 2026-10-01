@@ -47,6 +47,16 @@ function rules(tableTieBreak: SeasonRules["tableTieBreak"]): SeasonRules {
 }
 
 describe("season rules", () => {
+  it("records the complete 1981/82 league round calendar", () => {
+    const gaps = rulesForSeason(1981).leagueRoundGapDays;
+    expect(gaps).toHaveLength(42);
+    expect(gaps).toEqual([7, 4, 3, 7, 7, 3, 4, 7, 7, 7, 7, 7, 7, 7, 7, 3, 4, 7, 7, 7, 7, 2, 12, 7, 14, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 5, 7, 7, 3, 4, 7]);
+    expect(gaps[21]).toBe(2); // R21 -> R22: Christmas pair
+    expect(gaps[35]).toBe(2); // R35 -> R36: Easter pair
+    expect(gaps[22]).toBe(12); // R22 -> R23: FA Cup third round
+    expect(gaps[24]).toBe(14); // R24 -> R25: FA Cup fourth round
+  });
+
   it("changes the same match results when the win-points rule changes", () => {
     const table1989 = buildLeagueTable(MATCHES, rulesForSeason(1989, CHANGING_RULES));
     const table1990 = buildLeagueTable(MATCHES, rulesForSeason(1990, CHANGING_RULES));
@@ -62,7 +72,7 @@ describe("season rules", () => {
 
   it("has the English rules in force at the game start", () => {
     expect(rulesForSeason(1981)).toEqual({
-      leagueRoundGapDays: [7],
+      leagueRoundGapDays: [7, 4, 3, 7, 7, 3, 4, 7, 7, 7, 7, 7, 7, 7, 7, 3, 4, 7, 7, 7, 7, 2, 12, 7, 14, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 5, 7, 7, 3, 4, 7],
       pointsForAWin: 3,
       tableTieBreak: "goalDifference",
       firstDivisionTeams: 22,
