@@ -124,8 +124,8 @@ describe("matchday squad management", () => {
     expect(tired).toBeLessThan(fit);
     expect({ fit, tired, pointsCost: fit - tired }).toMatchInlineSnapshot(`
       {
-        "fit": 75,
-        "pointsCost": 11,
+        "fit": 71,
+        "pointsCost": 7,
         "tired": 64,
       }
     `);

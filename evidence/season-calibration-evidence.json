@@ -78,29 +78,29 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 11200,
       "goalsPerMatch": {
-        "mean": 2.687589,
-        "standardDeviation": 0.208539,
-        "minimum": 2.232143,
-        "maximum": 3.285714,
-        "percentile5": 2.357143,
-        "percentile95": 3.072321
+        "mean": 2.625,
+        "standardDeviation": 0.207166,
+        "minimum": 2.160714,
+        "maximum": 3.160714,
+        "percentile5": 2.303571,
+        "percentile95": 3.000893
       },
       "homeWinRate": {
-        "mean": 0.470268,
-        "standardDeviation": 0.06377
+        "mean": 0.467946,
+        "standardDeviation": 0.06397
       },
       "drawRate": {
-        "mean": 0.243393,
-        "standardDeviation": 0.053551
+        "mean": 0.246964,
+        "standardDeviation": 0.055043
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 2800,
-          "goalsPerMatch": 2.638214
+          "goalsPerMatch": 2.575357
         },
         "fourOrMoreLevelsApart": {
           "matches": 2400,
-          "goalsPerMatch": 2.60125
+          "goalsPerMatch": 2.538333
         }
       },
       "comparisons": {
@@ -111,9 +111,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.687589,
+          "measured": 2.625,
           "result": "PASS",
-          "statement": "PASS: goalsPerMatch measured 2.687589; band 2.564060-2.775226"
+          "statement": "PASS: goalsPerMatch measured 2.625000; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -122,9 +122,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.470268,
+          "measured": 0.467946,
           "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.470268; band 0.465784-0.530428"
+          "statement": "PASS: homeWinRate measured 0.467946; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -133,9 +133,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.243393,
+          "measured": 0.246964,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.243393; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.246964; band 0.205553-0.315551"
         }
       }
     },
@@ -144,29 +144,29 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 26400,
       "goalsPerMatch": {
-        "mean": 2.771818,
-        "standardDeviation": 0.143343,
-        "minimum": 2.424242,
-        "maximum": 3.128788,
-        "percentile5": 2.529545,
-        "percentile95": 3.030682
+        "mean": 2.708561,
+        "standardDeviation": 0.144286,
+        "minimum": 2.325758,
+        "maximum": 3.060606,
+        "percentile5": 2.468939,
+        "percentile95": 2.977652
       },
       "homeWinRate": {
-        "mean": 0.476818,
-        "standardDeviation": 0.040192
+        "mean": 0.474583,
+        "standardDeviation": 0.040599
       },
       "drawRate": {
-        "mean": 0.236212,
-        "standardDeviation": 0.035628
+        "mean": 0.239318,
+        "standardDeviation": 0.035357
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 4400,
-          "goalsPerMatch": 2.709545
+          "goalsPerMatch": 2.643864
         },
         "fourOrMoreLevelsApart": {
           "matches": 4000,
-          "goalsPerMatch": 2.81075
+          "goalsPerMatch": 2.7495
         }
       },
       "comparisons": {
@@ -177,9 +177,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.771818,
+          "measured": 2.708561,
           "result": "PASS",
-          "statement": "PASS: goalsPerMatch measured 2.771818; band 2.564060-2.775226"
+          "statement": "PASS: goalsPerMatch measured 2.708561; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -188,9 +188,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.476818,
+          "measured": 0.474583,
           "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.476818; band 0.465784-0.530428"
+          "statement": "PASS: homeWinRate measured 0.474583; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -199,9 +199,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.236212,
+          "measured": 0.239318,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.236212; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.239318; band 0.205553-0.315551"
         }
       }
     },
@@ -210,29 +210,29 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 48000,
       "goalsPerMatch": {
-        "mean": 2.644646,
-        "standardDeviation": 0.112828,
-        "minimum": 2.329167,
-        "maximum": 3.075,
-        "percentile5": 2.475,
-        "percentile95": 2.829167
+        "mean": 2.586438,
+        "standardDeviation": 0.110504,
+        "minimum": 2.279167,
+        "maximum": 3.025,
+        "percentile5": 2.420625,
+        "percentile95": 2.762708
       },
       "homeWinRate": {
-        "mean": 0.468333,
-        "standardDeviation": 0.031416
+        "mean": 0.466,
+        "standardDeviation": 0.030784
       },
       "drawRate": {
-        "mean": 0.249375,
-        "standardDeviation": 0.028876
+        "mean": 0.252833,
+        "standardDeviation": 0.027794
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 11600,
-          "goalsPerMatch": 2.636207
+          "goalsPerMatch": 2.577931
         },
         "fourOrMoreLevelsApart": {
           "matches": 8400,
-          "goalsPerMatch": 2.672619
+          "goalsPerMatch": 2.614286
         }
       },
       "comparisons": {
@@ -243,9 +243,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.644646,
+          "measured": 2.586438,
           "result": "PASS",
-          "statement": "PASS: goalsPerMatch measured 2.644646; band 2.564060-2.775226"
+          "statement": "PASS: goalsPerMatch measured 2.586438; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -254,9 +254,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.468333,
+          "measured": 0.466,
           "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.468333; band 0.465784-0.530428"
+          "statement": "PASS: homeWinRate measured 0.466000; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -265,9 +265,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.249375,
+          "measured": 0.252833,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.249375; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.252833; band 0.205553-0.315551"
         }
       }
     },
@@ -276,29 +276,29 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 76000,
       "goalsPerMatch": {
-        "mean": 2.731289,
-        "standardDeviation": 0.082403,
-        "minimum": 2.502632,
-        "maximum": 2.973684,
-        "percentile5": 2.6025,
-        "percentile95": 2.881711
+        "mean": 2.672053,
+        "standardDeviation": 0.082304,
+        "minimum": 2.444737,
+        "maximum": 2.913158,
+        "percentile5": 2.544474,
+        "percentile95": 2.813421
       },
       "homeWinRate": {
-        "mean": 0.474263,
-        "standardDeviation": 0.025639
+        "mean": 0.470684,
+        "standardDeviation": 0.025129
       },
       "drawRate": {
-        "mean": 0.249737,
-        "standardDeviation": 0.022842
+        "mean": 0.254092,
+        "standardDeviation": 0.023432
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 21600,
-          "goalsPerMatch": 2.675093
+          "goalsPerMatch": 2.61625
         },
         "fourOrMoreLevelsApart": {
           "matches": 11200,
-          "goalsPerMatch": 2.861071
+          "goalsPerMatch": 2.793929
         }
       },
       "comparisons": {
@@ -309,9 +309,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.731289,
+          "measured": 2.672053,
           "result": "PASS",
-          "statement": "PASS: goalsPerMatch measured 2.731289; band 2.564060-2.775226"
+          "statement": "PASS: goalsPerMatch measured 2.672053; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -320,9 +320,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.474263,
+          "measured": 0.470684,
           "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.474263; band 0.465784-0.530428"
+          "statement": "PASS: homeWinRate measured 0.470684; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -331,9 +331,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.249737,
+          "measured": 0.254092,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.249737; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.254092; band 0.205553-0.315551"
         }
       }
     },
@@ -342,37 +342,37 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 92400,
       "goalsPerMatch": {
-        "mean": 2.678874,
-        "standardDeviation": 0.101351,
-        "minimum": 2.357143,
-        "maximum": 2.945887,
-        "percentile5": 2.510606,
-        "percentile95": 2.848485
+        "mean": 2.621115,
+        "standardDeviation": 0.098727,
+        "minimum": 2.30303,
+        "maximum": 2.874459,
+        "percentile5": 2.45855,
+        "percentile95": 2.79026
       },
       "homeWinRate": {
-        "mean": 0.472175,
-        "standardDeviation": 0.02179
+        "mean": 0.46947,
+        "standardDeviation": 0.021504
       },
       "drawRate": {
-        "mean": 0.251829,
-        "standardDeviation": 0.023148
+        "mean": 0.255087,
+        "standardDeviation": 0.023383
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 24000,
-          "goalsPerMatch": 2.657208
+          "goalsPerMatch": 2.60175
         },
         "fourOrMoreLevelsApart": {
           "matches": 14000,
-          "goalsPerMatch": 2.756429
+          "goalsPerMatch": 2.696929
         }
       },
       "goalsLeagueSpread": {
-        "minimum": 2.357142857142857,
-        "percentile10": 2.5454545454545454,
-        "median": 2.6774891774891776,
-        "percentile90": 2.803030303030303,
-        "maximum": 2.945887445887446,
+        "minimum": 2.303030303030303,
+        "percentile10": 2.4935064935064934,
+        "median": 2.6233766233766236,
+        "percentile90": 2.7489177489177488,
+        "maximum": 2.8744588744588744,
         "insideRealSeasonBand": {
           "count": 190,
           "proportion": 0.95
@@ -386,9 +386,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.678874,
+          "measured": 2.621115,
           "result": "PASS",
-          "statement": "PASS: goalsPerMatch measured 2.678874; band 2.564060-2.775226"
+          "statement": "PASS: goalsPerMatch measured 2.621115; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -397,9 +397,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.472175,
+          "measured": 0.46947,
           "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.472175; band 0.465784-0.530428"
+          "statement": "PASS: homeWinRate measured 0.469470; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -408,9 +408,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.251829,
+          "measured": 0.255087,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.251829; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.255087; band 0.205553-0.315551"
         }
       }
     }
@@ -421,29 +421,29 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 11200,
       "goalsPerMatch": {
-        "mean": 2.647768,
-        "standardDeviation": 0.215258,
-        "minimum": 1.982143,
-        "maximum": 3.178571,
-        "percentile5": 2.303571,
-        "percentile95": 3.017857
+        "mean": 2.589821,
+        "standardDeviation": 0.209591,
+        "minimum": 1.964286,
+        "maximum": 3.089286,
+        "percentile5": 2.266964,
+        "percentile95": 2.946429
       },
       "homeWinRate": {
-        "mean": 0.468482,
-        "standardDeviation": 0.063637
+        "mean": 0.465982,
+        "standardDeviation": 0.062157
       },
       "drawRate": {
-        "mean": 0.243304,
-        "standardDeviation": 0.060278
+        "mean": 0.247054,
+        "standardDeviation": 0.058651
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 2800,
-          "goalsPerMatch": 2.613929
+          "goalsPerMatch": 2.557857
         },
         "fourOrMoreLevelsApart": {
           "matches": 2400,
-          "goalsPerMatch": 2.5325
+          "goalsPerMatch": 2.476667
         }
       },
       "comparisons": {
@@ -454,9 +454,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.647768,
+          "measured": 2.589821,
           "result": "PASS",
-          "statement": "PASS: goalsPerMatch measured 2.647768; band 2.564060-2.775226"
+          "statement": "PASS: goalsPerMatch measured 2.589821; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -465,9 +465,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.468482,
+          "measured": 0.465982,
           "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.468482; band 0.465784-0.530428"
+          "statement": "PASS: homeWinRate measured 0.465982; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -476,9 +476,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.243304,
+          "measured": 0.247054,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.243304; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.247054; band 0.205553-0.315551"
         }
       }
     },
@@ -487,29 +487,29 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 26400,
       "goalsPerMatch": {
-        "mean": 2.777273,
-        "standardDeviation": 0.16051,
-        "minimum": 2.371212,
-        "maximum": 3.204545,
-        "percentile5": 2.506439,
-        "percentile95": 3.060985
+        "mean": 2.716326,
+        "standardDeviation": 0.157072,
+        "minimum": 2.333333,
+        "maximum": 3.136364,
+        "percentile5": 2.445455,
+        "percentile95": 2.964773
       },
       "homeWinRate": {
-        "mean": 0.474659,
-        "standardDeviation": 0.044501
+        "mean": 0.471894,
+        "standardDeviation": 0.044893
       },
       "drawRate": {
-        "mean": 0.240265,
-        "standardDeviation": 0.037178
+        "mean": 0.242689,
+        "standardDeviation": 0.037577
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 4400,
-          "goalsPerMatch": 2.729091
+          "goalsPerMatch": 2.666818
         },
         "fourOrMoreLevelsApart": {
           "matches": 4000,
-          "goalsPerMatch": 2.833
+          "goalsPerMatch": 2.77225
         }
       },
       "comparisons": {
@@ -520,9 +520,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.777273,
-          "result": "FAIL",
-          "statement": "FAIL: goalsPerMatch measured 2.777273; band 2.564060-2.775226"
+          "measured": 2.716326,
+          "result": "PASS",
+          "statement": "PASS: goalsPerMatch measured 2.716326; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -531,9 +531,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.474659,
+          "measured": 0.471894,
           "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.474659; band 0.465784-0.530428"
+          "statement": "PASS: homeWinRate measured 0.471894; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -542,9 +542,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.240265,
+          "measured": 0.242689,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.240265; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.242689; band 0.205553-0.315551"
         }
       }
     },
@@ -553,29 +553,29 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 48000,
       "goalsPerMatch": {
-        "mean": 2.62875,
-        "standardDeviation": 0.101992,
-        "minimum": 2.4,
-        "maximum": 2.895833,
-        "percentile5": 2.454167,
-        "percentile95": 2.791875
+        "mean": 2.569937,
+        "standardDeviation": 0.102126,
+        "minimum": 2.3375,
+        "maximum": 2.858333,
+        "percentile5": 2.399583,
+        "percentile95": 2.7375
       },
       "homeWinRate": {
-        "mean": 0.467229,
-        "standardDeviation": 0.029296
+        "mean": 0.464646,
+        "standardDeviation": 0.029032
       },
       "drawRate": {
-        "mean": 0.251875,
-        "standardDeviation": 0.030069
+        "mean": 0.254771,
+        "standardDeviation": 0.02912
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 11600,
-          "goalsPerMatch": 2.607414
+          "goalsPerMatch": 2.549741
         },
         "fourOrMoreLevelsApart": {
           "matches": 8400,
-          "goalsPerMatch": 2.705238
+          "goalsPerMatch": 2.642143
         }
       },
       "comparisons": {
@@ -586,9 +586,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.62875,
+          "measured": 2.569937,
           "result": "PASS",
-          "statement": "PASS: goalsPerMatch measured 2.628750; band 2.564060-2.775226"
+          "statement": "PASS: goalsPerMatch measured 2.569937; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -597,9 +597,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.467229,
-          "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.467229; band 0.465784-0.530428"
+          "measured": 0.464646,
+          "result": "FAIL",
+          "statement": "FAIL: homeWinRate measured 0.464646; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -608,9 +608,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.251875,
+          "measured": 0.254771,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.251875; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.254771; band 0.205553-0.315551"
         }
       }
     },
@@ -619,29 +619,29 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 76000,
       "goalsPerMatch": {
-        "mean": 2.744921,
-        "standardDeviation": 0.084138,
-        "minimum": 2.552632,
-        "maximum": 2.994737,
-        "percentile5": 2.615263,
-        "percentile95": 2.897368
+        "mean": 2.685434,
+        "standardDeviation": 0.08204,
+        "minimum": 2.486842,
+        "maximum": 2.918421,
+        "percentile5": 2.555132,
+        "percentile95": 2.829211
       },
       "homeWinRate": {
-        "mean": 0.479276,
-        "standardDeviation": 0.025826
+        "mean": 0.476408,
+        "standardDeviation": 0.026078
       },
       "drawRate": {
-        "mean": 0.247684,
-        "standardDeviation": 0.021706
+        "mean": 0.251197,
+        "standardDeviation": 0.021445
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 21600,
-          "goalsPerMatch": 2.706065
+          "goalsPerMatch": 2.647222
         },
         "fourOrMoreLevelsApart": {
           "matches": 11200,
-          "goalsPerMatch": 2.884196
+          "goalsPerMatch": 2.82125
         }
       },
       "comparisons": {
@@ -652,9 +652,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.744921,
+          "measured": 2.685434,
           "result": "PASS",
-          "statement": "PASS: goalsPerMatch measured 2.744921; band 2.564060-2.775226"
+          "statement": "PASS: goalsPerMatch measured 2.685434; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -663,9 +663,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.479276,
+          "measured": 0.476408,
           "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.479276; band 0.465784-0.530428"
+          "statement": "PASS: homeWinRate measured 0.476408; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -674,9 +674,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.247684,
+          "measured": 0.251197,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.247684; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.251197; band 0.205553-0.315551"
         }
       }
     },
@@ -685,40 +685,40 @@
       "seasonsSimulated": 200,
       "totalMatchesSimulated": 92400,
       "goalsPerMatch": {
-        "mean": 2.6996,
-        "standardDeviation": 0.112062,
-        "minimum": 2.385281,
-        "maximum": 3.008658,
-        "percentile5": 2.538745,
-        "percentile95": 2.878896
+        "mean": 2.640725,
+        "standardDeviation": 0.112266,
+        "minimum": 2.333333,
+        "maximum": 2.961039,
+        "percentile5": 2.475866,
+        "percentile95": 2.818398
       },
       "homeWinRate": {
-        "mean": 0.474437,
-        "standardDeviation": 0.022046
+        "mean": 0.471602,
+        "standardDeviation": 0.022696
       },
       "drawRate": {
-        "mean": 0.249394,
-        "standardDeviation": 0.021255
+        "mean": 0.252825,
+        "standardDeviation": 0.021356
       },
       "goalsByLevelGap": {
         "withinOneLevel": {
           "matches": 24000,
-          "goalsPerMatch": 2.663458
+          "goalsPerMatch": 2.604833
         },
         "fourOrMoreLevelsApart": {
           "matches": 14000,
-          "goalsPerMatch": 2.780786
+          "goalsPerMatch": 2.718643
         }
       },
       "goalsLeagueSpread": {
-        "minimum": 2.3852813852813854,
-        "percentile10": 2.567099567099567,
-        "median": 2.6991341991341993,
-        "percentile90": 2.841991341991342,
-        "maximum": 3.0086580086580086,
+        "minimum": 2.3333333333333335,
+        "percentile10": 2.5,
+        "median": 2.6406926406926408,
+        "percentile90": 2.777056277056277,
+        "maximum": 2.961038961038961,
         "insideRealSeasonBand": {
-          "count": 186,
-          "proportion": 0.93
+          "count": 192,
+          "proportion": 0.96
         }
       },
       "comparisons": {
@@ -729,9 +729,9 @@
             "aggregateMean": 2.669643,
             "seasonStandardDeviation": 0.105583
           },
-          "measured": 2.6996,
+          "measured": 2.640725,
           "result": "PASS",
-          "statement": "PASS: goalsPerMatch measured 2.699600; band 2.564060-2.775226"
+          "statement": "PASS: goalsPerMatch measured 2.640725; band 2.564060-2.775226"
         },
         "homeWinRate": {
           "band": {
@@ -740,9 +740,9 @@
             "aggregateMean": 0.498106,
             "seasonStandardDeviation": 0.032322
           },
-          "measured": 0.474437,
+          "measured": 0.471602,
           "result": "PASS",
-          "statement": "PASS: homeWinRate measured 0.474437; band 0.465784-0.530428"
+          "statement": "PASS: homeWinRate measured 0.471602; band 0.465784-0.530428"
         },
         "drawRate": {
           "band": {
@@ -751,9 +751,9 @@
             "aggregateMean": 0.260552,
             "seasonStandardDeviation": 0.027499
           },
-          "measured": 0.249394,
+          "measured": 0.252825,
           "result": "PASS",
-          "statement": "PASS: drawRate measured 0.249394; band 0.205553-0.315551"
+          "statement": "PASS: drawRate measured 0.252825; band 0.205553-0.315551"
         }
       }
     }

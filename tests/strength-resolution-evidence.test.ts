@@ -228,9 +228,9 @@ describe("strength resolution evidence", () => {
     });
   });
 
-  it("commits schema version 4 without moving strongest-by-level figures", () => {
+  it("commits schema version 4 with the calibrated strongest-by-level figures", () => {
     const committed = JSON.parse(readFileSync("evidence/strength-resolution-evidence.json", "utf8")) as StrengthEvidence;
     expect(committed.schemaVersion).toBe(4);
-    expect(committed.rows.map((row) => row.strongestTeamFinishedTop.count)).toEqual([81, 23, 49, 70, 41]);
+    expect(committed.rows.map((row) => row.strongestTeamFinishedTop.count)).toEqual([82, 26, 48, 70, 37]);
   });
 });

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { eraBandsForSeason } from "./era-bands.js";
 import { generatePlayableSeasonEvidence, PLAYABLE_EVIDENCE_SEASON } from "./playable-season-evidence-report.js";
 import type { PlayableSeasonEvidenceReport } from "./playable-season-evidence-report.js";
+import { longRunGoalsRuleForSeason, verifyLongRunGoalsAverage } from "./long-run-goals-rule.js";
 
 const path = "evidence/playable-season-1000-games.json";
 const committed = JSON.parse(readFileSync(path, "utf8")) as PlayableSeasonEvidenceReport;
@@ -28,6 +29,9 @@ const goalsBand = eraBandsForSeason(PLAYABLE_EVIDENCE_SEASON).bands.goalsPerMatc
 if (fresh.goalsPerMatch < goalsBand.minimum || fresh.goalsPerMatch > goalsBand.maximum) {
   throw new Error(`Goals per match ${fresh.goalsPerMatch} is outside the ${PLAYABLE_EVIDENCE_SEASON} band ${goalsBand.minimum}–${goalsBand.maximum}`);
 }
+verifyLongRunGoalsAverage(fresh.goalsPerMatch, PLAYABLE_EVIDENCE_SEASON);
+const longRunGoalsRule = longRunGoalsRuleForSeason(PLAYABLE_EVIDENCE_SEASON);
 
 console.log(JSON.stringify(fresh, null, 2));
 console.log(`Verified against ${path}; goals band ${goalsBand.minimum}–${goalsBand.maximum}`);
+console.log(`Goals are within ${longRunGoalsRule.tolerance} of the sourced era aggregate mean (${longRunGoalsRule.source})`);
