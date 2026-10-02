@@ -42,6 +42,38 @@ export const LEAGUE_STRUCTURES: readonly LeagueStructure[] = [
   },
 ];
 
+/** Verify that each sourced season leads to the next sourced season's division sizes. */
+export function checkStructureBalance(table: readonly LeagueStructure[]): void {
+  const seasons = new Set<number>();
+  for (const row of table) {
+    for (let season = row.firstSeason; season <= row.lastSeason; season += 1) seasons.add(season);
+  }
+
+  for (const season of [...seasons].sort((a, b) => a - b)) {
+    if (!seasons.has(season + 1)) continue;
+    const current = leagueStructureForSeason(season, table);
+    const next = leagueStructureForSeason(season + 1, table);
+    for (const division of [1, 2, 3, 4] as const) {
+      let expected = current.divisionSizes[division];
+      for (const movement of current.movements) {
+        if (movement.from === division) expected += movement.relegated - movement.promoted;
+        if (movement.to === division) expected += movement.promoted - movement.relegated;
+      }
+      if (division === 4) {
+        const lowest = current.lowestDivision;
+        expected += lowest.kind === "re-election"
+          ? lowest.reElected - lowest.applicants
+          : lowest.promotedFromNonLeague - lowest.relegated;
+      }
+      if (next.divisionSizes[division] !== expected) {
+        throw new Error(
+          `Division ${division} does not balance from ${season} to ${season + 1}: expected ${expected} clubs, found ${next.divisionSizes[division]}`,
+        );
+      }
+    }
+  }
+}
+
 export function leagueStructureForSeason(
   season: SeasonId,
   table: readonly LeagueStructure[] = LEAGUE_STRUCTURES,
@@ -99,6 +131,12 @@ export function seasonMovements(
   structures: readonly LeagueStructure[] = LEAGUE_STRUCTURES,
 ): SeasonMovements {
   const structure = leagueStructureForSeason(season, structures);
+  if (structure.lowestDivision.kind === "automatic-relegation") {
+    throw new Error("automatic relegation from the League not modelled yet");
+  }
+  if (structure.lowestDivision.reElected !== structure.lowestDivision.applicants) {
+    throw new Error("re-election vote not modelled yet");
+  }
   const seen = new Set<string>();
   const clubs: ClubMovement[] = [];
   for (const division of [1, 2, 3, 4] as const) {
@@ -136,15 +174,9 @@ export function seasonMovements(
     applyBoundary(rule.to, "relegation", relegationLine, upper.slice(relegationLine), "relegated", rule.from);
   }
 
-  if (structure.lowestDivision.kind === "re-election") {
-    const rows = finalTables[4]!;
-    const line = rows.length - structure.lowestDivision.applicants;
-    applyBoundary(4, "re-election", line, rows.slice(line), "re-elected", 4);
-  } else {
-    const rows = finalTables[4]!;
-    const line = rows.length - structure.lowestDivision.relegated;
-    applyBoundary(4, "relegation", line, rows.slice(line), "relegated", 4);
-  }
+  const rows = finalTables[4]!;
+  const line = rows.length - structure.lowestDivision.applicants;
+  applyBoundary(4, "re-election", line, rows.slice(line), "re-elected", 4);
 
   return { clubs, unresolvedBoundaries };
 }

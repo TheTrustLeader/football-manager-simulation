@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   LEAGUE_STRUCTURES,
+  checkStructureBalance,
   leagueStructureForSeason,
   seasonMovements,
   type Division,
@@ -53,22 +54,47 @@ describe("dated league structures", () => {
   });
 
   it("balances every division between consecutive sourced seasons", () => {
-    for (const structure of LEAGUE_STRUCTURES) for (let season = structure.firstSeason; season < structure.lastSeason; season += 1) {
-      const current = leagueStructureForSeason(season);
-      const next = leagueStructureForSeason(season + 1);
-      for (const division of [1, 2, 3, 4] as const) {
-        let expected = current.divisionSizes[division];
-        for (const movement of current.movements) {
-          if (movement.from === division) expected += movement.relegated - movement.promoted;
-          if (movement.to === division) expected += movement.promoted - movement.relegated;
-        }
-        expect(next.divisionSizes[division]).toBe(expected);
-      }
-    }
+    expect(() => checkStructureBalance(LEAGUE_STRUCTURES)).not.toThrow();
+  });
+
+  it("checks balance across separate rows and identifies the first mismatch", () => {
+    const current = leagueStructureForSeason(1981);
+    const next: LeagueStructure = {
+      ...current, firstSeason: 1983, lastSeason: 1983,
+      divisionSizes: { ...current.divisionSizes, 1: 21 }, source: "test",
+    };
+    expect(() => checkStructureBalance([
+      { ...current, lastSeason: 1982 },
+      next,
+    ])).toThrow("Division 1 does not balance from 1982 to 1983");
+  });
+
+  it("accepts a correctly balanced pair of separate rows", () => {
+    const current = leagueStructureForSeason(1981);
+    const next: LeagueStructure = { ...current, firstSeason: 1983, lastSeason: 1983, source: "test" };
+    expect(() => checkStructureBalance([{ ...current, lastSeason: 1982 }, next])).not.toThrow();
   });
 });
 
 describe("season movements", () => {
+  it("refuses a re-election result that would remove clubs from the League", () => {
+    const base = leagueStructureForSeason(1981);
+    const changed: LeagueStructure = {
+      ...base,
+      lowestDivision: { kind: "re-election", applicants: 4, reElected: 3 },
+    };
+    expect(() => seasonMovements(1981, tablesFor(1981), [changed])).toThrow("re-election vote not modelled yet");
+  });
+
+  it("refuses automatic relegation until those seasons are sourced", () => {
+    const base = leagueStructureForSeason(1981);
+    const changed: LeagueStructure = {
+      ...base,
+      lowestDivision: { kind: "automatic-relegation", relegated: 1, promotedFromNonLeague: 1 },
+    };
+    expect(() => seasonMovements(1981, tablesFor(1981), [changed])).toThrow("automatic relegation from the League not modelled yet");
+  });
+
   it("maps all 92 clubs from 1981/82 into their real 1982/83 divisions", () => {
     const result = seasonMovements(1981, tablesFor(1981));
     const next = new Map(csvRows().filter((row) => row.season === 1982).map((row) => [row.club, row.division]));
