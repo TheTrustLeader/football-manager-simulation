@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-fm-league-2-promotion,-relegation-and-re-el
+head=444aee81244c146719c270eeba1165f535e8f810
+tree=ab8dd9aa6b3ee59e2ed311438b274c24166c1e95
+base=76c5066553581fdd90063c97aaab99596f66cca6
+item=FM-codex-github-mention-fm-league-2-promotion-releg
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-10-02 20:17 BST
