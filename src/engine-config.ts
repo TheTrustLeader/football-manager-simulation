@@ -69,7 +69,15 @@ const IDENTITY_BUDGET_ATTRIBUTE_WEIGHTS = {
 } as const;
 
 export const ENGINE_CONFIG = {
-  version: "match-engine-config-0.14.0",
+  version: "match-engine-config-0.15.0",
+  positionPenalty: {
+    neighbouring: 0.90,
+    far: 0.75,
+    neighbouringPairs: [
+      ["CB", "FB"], ["CB", "CM"], ["FB", "WM"],
+      ["CM", "WM"], ["CM", "FW"], ["WM", "FW"],
+    ],
+  },
   matchMinutes: 90,
   // Substitution windows are deliberately not modelled.
   possessionBase: 0.5,
