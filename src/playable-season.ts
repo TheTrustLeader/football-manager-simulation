@@ -6,9 +6,9 @@ import { SeededRandom } from "./random.js";
 import { rulesForSeason, SEASON_RULES } from "./rules.js";
 import type { Fixture, LeagueTableRow, SeasonPlayerStats } from "./competition.js";
 import type { SeasonId, SeasonRule } from "./rules.js";
-import type { MatchDecision, MatchOutput, Player, Style, Tactics, TeamInput } from "./types.js";
+import type { MatchDecision, MatchOutput, Player, Position, Style, Tactics, TeamInput } from "./types.js";
 
-export const PLAYABLE_SAVE_VERSION = 3;
+export const PLAYABLE_SAVE_VERSION = 4;
 
 /**
  * Players regain ten condition points per clear day between fixtures. A typical
@@ -35,6 +35,7 @@ export interface PlayableSeason {
 
 export interface MatchdaySelection {
   starterIds: string[];
+  playedPositions: Record<string, Position>;
   substituteIds: string[];
   substitutePlan?: { minute: number; playerOff: string; playerOn: string; whenTrailing: boolean };
 }
@@ -169,12 +170,16 @@ function selectedTeam(team: TeamInput, selection: MatchdaySelection, formation: 
   const substitutes = selection.substituteIds.map((id) => squad.get(id));
   if ([...starters, ...substitutes].some((player) => !player)) throw new Error("Selection contains a player outside the squad");
   if (new Set([...selection.starterIds, ...selection.substituteIds]).size !== 11 + selection.substituteIds.length) throw new Error("A player cannot be both starter and substitute");
-  const picked = starters as Player[];
+  const picked = (starters as Player[]).map((player) => {
+    const playedPosition = selection.playedPositions?.[player.id];
+    if (!playedPosition) throw new Error(`${player.name} is missing a played position`);
+    return { ...player, playedPosition } as Player;
+  });
   const [defenders, midfielders, forwards] = formation.split("-").map(Number);
-  if (picked.filter((player) => player.primaryPosition === "GK").length !== 1
-    || picked.filter((player) => player.primaryPosition === "CB" || player.primaryPosition === "FB").length !== defenders
-    || picked.filter((player) => player.primaryPosition === "CM" || player.primaryPosition === "WM").length !== midfielders
-    || picked.filter((player) => player.primaryPosition === "FW").length !== forwards) throw new Error(`The chosen eleven cannot fill ${formation}`);
+  if (picked.filter((player) => player.playedPosition === "GK").length !== 1
+    || picked.filter((player) => player.playedPosition === "CB" || player.playedPosition === "FB").length !== defenders
+    || picked.filter((player) => player.playedPosition === "CM" || player.playedPosition === "WM").length !== midfielders
+    || picked.filter((player) => player.playedPosition === "FW").length !== forwards) throw new Error(`The chosen eleven cannot fill ${formation}`);
   return { ...team, starters: picked, substitutes: substitutes as Player[] };
 }
 
@@ -187,7 +192,11 @@ export function newPlayableSeason(season: SeasonId, seed: number, userClubId: st
   const teams = clubs.map((club) => makeTeam(club.squadId, club.squadLevel));
   const selectedUser = teams[clubs.findIndex((club) => club.id === userClubId)]!;
   const rules = rulesForSeason(season, table);
-  const selection = { starterIds: selectedUser.starters.map((player) => player.id), substituteIds: selectedUser.substitutes.slice(0, rules.substitutesNamed).map((player) => player.id) };
+  const selection = {
+    starterIds: selectedUser.starters.map((player) => player.id),
+    playedPositions: Object.fromEntries(selectedUser.starters.map((player) => [player.id, player.primaryPosition])),
+    substituteIds: selectedUser.substitutes.slice(0, rules.substitutesNamed).map((player) => player.id),
+  };
   const playerConditions = Object.fromEntries(teams.flatMap((team) => [...team.starters, ...team.substitutes]).map((player) => [player.id, player.state.condition]));
   return { version: PLAYABLE_SAVE_VERSION, seed, season, userClubId, clubs, fixtures: generateFixtures(clubs.map((club) => club.id), seed, season, table), matches: [], nextRound: 1, tactics, selection, playerConditions };
 }
@@ -230,8 +239,8 @@ export function playMatchday(state: PlayableSeason, choices: MatchdayChoices, ta
     const home = byId.get(fixture.homeId)!;
     const away = byId.get(fixture.awayId)!;
     const matchSeed = (state.seed + index * 7919) >>> 0;
-    let matchHome = { ...home, substitutes: home.substitutes.slice(0, rules.substitutesNamed) };
-    let matchAway = { ...away, substitutes: away.substitutes.slice(0, rules.substitutesNamed) };
+    let matchHome = { ...home, starters: home.starters.map((player) => ({ ...player, playedPosition: player.primaryPosition } as Player)), substitutes: home.substitutes.slice(0, rules.substitutesNamed) };
+    let matchAway = { ...away, starters: away.starters.map((player) => ({ ...player, playedPosition: player.primaryPosition } as Player)), substitutes: away.substitutes.slice(0, rules.substitutesNamed) };
     if (home.id !== state.userClubId) matchHome = { ...matchHome, tactics: { ...matchHome.tactics, style: computerStyle(home, away, matchSeed, rules.computerStyleAdaptRate, rules.styleMatchups) } };
     if (away.id !== state.userClubId) matchAway = { ...matchAway, tactics: { ...matchAway.tactics, style: computerStyle(away, home, matchSeed, rules.computerStyleAdaptRate, rules.styleMatchups) } };
     const user = fixture.homeId === state.userClubId ? matchHome : fixture.awayId === state.userClubId ? matchAway : undefined;
@@ -258,8 +267,22 @@ export function loadPlayableSeason(json: string): PlayableSeason {
   let value: unknown;
   try { value = JSON.parse(json); } catch { throw new Error("This saved game is not valid."); }
   if (typeof value !== "object" || value === null || !("version" in value)) throw new Error("This saved game is not valid.");
-  if ((value as { version: unknown }).version !== PLAYABLE_SAVE_VERSION) throw new Error("This saved game was made by a different version and cannot be loaded.");
-  const state = value as PlayableSeason;
+  const version = (value as { version: unknown }).version;
+  if (version !== PLAYABLE_SAVE_VERSION && version !== 3) throw new Error("This saved game was made by a different version and cannot be loaded.");
+  let state = value as PlayableSeason;
   if (!Array.isArray(state.clubs) || !Array.isArray(state.fixtures) || !Array.isArray(state.matches) || typeof state.season !== "number") throw new Error("This saved game is not valid.");
+  if (version === 3) {
+    const squad = playableSquad(state);
+    const natural = new Map(squad.map((player) => [player.id, player.primaryPosition]));
+    const playedPositions = Object.fromEntries(state.selection.starterIds.map((id) => {
+      const position = natural.get(id);
+      if (!position) throw new Error("This saved game is not valid.");
+      return [id, position];
+    }));
+    state = { ...state, version: PLAYABLE_SAVE_VERSION, selection: {
+      ...state.selection,
+      playedPositions,
+    } };
+  }
   return state;
 }

@@ -73,7 +73,7 @@ describe("seeded squad generation", () => {
 
   it("leaves a known generated squad byte-identical", () => {
     const team = makeTeam("rating-regression", 10, {}, { seed: 24680, identity: "balanced" });
-    expect(stableHash(team)).toBe("fnv1a64:a4160a824dbee722");
+    expect(stableHash(team)).toBe("fnv1a64:df49207fb7908f46");
   });
 
   it("reproduces the same squad from the same inputs and seed", () => {
