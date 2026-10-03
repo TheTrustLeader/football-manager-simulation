@@ -57,3 +57,11 @@ Final tables for all four Football League divisions in 1981/82 and 1982/83.
 Sources: Wikipedia, “1981–82 Football League” and “1982–83 Football League”,
 cross-checked against the final tables at englishfootballleaguetables.co.uk.
 The real club names are historical evidence only and are not game content.
+
+## gb-place-names.txt
+
+Real place names in Great Britain and Northern Ireland, used only to check that the game's invented club places are not real places. One name per line, 38,858 names, sorted.
+
+- Source: GeoNames GB extract, https://download.geonames.org/export/dump/GB.zip, downloaded 3 Oct 2026.
+- Kept: the `name` and `asciiname` fields of every entry with feature class P (populated places: cities, towns, villages, hamlets) or A (administrative areas). Alternate names were left out because they include other languages.
+- Licence: GeoNames (https://www.geonames.org/), Creative Commons Attribution 4.0 (https://creativecommons.org/licenses/by/4.0/). Contains GeoNames data; no changes other than the selection above.
