@@ -74,6 +74,62 @@ describe("dated league structures", () => {
     const next: LeagueStructure = { ...current, firstSeason: 1983, lastSeason: 1983, source: "test" };
     expect(() => checkStructureBalance([{ ...current, lastSeason: 1982 }, next])).not.toThrow();
   });
+
+  it("balances an uneven top-flight promotion and relegation exchange", () => {
+    const current: LeagueStructure = {
+      firstSeason: 2000, lastSeason: 2000,
+      divisionSizes: { 1: 22, 2: 22, 3: 24, 4: 24 },
+      movements: [{ from: 2, to: 1, promoted: 3, relegated: 4 }],
+      lowestDivision: { kind: "re-election", applicants: 4, reElected: 4 },
+      source: "test",
+    };
+    const next = (divisionSizes: LeagueStructure["divisionSizes"]): LeagueStructure => ({
+      ...current, firstSeason: 2001, lastSeason: 2001, divisionSizes,
+    });
+
+    expect(() => checkStructureBalance([
+      current,
+      next({ 1: 21, 2: 23, 3: 24, 4: 24 }),
+    ])).not.toThrow();
+    expect(() => checkStructureBalance([
+      current,
+      next({ 1: 23, 2: 21, 3: 24, 4: 24 }),
+    ])).toThrow("Division 1 does not balance");
+  });
+
+  it("accounts for a club lost through re-election", () => {
+    const current: LeagueStructure = {
+      firstSeason: 2000, lastSeason: 2000,
+      divisionSizes: { 1: 22, 2: 22, 3: 24, 4: 24 }, movements: [],
+      lowestDivision: { kind: "re-election", applicants: 4, reElected: 3 }, source: "test",
+    };
+    const next = (divisionFourSize: number): LeagueStructure => ({
+      ...current, firstSeason: 2001, lastSeason: 2001,
+      divisionSizes: { ...current.divisionSizes, 4: divisionFourSize },
+    });
+
+    expect(() => checkStructureBalance([current, next(23)])).not.toThrow();
+    expect(() => checkStructureBalance([current, next(24)])).toThrow("Division 4 does not balance");
+  });
+
+  it("accounts for automatic relegation and non-League promotion", () => {
+    const current: LeagueStructure = {
+      firstSeason: 2000, lastSeason: 2000,
+      divisionSizes: { 1: 22, 2: 22, 3: 24, 4: 24 }, movements: [],
+      lowestDivision: { kind: "automatic-relegation", relegated: 1, promotedFromNonLeague: 0 }, source: "test",
+    };
+    const next = (divisionFourSize: number): LeagueStructure => ({
+      ...current, firstSeason: 2001, lastSeason: 2001,
+      divisionSizes: { ...current.divisionSizes, 4: divisionFourSize },
+    });
+
+    expect(() => checkStructureBalance([current, next(23)])).not.toThrow();
+    expect(() => checkStructureBalance([current, next(24)])).toThrow("Division 4 does not balance");
+    expect(() => checkStructureBalance([
+      { ...current, lowestDivision: { kind: "automatic-relegation", relegated: 1, promotedFromNonLeague: 1 } },
+      next(24),
+    ])).not.toThrow();
+  });
 });
 
 describe("season movements", () => {
