@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-83-r1-player-facing-screens
+head=5ea543ba9410e04419f3d14699ffd6e207aab794
+tree=5d21bc2cf3843b8c5304a2cca0fb8b4e7b51a3c3
+base=d586ae1a36ca8cc1563ef6c9a547f673c8bad815
+item=FM-codex-issue-83-r1-player-facing-screens
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-10-03 17:17 BST
