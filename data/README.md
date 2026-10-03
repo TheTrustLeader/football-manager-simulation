@@ -50,3 +50,10 @@ Summing seasons 1992/93 to 2020/21 in this file gives **11,266 matches** and
 
 ⭐ If someone edits this file, that control is the first thing to re-run. A
 change that breaks it means the file is wrong.
+
+## football-league-final-tables-1981-1983.csv
+
+Final tables for all four Football League divisions in 1981/82 and 1982/83.
+Sources: Wikipedia, “1981–82 Football League” and “1982–83 Football League”,
+cross-checked against the final tables at englishfootballleaguetables.co.uk.
+The real club names are historical evidence only and are not game content.
