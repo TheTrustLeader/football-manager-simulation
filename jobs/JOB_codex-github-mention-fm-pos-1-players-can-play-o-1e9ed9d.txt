@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-fm-pos-1-players-can-play-out-of-position,
+head=1e9ed9d91dac1d1a07582d35b4a5bee32ed09987
+tree=824aa9715f935702e88ebf7e911c0658e086a1ca
+base=d586ae1a36ca8cc1563ef6c9a547f673c8bad815
+item=FM-codex-github-mention-fm-pos-1-players-can-play-o
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-10-03 20:16 BST

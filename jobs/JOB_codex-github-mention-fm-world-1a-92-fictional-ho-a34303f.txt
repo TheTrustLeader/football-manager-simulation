@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-fm-world-1a-92-fictional-home-country-clubs
+head=a34303f266895826a7e2b03cef8e0d1b84172e86
+tree=40138eee84c1329017d47742896cffb069067a9f
+base=d586ae1a36ca8cc1563ef6c9a547f673c8bad815
+item=FM-codex-github-mention-fm-world-1a-92-fictional-ho
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-10-03 20:16 BST

@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/github-mention-fm-ui-2-player-numbers,-club-strength-as-di
+head=87566ebcc37a4716725ef2d414939f93da644d09
+tree=d04876493188094f0c3adf0467b35c8fca55bcd2
+base=d586ae1a36ca8cc1563ef6c9a547f673c8bad815
+item=FM-codex-github-mention-fm-ui-2-player-numbers-club
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-10-03 20:16 BST
