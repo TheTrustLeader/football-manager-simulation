@@ -54,6 +54,8 @@ interface PlayerBase {
   age: number;
   hidden: HiddenTraits;
   state: PlayerState;
+  /** Position occupied in this match. Required for starters; substitutes inherit the replaced player's position. */
+  playedPosition?: Position;
 }
 
 export interface GoalkeeperPlayer extends PlayerBase {

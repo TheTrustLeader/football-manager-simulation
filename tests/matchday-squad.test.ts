@@ -16,6 +16,7 @@ function rotatedSelection(seed = 101): { state: ReturnType<typeof newPlayableSea
   const replacement = squad.find((player) => !state.selection.starterIds.includes(player.id) && player.primaryPosition === "FW")!;
   return { state, rested: rested.id, replacement: replacement.id, selection: {
     starterIds: state.selection.starterIds.map((id) => id === rested.id ? replacement.id : id),
+    playedPositions: { ...state.selection.playedPositions, [replacement.id]: replacement.primaryPosition },
     substituteIds: [rested.id],
   } };
 }
@@ -42,6 +43,7 @@ describe("matchday squad management", () => {
         const resting = round === restRound;
         const selection = resting ? {
           starterIds: state.selection.starterIds.map((id) => id === tracked ? replacement : id),
+          playedPositions: { ...state.selection.playedPositions, [replacement]: playableSquad(state).find((player) => player.id === replacement)!.primaryPosition },
           substituteIds: [tracked],
         } : state.selection;
         state = playMatchday(state, { ...tactics, selection });

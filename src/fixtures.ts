@@ -223,7 +223,10 @@ export function makeTeam(id: string, level = 10, overrides: Partial<Tactics> = {
     return player;
   }
 
-  const starters = starterPositions.map((position, index) => create(position, `p${index + 1}`, `Player ${index + 1}`));
+  const starters = starterPositions.map((position, index) => ({
+    ...create(position, `p${index + 1}`, `Player ${index + 1}`),
+    playedPosition: position,
+  } as Player));
   const substitutes = substitutePositions.map((position, index) => create(position, `sub-p${index + 1}`, `Substitute ${index + 1}`));
   const captain = starters.find((player) => player.primaryPosition === "CB")!;
   const creator = starters.find((player) => player.primaryPosition === "CM")!;

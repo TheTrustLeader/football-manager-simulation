@@ -1,11 +1,13 @@
 import { ENGINE_CONFIG, ENGINE_CONFIG_HASH } from "./engine-config.js";
 import { SeededRandom } from "./random.js";
-import type { AttributeName, MatchDecision, MatchEvent, MatchInput, MatchOutput, MinutePlayerSnapshot, MinuteSnapshot, Player, PlayerContribution, ScoreState, TeamInput, TeamStats } from "./types.js";
+import type { AttributeName, MatchDecision, MatchEvent, MatchInput, MatchOutput, MinutePlayerSnapshot, MinuteSnapshot, OutfieldPosition, Player, PlayerContribution, Position, ScoreState, TeamInput, TeamStats } from "./types.js";
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
 interface PlayerRuntime {
   player: Player;
+  playedPosition: Position;
+  positionMultiplier: number;
   entryMinute: number;
   initialCondition: number;
   lossPerWorkload: number;
@@ -69,15 +71,31 @@ function attributeValue(player: Player, key: AttributeName): number {
   return value;
 }
 
-function createPlayerRuntime(player: Player, initialCondition: number, entryMinute = 1): PlayerRuntime {
+export function positionMultiplier(natural: OutfieldPosition, played: OutfieldPosition): number {
+  if (natural === played) return 1;
+  const neighbouring = ENGINE_CONFIG.positionPenalty.neighbouringPairs.some((pair) => (pair as readonly OutfieldPosition[]).includes(natural) && (pair as readonly OutfieldPosition[]).includes(played));
+  return neighbouring ? ENGINE_CONFIG.positionPenalty.neighbouring : ENGINE_CONFIG.positionPenalty.far;
+}
+
+export function positionAdjustedAttribute(player: Player, played: OutfieldPosition, key: AttributeName): number {
+  if (player.primaryPosition === "GK") throw new Error("Goalkeeper attributes cannot be adjusted for an outfield position");
+  return attributeValue(player, key) * positionMultiplier(player.primaryPosition, played);
+}
+
+function createPlayerRuntime(player: Player, initialCondition: number, entryMinute = 1, inheritedPosition?: Position): PlayerRuntime {
   const c = ENGINE_CONFIG;
   const f = c.fatigue;
-  const stamina = player.primaryPosition === "GK" ? f.staminaBaseline : player.attributes.stamina;
+  const playedPosition = inheritedPosition ?? player.playedPosition;
+  if (!playedPosition) throw new Error(`${player.name} is missing a played position`);
+  const multiplier = player.primaryPosition === "GK" ? 1 : positionMultiplier(player.primaryPosition, playedPosition as OutfieldPosition);
+  const stamina = player.primaryPosition === "GK" ? f.staminaBaseline : player.attributes.stamina * multiplier;
   const staminaFactor = Math.max(0.65, 1 + (f.staminaBaseline - stamina) * f.staminaSensitivity);
   const lossPerWorkload = f.baseConditionLossPerMinute * staminaFactor;
   const floorBreakpoint = lossPerWorkload === 0 ? Number.POSITIVE_INFINITY : Math.max(0, (initialCondition - f.minimumCondition) / lossPerWorkload);
   return {
     player,
+    playedPosition,
+    positionMultiplier: multiplier,
     entryMinute,
     initialCondition,
     lossPerWorkload,
@@ -96,7 +114,7 @@ function createAttributeCurve(players: PlayerRuntime[], key: AttributeName): Att
   let minimumFloorBreakpoint = Number.POSITIVE_INFINITY;
 
   for (const runtime of players) {
-    const weight = attributeValue(runtime.player, key) * runtime.formFactor * runtime.moraleFactor;
+    const weight = attributeValue(runtime.player, key) * runtime.positionMultiplier * runtime.formFactor * runtime.moraleFactor;
     entries.push({
       weight,
       initialCondition: runtime.initialCondition,
@@ -125,9 +143,9 @@ function createAttributeCurve(players: PlayerRuntime[], key: AttributeName): Att
 
 function buildProfileCurves(players: PlayerRuntime[]): ProfileCurves {
   if (players.length === 0) throw new Error("Cannot build a team profile with no active players");
-  const outfield = players.filter((runtime) => runtime.player.primaryPosition !== "GK");
-  const forwards = players.filter((runtime) => runtime.player.primaryPosition === "FW");
-  const keepers = players.filter((runtime) => runtime.player.primaryPosition === "GK");
+  const outfield = players.filter((runtime) => runtime.playedPosition !== "GK");
+  const forwards = players.filter((runtime) => runtime.playedPosition === "FW");
+  const keepers = players.filter((runtime) => runtime.playedPosition === "GK");
   if (keepers.length === 0) throw new Error("Active team has no goalkeeper");
   const finishers = forwards.length > 0 ? forwards : outfield;
   if (finishers.length === 0) throw new Error("Active team has no eligible finisher");
@@ -259,7 +277,7 @@ function effectiveAttribute(runtime: TeamRuntime, player: Player, key: Attribute
   if (!prepared) throw new Error(`Missing runtime state for ${player.id}`);
   const c = ENGINE_CONFIG.condition;
   const conditionFactor = c.base + c.range * clamp(playerCondition(runtime, prepared) / c.scale, 0, 1);
-  return attributeValue(player, key) * conditionFactor * prepared.formFactor * prepared.moraleFactor;
+  return attributeValue(player, key) * prepared.positionMultiplier * conditionFactor * prepared.formFactor * prepared.moraleFactor;
 }
 
 function emptyStats(): TeamStats {
@@ -283,7 +301,7 @@ function playerRating(contribution: PlayerContribution): number {
 }
 
 function activeOutfield(runtime: TeamRuntime, teamName: string): Player[] {
-  const players = runtime.activePlayers.filter((entry) => entry.player.primaryPosition !== "GK").map((entry) => entry.player);
+  const players = runtime.activePlayers.filter((entry) => entry.playedPosition !== "GK").map((entry) => entry.player);
   if (players.length === 0) throw new Error(`${teamName} has no active outfield players`);
   return players;
 }
@@ -309,8 +327,8 @@ function creditDefensiveStop(random: SeededRandom, team: TeamInput, runtime: Tea
 }
 
 function chooseAttacker(random: SeededRandom, team: TeamInput, runtime: TeamRuntime): Player {
-  const active = runtime.activePlayers.map((entry) => entry.player);
-  const forwards = active.filter((player) => player.primaryPosition === "FW");
+  const active = runtime.activePlayers;
+  const forwards = active.filter((entry) => entry.playedPosition === "FW").map((entry) => entry.player);
   if (forwards.length > 0) return random.pick(forwards);
   return random.pick(activeOutfield(runtime, team.name));
 }
@@ -319,7 +337,7 @@ function chooseCreator(random: SeededRandom, team: TeamInput, runtime: TeamRunti
   const active = runtime.activePlayers.map((entry) => entry.player);
   const designated = active.find((player) => player.id === team.tactics.creatorId);
   if (designated && random.chance(ENGINE_CONFIG.creator.designatedShare)) return designated;
-  const candidates = active.filter((player) => player.primaryPosition === "CM" || player.primaryPosition === "WM" || player.primaryPosition === "FW");
+  const candidates = runtime.activePlayers.filter((entry) => entry.playedPosition === "CM" || entry.playedPosition === "WM" || entry.playedPosition === "FW").map((entry) => entry.player);
   if (candidates.length > 0) return random.pick(candidates);
   return random.pick(activeOutfield(runtime, team.name));
 }
@@ -409,11 +427,12 @@ function applySubstitution(
   // Shift the entrant's curve origin to the team's current workload. This keeps
   // their supplied starting condition while allowing fatigue to accrue only
   // from the work performed after they enter.
-  const startingRuntime = createPlayerRuntime(on, conditionFor(on, conditions));
+  const startingRuntime = createPlayerRuntime(on, conditionFor(on, conditions), 1, offRuntime.playedPosition);
   const onRuntime = createPlayerRuntime(
     on,
     startingRuntime.initialCondition + runtime.workload * startingRuntime.lossPerWorkload,
     decision.minute,
+    offRuntime.playedPosition,
   );
   runtime.players.set(on.id, onRuntime);
   runtime.activePlayers.splice(offIndex, 1, onRuntime);
@@ -568,7 +587,7 @@ export function simulateMatch(input: MatchInput): MatchOutput {
           if (creator.id !== shooter.id) contributionFor(contributions, creator).assists += 1;
           events.push({ minute, type: "goal", teamId: attackingTeam.id, playerId: shooter.id, secondaryPlayerId: creator.id, detail: `${shooter.name} scores` });
         } else {
-          const keeper = defenceRuntime.activePlayers.find((entry) => entry.player.primaryPosition === "GK")?.player;
+          const keeper = defenceRuntime.activePlayers.find((entry) => entry.playedPosition === "GK")?.player;
           if (!keeper) throw new Error(`${defendingTeam.name} has no active goalkeeper`);
           contributionFor(contributions, keeper).saves += 1;
           events.push({ minute, type: "save", teamId: defendingTeam.id, playerId: keeper.id, secondaryPlayerId: shooter.id, detail: `${keeper.name} makes the save` });
@@ -649,8 +668,13 @@ export function validateMatchInput(input: MatchInput): void {
   if (!input.seasonRules.styleMatchups) throw new Error("Match input must include dated style match-up rules");
   for (const team of [input.home, input.away]) {
     if (team.starters.length !== 11) throw new Error(`${team.name} must have exactly 11 starters`);
-    if (team.starters.filter((p) => p.primaryPosition === "GK").length !== 1) throw new Error(`${team.name} must have exactly one starting goalkeeper`);
-    if (team.starters.filter((p) => p.primaryPosition === "FW").length === 0) throw new Error(`${team.name} must have at least one starting forward`);
+    for (const player of team.starters) {
+      if (!player.playedPosition) throw new Error(`${player.name} is missing a played position`);
+      if (player.playedPosition === "GK" && player.primaryPosition !== "GK") throw new Error(`${player.name}: only a natural goalkeeper can play in goal`);
+      if (player.primaryPosition === "GK" && player.playedPosition !== "GK") throw new Error(`${player.name}: a natural goalkeeper cannot play outfield`);
+    }
+    if (team.starters.filter((p) => p.playedPosition === "GK").length !== 1) throw new Error(`${team.name} must have exactly one played goalkeeper`);
+    if (team.starters.filter((p) => p.playedPosition === "FW").length === 0) throw new Error(`${team.name} must have at least one played forward`);
     const ids = new Set([...team.starters, ...team.substitutes].map((p) => p.id));
     if (ids.size !== team.starters.length + team.substitutes.length) throw new Error(`${team.name} contains duplicate player ids`);
     if (team.substitutes.length > input.seasonRules.substitutesNamed) {
