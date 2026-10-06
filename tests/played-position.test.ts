@@ -84,6 +84,10 @@ describe("played positions", () => {
     const natural = total(naturalMatches);
     const neighbouring = total(neighbouringMatches);
     const far = total(farMatches);
+    expect(neighbouring / natural).toBeGreaterThan(0.88);
+    expect(neighbouring / natural).toBeLessThan(0.96);
+    expect(far / natural).toBeGreaterThan(0.78);
+    expect(far / natural).toBeLessThan(0.90);
     expect(natural - neighbouring).toBeGreaterThan(2 * pairedCountStandardError(naturalMatches, neighbouringMatches));
     expect(neighbouring - far).toBeGreaterThan(0);
     expect({ natural, neighbouring, far }).toMatchInlineSnapshot(`
@@ -158,6 +162,8 @@ describe("played positions", () => {
     const neighbouringMatches = goals("CM");
     const natural = total(naturalMatches);
     const neighbouring = total(neighbouringMatches);
+    expect(neighbouring / natural).toBeGreaterThan(0.91);
+    expect(neighbouring / natural).toBeLessThan(0.97);
     expect(natural - neighbouring).toBeGreaterThan(2 * pairedCountStandardError(naturalMatches, neighbouringMatches));
     expect({ natural, neighbouring }).toMatchInlineSnapshot(`
       {
