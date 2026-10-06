@@ -1,11 +1,25 @@
 import { leagueStructureForSeason, type Division, type LeagueStructure } from "./league-structure.js";
 import { SeededRandom } from "./random.js";
-import type { SeasonId } from "./rules.js";
+import { rulesForSeason, SEASON_RULES, type SeasonId, type SeasonRule } from "./rules.js";
+import { actualSquadRating, makeTeam } from "./fixtures.js";
 
 export interface WorldClub {
   id: string;
   name: string;
   division: Division;
+}
+
+export interface StrengthenedWorldClub extends WorldClub {
+  squadId: string;
+  squadLevel: number;
+  strength: number;
+  strong: boolean;
+}
+
+function evenlySpread(count: number, minimum: number, maximum: number): number[] {
+  if (count <= 0) return [];
+  if (count === 1) return [minimum];
+  return Array.from({ length: count }, (_, index) => minimum + ((maximum - minimum) * index / (count - 1)));
 }
 
 /** Fixed identities: an id always belongs to the same invented-place name. */
@@ -44,6 +58,40 @@ export function clubPlacePart(name: string): string {
   const words = name.trim().split(/\s+/);
   if (CLUB_WORDS.has(words.at(-1)!.toLocaleLowerCase("en-GB"))) words.pop();
   return words.join(" ");
+}
+
+/** Generate dated, seeded squad strength independently inside every division. */
+export function strengthenedHomeCountryClubsForSeason(
+  season: SeasonId,
+  seed: number,
+  rulesTable: readonly SeasonRule[] = SEASON_RULES,
+  structures?: readonly LeagueStructure[],
+  pool: readonly string[] = HOME_COUNTRY_CLUBS,
+): StrengthenedWorldClub[] {
+  const clubs = homeCountryClubsForSeason(season, seed, structures, pool);
+  const rules = rulesForSeason(season, rulesTable);
+  const result = new Map<string, StrengthenedWorldClub>();
+  for (const division of [1, 2, 3, 4] as const) {
+    const divisionClubs = clubs.filter((club) => club.division === division);
+    const shape = rules.divisionShapes[division];
+    if (!Number.isInteger(shape.strongClubCount) || shape.strongClubCount < 0 || shape.strongClubCount > divisionClubs.length) {
+      throw new Error(`Invalid Division ${division} shape: ${shape.strongClubCount} strong clubs for ${divisionClubs.length} teams`);
+    }
+    const levels = [
+      ...evenlySpread(shape.strongClubCount, shape.strongMinimum, shape.strongMaximum).map((level) => ({ level, strong: true })),
+      ...evenlySpread(divisionClubs.length - shape.strongClubCount, shape.otherMinimum, shape.otherMaximum).map((level) => ({ level, strong: false })),
+    ];
+    const assignmentOrder = [...divisionClubs].sort((left, right) => {
+      const rank = (club: WorldClub) => ((Number(club.id.slice("home-club-".length)) + Math.imul(seed, 2)) % HOME_COUNTRY_CLUBS.length);
+      return rank(left) - rank(right);
+    });
+    assignmentOrder.forEach((club, index) => {
+      const assigned = levels[index]!;
+      const squadId = `world-${seed}-${club.id}`;
+      result.set(club.id, { ...club, squadId, squadLevel: assigned.level, strength: actualSquadRating(makeTeam(squadId, assigned.level)), strong: assigned.strong });
+    });
+  }
+  return clubs.map((club) => result.get(club.id)!);
 }
 
 function assertUniquePool(pool: readonly string[]): void {

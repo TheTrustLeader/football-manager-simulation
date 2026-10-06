@@ -7,6 +7,7 @@ export interface LeagueShape {
   otherMinimum: number;
   otherMaximum: number;
 }
+export type DivisionShapes = Readonly<Record<1 | 2 | 3 | 4, LeagueShape>>;
 
 import type { StyleMatchups } from "./types.js";
 
@@ -15,7 +16,7 @@ export interface SeasonRules {
   pointsForAWin: number;
   tableTieBreak: TableTieBreak;
   firstDivisionTeams: number;
-  leagueShape: LeagueShape;
+  divisionShapes: DivisionShapes;
   substitutesNamed: number;
   substitutesUsed: number;
   styleMatchups: StyleMatchups;
@@ -65,16 +66,15 @@ export const SEASON_RULES: readonly SeasonRule[] = [
     source: "Football League regulations for 1981/82 allowed one substitute to be used.",
   },
   {
-    rule: "leagueShape",
+    rule: "divisionShapes",
     value: {
-      strongClubCount: 5,
-      strongMinimum: 12,
-      strongMaximum: 13,
-      otherMinimum: 7,
-      otherMaximum: 10.5,
+      1: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
+      2: { strongClubCount: 5, strongMinimum: 8, strongMaximum: 8.25, otherMinimum: 5.5, otherMaximum: 8 },
+      3: { strongClubCount: 5, strongMinimum: 5, strongMaximum: 5.5, otherMinimum: 3.5, otherMaximum: 5 },
+      4: { strongClubCount: 5, strongMinimum: 3.5, strongMaximum: 4, otherMinimum: 1.5, otherMaximum: 3.5 },
     },
     firstSeason: 1981,
-    source: "Design decision by Scott, 28 Sep 2026 (#50): a handful of strong clubs",
+    source: "Design decisions by Scott, 28 Sep 2026 (#50) and 6 Oct 2026 (#93): overlapping steps and a strong group in every division.",
   },
   {
     rule: "firstDivisionTeams",
@@ -96,7 +96,7 @@ export const SEASON_RULES: readonly SeasonRule[] = [
   },
 ];
 
-const RULE_NAMES: readonly (keyof SeasonRules)[] = ["leagueRoundGapDays", "pointsForAWin", "tableTieBreak", "firstDivisionTeams", "leagueShape", "substitutesNamed", "substitutesUsed", "styleMatchups", "computerStyleAdaptRate"];
+const RULE_NAMES: readonly (keyof SeasonRules)[] = ["leagueRoundGapDays", "pointsForAWin", "tableTieBreak", "firstDivisionTeams", "divisionShapes", "substitutesNamed", "substitutesUsed", "styleMatchups", "computerStyleAdaptRate"];
 
 /** Resolve every rule in force for a season identified by its starting year. */
 export function rulesForSeason(
@@ -123,8 +123,8 @@ export function rulesForSeason(
       resolved.tableTieBreak = matches[0]!.value as TableTieBreak;
     } else if (rule === "firstDivisionTeams") {
       resolved.firstDivisionTeams = matches[0]!.value as number;
-    } else if (rule === "leagueShape") {
-      resolved.leagueShape = matches[0]!.value as LeagueShape;
+    } else if (rule === "divisionShapes") {
+      resolved.divisionShapes = matches[0]!.value as DivisionShapes;
     } else if (rule === "substitutesNamed") {
       resolved.substitutesNamed = matches[0]!.value as number;
     } else if (rule === "substitutesUsed") {

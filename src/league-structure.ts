@@ -1,4 +1,5 @@
 import type { SeasonId } from "./rules.js";
+import { rulesForSeason, SEASON_RULES, type SeasonRule } from "./rules.js";
 
 export type Division = 1 | 2 | 3 | 4;
 export type MovementStatus = "promoted" | "relegated" | "re-elected" | "stays";
@@ -83,6 +84,20 @@ export function leagueStructureForSeason(
   if (matches.length === 0) throw new Error(`Season ${season}'s league structure is not sourced yet`);
   if (matches.length > 1) throw new Error(`Season ${season}'s league structure has overlapping rows`);
   return matches[0]!;
+}
+
+/** Check the independently sourced rules and structure cannot disagree on Division 1 size. */
+export function checkFirstDivisionSizesAgree(
+  rules: readonly SeasonRule[] = SEASON_RULES,
+  structures: readonly LeagueStructure[] = LEAGUE_STRUCTURES,
+): void {
+  for (const row of structures) {
+    for (let season = row.firstSeason; season <= row.lastSeason; season += 1) {
+      const ruleSize = rulesForSeason(season, rules).firstDivisionTeams;
+      const structureSize = leagueStructureForSeason(season, structures).divisionSizes[1];
+      if (ruleSize !== structureSize) throw new Error(`First Division size for ${season}: rule has ${ruleSize}, structure has ${structureSize}`);
+    }
+  }
 }
 
 export interface FinalTableRow {

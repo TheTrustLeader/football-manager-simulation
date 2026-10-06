@@ -28,6 +28,7 @@
     "golden:print": "tsx src/print-golden.ts",
     "playable:evidence": "tsx src/playable-season-evidence.ts",
     "playable:verify": "tsx src/verify-playable-season-evidence.ts",
+    "world-strength:evidence": "tsx src/world-strength-evidence.ts",
     "web:dev": "vite",
     "web:build": "vite build"
   },

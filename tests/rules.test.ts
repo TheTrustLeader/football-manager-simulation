@@ -12,7 +12,7 @@ const CHANGING_RULES: readonly SeasonRule[] = [
   { rule: "substitutesNamed", value: 1, firstSeason: 1981, source: "Test named substitutes row." },
   { rule: "substitutesUsed", value: 1, firstSeason: 1981, source: "Test used substitutes row." },
   {
-    rule: "leagueShape", value: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 }, firstSeason: 1981,
+    rule: "divisionShapes", value: rulesForSeason(1981).divisionShapes, firstSeason: 1981,
     source: "Test league-shape row.",
   },
   {
@@ -78,7 +78,12 @@ describe("season rules", () => {
       firstDivisionTeams: 22,
       substitutesNamed: 1,
       substitutesUsed: 1,
-      leagueShape: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
+      divisionShapes: {
+        1: { strongClubCount: 5, strongMinimum: 12, strongMaximum: 13, otherMinimum: 7, otherMaximum: 10.5 },
+        2: { strongClubCount: 5, strongMinimum: 8, strongMaximum: 8.25, otherMinimum: 5.5, otherMaximum: 8 },
+        3: { strongClubCount: 5, strongMinimum: 5, strongMaximum: 5.5, otherMinimum: 3.5, otherMaximum: 5 },
+        4: { strongClubCount: 5, strongMinimum: 3.5, strongMaximum: 4, otherMinimum: 1.5, otherMaximum: 3.5 },
+      },
       styleMatchups: {
         passing: { passing: 1, direct: 1.124, counter: 0.876, balanced: 1.124 },
         direct: { passing: 0.876, direct: 1, counter: 1.124, balanced: 0.876 },
