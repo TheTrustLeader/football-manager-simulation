@@ -42,7 +42,10 @@ function squadTableHtml(squad: ReturnType<typeof playableSquad>): string {
   return `<div class="scroll squad"><table><thead><tr><th>Name</th><th>Pos</th><th>Fit</th>${attributes.map((attribute) => `<th>${ATTRIBUTE_HEADINGS[attribute] ?? attribute}</th>`).join("")}</tr></thead><tbody>${squad.map((player) => `<tr data-player="${player.id}"><td>${player.name}</td><td>${player.primaryPosition}</td><td>${Math.round(state!.playerConditions[player.id] ?? player.state.condition)}%</td>${attributes.map((attribute) => `<td data-attribute="${attribute}">${attribute in player.attributes ? Math.round((player.attributes as unknown as Record<string, number>)[attribute]!) : ""}</td>`).join("")}</tr>`).join("")}</tbody></table><p class="attribute-key">Def defending · Pas passing · Cre creativity · Pac pace · Air aerial · Fin finishing · Cro crossing · Sta stamina · Ldr leadership · Sho shot stopping · Han handling · Kic kicking</p></div>`;
 }
 
-type WebConfig = Pick<typeof ENGINE_CONFIG, "positionPenalty" | "squadGeneration">;
+type WebConfig = {
+  positionPenalty: Omit<typeof ENGINE_CONFIG.positionPenalty, "neighbouring" | "far"> & { neighbouring: number; far: number };
+  squadGeneration: typeof ENGINE_CONFIG.squadGeneration;
+};
 const positionOrder: readonly Position[] = ["FW", "WM", "CM", "FB", "CB", "GK"];
 
 function slotsFor(formation: Formation, config: WebConfig): Position[] {
@@ -108,6 +111,7 @@ export function renderGame(config: WebConfig = ENGINE_CONFIG): void {
       const refusal = rejectGoalkeeper(id, position);
       if (refusal) { message = refusal; selectedPlayer = ""; return renderGame(config); }
       const displaced = target.querySelector<HTMLElement>("[data-pick]")?.dataset.pick;
+      if (displaced === id) { selectedPlayer = ""; return renderGame(config); }
       const oldPosition = state!.selection.playedPositions[id];
       state!.selection.starterIds = state!.selection.starterIds.filter((candidate) => candidate !== id && candidate !== displaced);
       state!.selection.substituteIds = state!.selection.substituteIds.filter((candidate) => candidate !== id && candidate !== displaced);
@@ -118,6 +122,7 @@ export function renderGame(config: WebConfig = ENGINE_CONFIG): void {
     } else if (target.hasAttribute("data-bench")) {
       const index = Number(target.getAttribute("data-bench"));
       const displaced = state!.selection.substituteIds[index];
+      if (displaced === id) { selectedPlayer = ""; return renderGame(config); }
       const oldPosition = state!.selection.playedPositions[id];
       state!.selection.starterIds = state!.selection.starterIds.filter((candidate) => candidate !== id);
       delete state!.selection.playedPositions[id];

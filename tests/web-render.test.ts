@@ -8,7 +8,7 @@ import type { SeasonRule } from "../src/rules.js";
 const RANDOM = 0.25;
 const SEED = Math.floor(RANDOM * 0xffffffff);
 
-async function loadPage() {
+async function loadPage(saved?: string) {
   vi.resetModules();
   vi.spyOn(Math, "random").mockReturnValue(RANDOM);
   const window = new Window();
@@ -22,7 +22,16 @@ async function loadPage() {
   });
   document.body.innerHTML = '<main id="app"></main>';
   localStorage.clear();
+  if (saved) localStorage.setItem("football-manager-simulation-save", saved);
   return import("../src/web.js");
+}
+
+function playButton(): HTMLButtonElement {
+  return document.querySelector<HTMLButtonElement>("form > button")!;
+}
+
+function savedGame() {
+  return JSON.parse(localStorage.getItem("football-manager-simulation-save")!);
 }
 
 beforeEach(() => vi.restoreAllMocks());
@@ -104,6 +113,110 @@ describe("rendered web page", () => {
     document.querySelector<HTMLElement>("[data-squad]")!.click();
     expect(document.querySelector<HTMLButtonElement>('form button[type="submit"], form > button:last-of-type')?.disabled).toBe(true);
     expect(document.querySelector(".selection-status")!.textContent).toContain("1 pitch spot empty");
+  });
+
+  it("leaves pitch and bench selections unique when a player is tapped onto his own place", async () => {
+    await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    const pitchPlayer = document.querySelector<HTMLElement>('[data-position="CB"] [data-pick]')!;
+    const pitchId = pitchPlayer.dataset.pick!;
+    pitchPlayer.click();
+    document.querySelector<HTMLElement>(`[data-position="CB"] [data-pick="${pitchId}"]`)!.closest<HTMLElement>("[data-spot]")!.click();
+    const afterPitch = savedGame();
+    expect(afterPitch.selection.starterIds).toHaveLength(11);
+    expect(new Set(afterPitch.selection.starterIds)).toHaveLength(11);
+
+    const benchPlayer = document.querySelector<HTMLElement>("[data-bench] [data-pick]")!;
+    const benchId = benchPlayer.dataset.pick!;
+    benchPlayer.click();
+    document.querySelector<HTMLElement>(`[data-bench] [data-pick="${benchId}"]`)!.closest<HTMLElement>("[data-bench]")!.click();
+    const afterBench = savedGame();
+    expect(afterBench.selection.substituteIds).toEqual([benchId]);
+    playButton().click();
+    expect(savedGame().nextRound).toBe(2);
+  });
+
+  it("submits the pitch spot as the player's played position", async () => {
+    await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    const winger = document.querySelector<HTMLElement>('[data-position="WM"] [data-pick]')!;
+    const wingerId = winger.dataset.pick!;
+    winger.click(); document.querySelector<HTMLElement>('[data-position="FW"]')!.click();
+    playButton().click();
+    const saved = savedGame();
+    expect(saved.nextRound).toBe(2);
+    expect(saved.selection.playedPositions[wingerId]).toBe("FW");
+  });
+
+  it("uses drag and drop to make the same placement as tapping", async () => {
+    await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    const winger = document.querySelector<HTMLElement>('[data-position="WM"] [data-pick]')!;
+    const wingerId = winger.dataset.pick!;
+    const target = document.querySelector<HTMLElement>('[data-position="FW"]')!;
+    const transfer = { value: "", setData(_type: string, value: string) { this.value = value; }, getData() { return this.value; } };
+    for (const [element, type] of [[winger, "dragstart"], [target, "dragover"], [target, "drop"]] as const) {
+      const event = new window.Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, "dataTransfer", { value: transfer });
+      element.dispatchEvent(event);
+    }
+    expect(savedGame().selection.playedPositions[wingerId]).toBe("FW");
+    expect(document.querySelector(`[data-position="FW"] [data-pick="${wingerId}"]`)).not.toBeNull();
+  });
+
+  it("derives penalty markers from injected config and omits them for natural positions", async () => {
+    const { renderGame } = await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    const changed = { ...ENGINE_CONFIG, positionPenalty: { ...ENGINE_CONFIG.positionPenalty, neighbouring: 0.8, far: 0.6 } };
+    renderGame(changed);
+    const winger = document.querySelector<HTMLElement>('[data-position="WM"] [data-pick]')!;
+    const wingerId = winger.dataset.pick!;
+    winger.click(); document.querySelector<HTMLElement>('[data-position="FW"]')!.click();
+    expect(document.querySelector(`[data-position="FW"] [data-pick="${wingerId}"]`)!.textContent).toContain("plays at 80%");
+    const centreBack = document.querySelector<HTMLElement>('[data-position="CB"] [data-pick]')!;
+    const centreBackId = centreBack.dataset.pick!;
+    centreBack.click(); document.querySelector<HTMLElement>('[data-position="FW"]')!.click();
+    expect(document.querySelector(`[data-position="FW"] [data-pick="${centreBackId}"]`)!.textContent).toContain("plays at 60%");
+    expect(document.querySelector('[data-position="GK"] [data-pick]')!.textContent).not.toContain("out of position");
+  });
+
+  it("refuses an outfield player in goal and leaves the goalkeeper in place", async () => {
+    await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    const keeperId = document.querySelector<HTMLElement>('[data-position="GK"] [data-pick]')!.dataset.pick!;
+    const outfielder = document.querySelector<HTMLElement>('[data-position="CB"] [data-pick]')!;
+    outfielder.click(); document.querySelector<HTMLElement>('[data-position="GK"]')!.click();
+    expect(document.querySelector(".error")!.textContent).toContain("Only a natural goalkeeper can play in goal.");
+    expect(document.querySelector(`[data-position="GK"] [data-pick="${keeperId}"]`)).not.toBeNull();
+  });
+
+  it("keeps nine compatible starters and returns both wingers on a 4-4-2 to 4-3-3 change", async () => {
+    await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    const before = savedGame();
+    const wingerIds = before.selection.starterIds.filter((id: string) => before.selection.playedPositions[id] === "WM");
+    const kept = Object.fromEntries(Object.entries(before.selection.playedPositions).filter(([id]) => !wingerIds.includes(id)));
+    const formation = document.querySelector<HTMLSelectElement>('select[name="formation"]')!;
+    formation.value = "4-3-3"; formation.dispatchEvent(new window.Event("change", { bubbles: true }));
+    const after = savedGame();
+    expect(after.selection.playedPositions).toEqual(kept);
+    expect(after.selection.starterIds).toHaveLength(9);
+    expect(wingerIds.every((id: string) => document.querySelector(`[data-squad] [data-pick="${id}"]`))).toBe(true);
+    expect(document.querySelector(".selection-status")!.textContent).toContain("2 pitch spots empty");
+  });
+
+  it("restores an out-of-position spot on reload and submits that spot", async () => {
+    await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    const winger = document.querySelector<HTMLElement>('[data-position="WM"] [data-pick]')!;
+    const wingerId = winger.dataset.pick!;
+    winger.click(); document.querySelector<HTMLElement>('[data-position="FW"]')!.click();
+    const saved = localStorage.getItem("football-manager-simulation-save")!;
+    await loadPage(saved);
+    expect(document.querySelector(`[data-position="FW"] [data-pick="${wingerId}"]`)).not.toBeNull();
+    playButton().click();
+    expect(savedGame().nextRound).toBe(2);
+    expect(savedGame().selection.playedPositions[wingerId]).toBe("FW");
   });
 
   it("refuses goalkeeper misuse before play", async () => {
