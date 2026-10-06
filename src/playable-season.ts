@@ -94,8 +94,8 @@ export function ruleDescriptions(season: SeasonId, table: readonly SeasonRule[] 
       ? rules.tableTieBreak === "goalDifference" ? "Goal difference" : "Goal average"
       : row.rule === "firstDivisionTeams"
         ? `${rules.firstDivisionTeams} clubs in the First Division`
-        : row.rule === "leagueShape"
-          ? `${rules.leagueShape.strongClubCount} strong clubs`
+        : row.rule === "divisionShapes"
+          ? `${rules.divisionShapes[1].strongClubCount} strong clubs`
         : row.rule === "substitutesNamed"
             ? `${rules.substitutesNamed} substitute named`
             : row.rule === "substitutesUsed"
@@ -115,7 +115,7 @@ export function clubsForSeason(season: SeasonId, table: readonly SeasonRule[] = 
   const rules = rulesForSeason(season, table);
   const count = rules.firstDivisionTeams;
   if (!Number.isInteger(count) || count < 2 || count > CLUB_NAMES.length) throw new Error(`Unsupported First Division size: ${count}`);
-  const shape = rules.leagueShape;
+  const shape = rules.divisionShapes[1];
   if (!Number.isInteger(shape.strongClubCount) || shape.strongClubCount < 0 || shape.strongClubCount > count) {
     throw new Error(`Invalid league shape for season ${season}: ${shape.strongClubCount} strong clubs for ${count} teams`);
   }

@@ -29,8 +29,8 @@ describe("playable season", () => {
   });
 
   it("throws clearly when the season has no league-shape rule", () => {
-    const withoutShape = SEASON_RULES.filter((rule) => rule.rule !== "leagueShape");
-    expect(() => clubsForSeason(1981, withoutShape, 1)).toThrow("leagueShape for season 1981: no matching row");
+    const withoutShape = SEASON_RULES.filter((rule) => rule.rule !== "divisionShapes");
+    expect(() => clubsForSeason(1981, withoutShape, 1)).toThrow("divisionShapes for season 1981: no matching row");
   });
 
   it("builds a repeatable, seed-specific league and strength order", () => {
