@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Window } from "happy-dom";
 import { playableSquad, prepareNewPlayableSeason } from "../src/playable-season.js";
 import { SEASON_RULES } from "../src/rules.js";
+import { ENGINE_CONFIG } from "../src/engine-config.js";
 import type { SeasonRule } from "../src/rules.js";
 
 const RANDOM = 0.25;
@@ -69,6 +70,48 @@ describe("rendered web page", () => {
     expect(document.querySelector(".scroll.squad table")).not.toBeNull();
     const expectedCount = playableSquad(prepareNewPlayableSeason(1981, SEED).start("club-1")).length;
     expect(document.querySelectorAll(".scroll.squad [data-player]")).toHaveLength(expectedCount);
+  });
+
+  it("builds every formation's pitch spots from the engine requirements and removes starter dropdowns", async () => {
+    await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    for (const formation of Object.keys(ENGINE_CONFIG.squadGeneration.formationPositionRequirements)) {
+      const select = document.querySelector<HTMLSelectElement>('select[name="formation"]')!;
+      select.value = formation;
+      select.dispatchEvent(new window.Event("change", { bubbles: true }));
+      const actual = [...document.querySelectorAll<HTMLElement>("[data-spot]")].reduce<Record<string, number>>((counts, spot) => {
+        const position = spot.dataset.position!; counts[position] = (counts[position] ?? 0) + 1; return counts;
+      }, {});
+      expect(actual).toEqual(ENGINE_CONFIG.squadGeneration.formationPositionRequirements[formation as keyof typeof ENGINE_CONFIG.squadGeneration.formationPositionRequirements]);
+      expect(document.querySelector('[name^="starter-"]')).toBeNull();
+    }
+  });
+
+  it("uses tap placement, swaps occupants, removes to the squad, and autosaves the spot position", async () => {
+    await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    const winger = document.querySelector<HTMLElement>('[data-position="WM"] [data-pick]')!;
+    const wingerId = winger.dataset.pick!;
+    const forwardSpot = document.querySelector<HTMLElement>('[data-position="FW"]')!;
+    const forwardId = forwardSpot.querySelector<HTMLElement>("[data-pick]")!.dataset.pick!;
+    winger.click(); forwardSpot.click();
+    const saved = JSON.parse(localStorage.getItem("football-manager-simulation-save")!);
+    expect(saved.selection.playedPositions[wingerId]).toBe("FW");
+    expect(saved.selection.playedPositions[forwardId]).toBe("WM");
+    expect(document.querySelector(`[data-position="FW"] [data-pick="${wingerId}"]`)?.textContent).toContain("out of position · plays at 90%");
+
+    document.querySelector<HTMLElement>(`[data-pick="${wingerId}"]`)!.click();
+    document.querySelector<HTMLElement>("[data-squad]")!.click();
+    expect(document.querySelector<HTMLButtonElement>('form button[type="submit"], form > button:last-of-type')?.disabled).toBe(true);
+    expect(document.querySelector(".selection-status")!.textContent).toContain("1 pitch spot empty");
+  });
+
+  it("refuses goalkeeper misuse before play", async () => {
+    await loadPage();
+    document.querySelector<HTMLButtonElement>("[data-club]")!.click();
+    const keeper = document.querySelector<HTMLElement>('[data-position="GK"] [data-pick]')!;
+    keeper.click(); document.querySelector<HTMLElement>('[data-position="CB"]')!.click();
+    expect(document.querySelector(".error")!.textContent).toContain("goalkeeper cannot play outfield");
   });
 
   it("explains squad strength and labels every club's dots", async () => {
