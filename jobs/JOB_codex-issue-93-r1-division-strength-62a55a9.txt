@@ -1,0 +1,9 @@
+repo=TheTrustLeader/football-manager-simulation
+source=github-public-clone
+branch=codex/issue-93-r1-division-strength
+head=62a55a9ea5f695e4154732ebdeb61ff1c1a8ad12
+tree=b2cfd31d2a28f29a5e0e76c3e0cbb00621efab83
+base=5c105af0378f0fbb0e70b2d6a6066376905dad29
+item=FM-codex-issue-93-r1-division-strength
+verify=npm install --no-audit --no-fund && npm run build && npm test && npm run evidence && npm run simulate -- 10000
+queued_at=2026-10-06 23:39 BST
